@@ -14,14 +14,6 @@
     "interface-name": false,
     "ordered-imports": false,
     "object-literal-sort-keys": false,
-    "no-consecutive-blank-lines": true,
-    "semi": [
-      true,
-      "always"
-    ],
-    "comma-dangle": [
-      true,
-      "only-multiline"
-    ]
+    "no-consecutive-blank-lines": true
   }
 }
