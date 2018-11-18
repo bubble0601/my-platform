@@ -112,7 +112,7 @@ func run() {
 	if gin.IsDebugging() {
 		err = server.Run()
 	} else {
-		err = server.RunUnix("deploy/gin.sock")
+		err = server.RunUnix("deploy/tmp/gin.sock")
 	}
 	if err != nil {
 		util.LogFatal("failed to run server: ", err)
