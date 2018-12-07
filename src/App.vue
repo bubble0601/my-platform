@@ -1,29 +1,34 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <Navbar/>
+    <section class="section">
+      <router-view/>
+    </section>
   </div>
 </template>
+<script lang="ts">
+import Vue from 'vue';
+import Navbar from './containers/Navbar.vue';
+import { AUTH_INIT } from './store/auth';
 
+export default Vue.extend({
+  components: {
+    Navbar,
+  },
+  created() {
+    this.$store.dispatch(AUTH_INIT);
+  },
+});
+</script>
 <style lang="scss">
+@import 'scss/common';
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+
+#app > .section {
+  flex-grow: 1;
 }
 </style>

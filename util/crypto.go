@@ -11,6 +11,6 @@ func ToHash(password string) (string, error) {
 }
 
 // VerifyPassword verifies password comparing with hash
-func VerifyPassword(hash, password string) error {
+func VerifyPassword(hash string, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }

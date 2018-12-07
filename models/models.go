@@ -15,14 +15,13 @@ var db *gorm.DB
 func init() {
 	conf := util.GetConf()
 	ms := conf.MySQL
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s", ms.User, ms.Password, ms.Host, ms.DBName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=true", ms.User, ms.Password, ms.Host, ms.DBName)
 
 	var err error
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
 		util.LogFatal("failed to connect mysql server: ", err)
 	}
-	defer db.Close()
 
 	db.DB().SetMaxIdleConns(15)
 	db.DB().SetMaxOpenConns(30)
@@ -31,7 +30,7 @@ func init() {
 }
 
 func initDB(db *gorm.DB) {
-	db.AutoMigrate(&Song{})
+	db.AutoMigrate(&Song{}, &User{})
 }
 
 // DB returns gorm.DB object

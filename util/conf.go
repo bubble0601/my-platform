@@ -28,9 +28,6 @@ type Conf struct {
 		Secret     string
 		CsrfSecret string
 	}
-	JS struct {
-		Version int
-	}
 }
 
 func init() {

@@ -1,0 +1,19 @@
+// Bulma, Buefy
+
+// Update Bulma's initial variables
+$primary: #54c3f1;
+$radius-small: 3px;
+
+@import "~bulma/sass/utilities/_all";
+
+// Update Bulma's derived variables
+$input-shadow: none;
+$input-hover-color: $grey-darker;
+$input-hover-border-color: 	$grey-lighter;
+$input-radius: .4em;
+
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
+
+// utilitiies from bootstrap
+@import "~bootstrap-utilities-for-bulma/utilities"

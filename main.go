@@ -7,16 +7,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/utrack/gin-csrf"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 
 	"ibubble/models"
 	"ibubble/routes"
 	"ibubble/util"
-
-	"github.com/gin-gonic/gin"
 )
 
 var server *gin.Engine
@@ -30,6 +28,7 @@ func main() {
 
 func initLogger() {
 	if gin.IsDebugging() {
+		models.DB().LogMode(true)
 		return
 	}
 	util.SetLogMode(false)
@@ -62,7 +61,6 @@ func initServer() {
 	server.Use(func(c *gin.Context) {
 		// set values
 		c.Set("group", strings.Split(c.Request.URL.Path, "/")[1])
-		c.Set("version", conf.JS.Version)
 
 		c.Next()
 
@@ -95,7 +93,7 @@ func initServer() {
 		Secret: conf.Session.CsrfSecret,
 		ErrorFunc: func(c *gin.Context) {
 			util.Assert(c.GetString("group") == "api")
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 				"error_message": "Invalid CSRF Token",
 			})
 		},
