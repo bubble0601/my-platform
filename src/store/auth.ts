@@ -22,10 +22,13 @@ export default {
     user: null,
   },
   getters: {
+    isInitialized(state: State): boolean {
+      return state.status !== '';
+    },
     isAuthenticated(state: State): boolean {
       return state.status === 'success';
     },
-    getUser(state: State): User {
+    user(state: State): User {
       return state.user;
     },
   },
@@ -41,12 +44,13 @@ export default {
       state.status = 'error';
     },
     [AUTH_SIGNOUT](state: State) {
-      state.status = '';
+      state.status = 'signout';
     },
   },
   actions: {
     [AUTH_INIT]({ commit }: ActionContext<State, any>, data: any) {
       return new Promise((resolve) => {
+        commit(AUTH_REQUEST);
         axios.get('/api/user/init').then((res) => {
           axios.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
             if (config.method && ['get', 'head', 'options'].includes(config.method.toLowerCase())) return config;
@@ -54,6 +58,7 @@ export default {
             return config;
           });
           if (res.data.user) commit(AUTH_SUCCESS, res.data.user);
+          else commit(AUTH_SIGNOUT);
           resolve(res);
         });
       });

@@ -4,6 +4,7 @@ import Router from 'vue-router';
 import { Toast } from 'buefy/dist/components/toast';
 import { VueOptions } from '../types';
 import store from '../store';
+import { AUTH_INIT } from '../store/auth';
 import Home from '../pages/Home.vue';
 
 Vue.use(Router);
@@ -37,16 +38,36 @@ const router = new Router({
 
 // Authentication check
 router.beforeEach((to, from, next) => {
-  if (to.meta.public || store.getters.isAuthenticated) {
-    next();
+  if (store.getters.isInitialized) {
+    if (to.meta.public || store.getters.isAuthenticated) {
+      next();
+    } else {
+      // next('/login?redirect=' + to.path);
+      Toast.open({
+        type: 'is-danger',
+        position: 'is-bottom',
+        message: 'Sign in required',
+      });
+      next(false);
+    }
   } else {
-    // next('/login?redirect=' + to.path);
-    Toast.open({
-      type: 'is-danger',
-      position: 'is-bottom',
-      message: 'Sign in required',
-    });
-    next(false);
+    if (to.meta.public) {
+      next();
+      store.dispatch(AUTH_INIT);
+    } else {
+      store.dispatch(AUTH_INIT).then(() => {
+        if (store.getters.isAuthenticated) {
+          next();
+        } else {
+          Toast.open({
+            type: 'is-danger',
+            position: 'is-bottom',
+            message: 'Sign in required',
+          });
+          next('/');
+        }
+      });
+    }
   }
 });
 

@@ -70,7 +70,7 @@ export default Vue.extend({
       return this.$store.getters.isAuthenticated;
     },
     user(): User {
-      return this.$store.getters.getUser;
+      return this.$store.getters.user;
     },
   },
   watch: {

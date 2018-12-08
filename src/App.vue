@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Navbar/>
-    <section class="section">
+    <section class="section py-2" :class="{ 'is-padding-less': $route.meta.fill }">
       <router-view/>
     </section>
   </div>
@@ -14,9 +14,6 @@ import { AUTH_INIT } from './store/auth';
 export default Vue.extend({
   components: {
     Navbar,
-  },
-  created() {
-    this.$store.dispatch(AUTH_INIT);
   },
 });
 </script>

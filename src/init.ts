@@ -14,6 +14,7 @@ axios.interceptors.response.use(undefined, (err) => {
     position: 'is-bottom',
     message: err.response.data.error_message,
   });
+  throw err;
 });
 
 if (process.env.NODE_ENV !== 'production') {
