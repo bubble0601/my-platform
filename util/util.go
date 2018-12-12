@@ -27,7 +27,7 @@ func GetFiles(dir string) []string {
 // FileExists returns true if the file specified by filename exists
 func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
-	return !os.IsNotExist(err)
+	return err == nil
 }
 
 // RenameIfExists renames specified file not to overwrite

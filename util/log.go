@@ -9,18 +9,32 @@ import (
 var (
 	logger log.Logger
 	dev    = true
+	sep    = " "
 )
 
 func printLog(prefix string, v ...interface{}) {
 	log.SetPrefix(prefix + " ")
-	log.Print(v...)
+	values := insertSep(v)
+	log.Print(values...)
 	log.SetPrefix("")
 }
 
 func printLogf(prefix string, format string, v ...interface{}) {
 	log.SetPrefix(prefix + " ")
-	log.Printf(format, v...)
+	values := insertSep(v)
+	log.Printf(format, values...)
 	log.SetPrefix("")
+}
+
+func insertSep(values []interface{}) []interface{} {
+	newValues := make([]interface{}, len(values)*2-1)
+	for i, v := range values {
+		newValues[i*2] = v
+		if i < len(values)-1 {
+			newValues[i*2+1] = sep
+		}
+	}
+	return newValues
 }
 
 // LogDebug prints debug log

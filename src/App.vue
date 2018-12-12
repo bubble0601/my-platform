@@ -27,5 +27,6 @@ export default Vue.extend({
 
 #app > .section {
   flex-grow: 1;
+  background-color: #fafafa;
 }
 </style>

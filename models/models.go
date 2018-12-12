@@ -26,11 +26,6 @@ func init() {
 	db.DB().SetMaxIdleConns(15)
 	db.DB().SetMaxOpenConns(30)
 	db.DB().SetConnMaxLifetime(time.Hour)
-	initDB(db)
-}
-
-func initDB(db *gorm.DB) {
-	db.AutoMigrate(&Song{}, &User{})
 }
 
 // DB returns gorm.DB object
