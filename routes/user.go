@@ -20,7 +20,6 @@ func userRoute(r *gin.RouterGroup) {
 func initUser(c *gin.Context) {
 	session := sessions.Default(c)
 	uid, ok := session.Get("UserID").(uint)
-	session.Clear()
 
 	if !ok {
 		c.JSON(http.StatusOK, gin.H{
@@ -31,6 +30,7 @@ func initUser(c *gin.Context) {
 
 	var user models.User
 	if err := user.FetchByID(int(uid)); err != nil {
+		session.Clear()
 		session.Save()
 		c.JSON(http.StatusOK, gin.H{
 			"token": csrf.GetToken(c),
@@ -38,8 +38,6 @@ func initUser(c *gin.Context) {
 		return
 	}
 
-	session.Set("UserID", uid)
-	session.Save()
 	c.JSON(http.StatusOK, gin.H{
 		"token": csrf.GetToken(c),
 		"user": gin.H{

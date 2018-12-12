@@ -83,8 +83,10 @@ func initServer() {
 	// session
 	store := cookie.NewStore([]byte(conf.Session.Secret))
 	store.Options(sessions.Options{
+		Path:     "/",
 		Secure:   conf.Server.SSL,
 		HttpOnly: true,
+		MaxAge:   2592000,
 	})
 	server.Use(sessions.Sessions(conf.Session.Name, store))
 
