@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"ibubble/util"
 	"net/http"
+
+	"ibubble/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,12 @@ func RegisterRoutes(server *gin.Engine) {
 	api := server.Group("/api")
 	{
 		userRoute(api.Group("/user"))
+		musicRoute(api.Group("/music", authRequired()))
+	}
+
+	static := server.Group("/static")
+	{
+		musicStaticRoute(static.Group("/music", authRequired()))
 	}
 
 	server.NoRoute(func(c *gin.Context) {

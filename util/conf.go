@@ -2,6 +2,7 @@ package util
 
 import (
 	"io/ioutil"
+	"os"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -28,10 +29,26 @@ type Conf struct {
 		Secret     string
 		CsrfSecret string
 	}
+	Storage struct {
+		Music string
+	}
 }
 
+const confFile = "conf.yml"
+
 func init() {
-	body, err := ioutil.ReadFile("conf.yml")
+	// seek project root
+	for {
+		if FileExists(confFile) {
+			break
+		}
+		if path, _ := os.Getwd(); path == "/" {
+			LogFatal(confFile, "not found")
+			break
+		}
+		os.Chdir("..")
+	}
+	body, err := ioutil.ReadFile(confFile)
 	if err != nil {
 		LogFatal("failed to load conf: ", err)
 	}
