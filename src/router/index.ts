@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-// @ts-ignore
-import { Toast } from 'buefy/dist/components/toast';
 import { VueOptions } from '../types';
 import store from '../store';
 import { AUTH_INIT } from '../store/auth';
 import Home from '../pages/Home.vue';
+import music from './music';
 
 Vue.use(Router);
 
@@ -25,14 +24,7 @@ const router = new Router({
       component: Home,
       meta: { title: 'Home', public: true },
     },
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (about.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import(/* webpackChunkName: "about" */ './views/About.vue'),
-    // },
+    ...music,
   ],
 });
 
@@ -43,11 +35,7 @@ router.beforeEach((to, from, next) => {
       next();
     } else {
       // next('/login?redirect=' + to.path);
-      Toast.open({
-        type: 'is-danger',
-        position: 'is-bottom',
-        message: 'Sign in required',
-      });
+      Vue.prototype.$message.error('Sign in required');
       next(false);
     }
   } else {
@@ -59,11 +47,7 @@ router.beforeEach((to, from, next) => {
         if (store.getters.isAuthenticated) {
           next();
         } else {
-          Toast.open({
-            type: 'is-danger',
-            position: 'is-bottom',
-            message: 'Sign in required',
-          });
+          Vue.prototype.$message.error('Sign in required');
           next('/');
         }
       });

@@ -1,19 +1,17 @@
-// Bulma, Buefy
+//// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+@import '~bootstrap-vue/src/index.scss';
 
-// Update Bulma's initial variables
-$primary: #54c3f1;
-$radius-small: 3px;
+@media screen and (max-width: 575.98px) {
+  html {
+    font-size: 15px;
+  }
+}
 
-@import "~bulma/sass/utilities/_all";
+@media screen and (min-width: 576px) {
+  html {
+    font-size: 16px;
+  }
+}
 
-// Update Bulma's derived variables
-$input-shadow: none;
-$input-hover-color: $grey-darker;
-$input-hover-border-color: 	$grey-lighter;
-$input-radius: .4em;
-
-@import "~bulma";
-@import "~buefy/src/scss/buefy";
-
-// utilitiies from bootstrap
-@import "~bootstrap-utilities-for-bulma/utilities"
+@import "misc";

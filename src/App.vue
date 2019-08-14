@@ -1,15 +1,14 @@
 <template>
   <div id="app">
     <Navbar/>
-    <section class="section py-2" :class="{ 'is-padding-less': $route.meta.fill }">
+    <main>
       <router-view/>
-    </section>
+    </main>
   </div>
 </template>
 <script lang="ts">
 import Vue from 'vue';
 import Navbar from './containers/Navbar.vue';
-import { AUTH_INIT } from './store/auth';
 
 export default Vue.extend({
   components: {
@@ -18,14 +17,14 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss">
-@import 'scss/common';
+@import 'assets/scss/common';
 #app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-#app > .section {
+#app > main {
   flex-grow: 1;
   background-color: #fafafa;
 }

@@ -1,19 +1,22 @@
 import Vue from 'vue';
-import Buefy from 'buefy';
-// @ts-ignore
-import { Toast } from 'buefy/dist/components/toast';
+import BootstrapVue from 'bootstrap-vue';
 import axios from 'axios';
+import { initDialogs } from './utils';
+import { VField, VHelp, VIcon, VInput, VTextarea } from './basics';
 
-Vue.use(Buefy, {
-  defaultIconPack: 'fa',
-});
+Vue.use(BootstrapVue);
+Vue.component('VField', VField);
+Vue.component('VHelp', VHelp);
+Vue.component('VIcon', VIcon);
+Vue.component('VInput', VInput);
+Vue.component('VTextarea', VTextarea);
+initDialogs();
 
 axios.interceptors.response.use(undefined, (err) => {
-  Toast.open({
-    type: 'is-danger',
-    position: 'is-bottom',
-    message: err.response.data.error_message,
-  });
+  const { data } = err.response;
+  if (!data || data.error_message) {
+    Vue.prototype.$message.error(data.error_message || '通信に失敗しました');
+  }
   throw err;
 });
 
