@@ -1,5 +1,5 @@
 <template>
-  <b-navbar>
+  <b-navbar class="py-0">
     <div class="container">
       <b-navbar-brand to="/">
         <img class="brand" src="../assets/logo.png" alt="Logo">

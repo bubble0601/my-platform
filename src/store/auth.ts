@@ -8,6 +8,12 @@ export interface User {
   name: string;
 }
 
+const api = {
+  init: () => axios.get<{ user: User, token: string }>('/api/user/init'),
+  signIn: (data: { username: string, password: string }) => axios.post<{ user: User }>('/api/user/signin', data),
+  signOut: () => axios.get('/api/user/signout'),
+};
+
 @Module({ dynamic: true, store, name: 'auth' })
 class Auth extends VuexModule {
   public status: Status = '';
@@ -45,7 +51,7 @@ class Auth extends VuexModule {
   @Action
   public async Init() {
     this.REQUEST();
-    const res = await axios.get<{ user: User, token: string }>('/api/user/init');
+    const res = await api.init();
     axios.interceptors.request.use((config) => {
       if (config.method && ['get', 'head', 'options'].includes(config.method.toLowerCase())) return config;
       config.headers['X-CSRF-TOKEN'] = res.data.token;
@@ -59,7 +65,7 @@ class Auth extends VuexModule {
   @Action
   public async SignIn(data: { username: string, password: string }) {
     this.REQUEST();
-    await axios.post<{ user: User }>('/api/user/signin', data).then((res) => {
+    return api.signIn(data).then((res) => {
       this.SUCCESS(res.data.user);
       return res;
     }).catch((err) => {
@@ -70,9 +76,8 @@ class Auth extends VuexModule {
 
   @Action
   public async SignOut() {
-    await axios.get('/api/user/signout').then(() => {
-      this.SIGNOUT();
-    });
+    await api.signOut();
+    this.SIGNOUT();
   }
 }
 

@@ -58,7 +58,16 @@ export function getWeekDay(arg: string | Date) {
   return '日月火水木金土'[date.getDay()];
 }
 
-// tslint:disable-next-line
+export function convertTime(time: number) {
+  const h = Math.floor(time / 3600);
+  const m = Math.floor((time - 3600 * h) / 60);
+  const s = time % 60;
+  const H = h > 0 ? `${h}:` : '';
+  const M = m < 10 ? `0${m}` : String(m);
+  const S = s < 10 ? `0${s}` : String(s);
+  return `${H}${M}:${S}`;
+}
+
 export function timeRange(_start: string, _end: string, emphStart = false, emphEnd = false) {
   let start = escapeHtml(_start);
   let end = escapeHtml(_end);

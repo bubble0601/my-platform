@@ -1,17 +1,67 @@
 <template>
-  <div>
-    music
+  <div class="d-flex flex-column" :style="{ height }">
+    <div class="d-flex flex-grow-1 overflow-hidden">
+      <div class="sidemenu-left py-2">
+        <router-link v-for="t in tabs" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
+          {{ t.name }}
+        </router-link>
+      </div>
+      <div class="flex-grow-1 overflow-auto">
+        <router-view/>
+      </div>
+      <div class="sidemenu-right ml-auto">
+
+      </div>
+    </div>
+    <audio-player class="mt-auto"/>
   </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
-import axios from 'axios';
+import { Vue, Component, Prop } from 'vue-property-decorator';
+// import MusicModule, { Song } from '@/store/music';
+import { AudioPlayer } from '@/components';
 
-export default Vue.extend({
-  created() {
-    axios.get('/api/music/all').then((res) => {
-      console.log(res.data);
-    });
+@Component({
+  components: {
+    AudioPlayer,
   },
-});
+})
+export default class extends Vue {
+  private height = 'auto';
+  private tabs = [
+    { key: 'all', name: 'All' },
+    { key: 'fav', name: 'Favorite' },
+  ];
+
+  private mounted() {
+    if (this.$el instanceof HTMLElement) {
+      this.height = `calc(100vh - ${this.$el.offsetTop}px)`;
+    }
+  }
+}
 </script>
+<style lang="scss" scoped>
+.sidemenu-left {
+  border-right: 2px solid #dee2e6;
+  .menu-item {
+    display: block;
+    color: #6c757d;
+    cursor: pointer;
+    &:hover {
+      color: #595e63;
+    }
+    &.active {
+      color: #494d50;
+      background-color: #9999;
+      cursor: default;
+    }
+  }
+}
+.table {
+  font-size: smaller;
+}
+.sidemenu-right {
+  border-left: 2px solid #dee2e6;
+  min-width: 20vw;
+}
+</style>

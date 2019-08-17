@@ -49,8 +49,17 @@ func RenameIfExists(filename string) {
 	}
 }
 
+// EscapeFilename escapes name
+func EscapeFilename(name string) string {
+	// 環境によってファイル名に使えない文字を取り除く
+	for _, c := range []string{"\\", "/", "|", ":", "*", "?", "\"", "<", ">"} {
+		name = strings.Replace(name, c, " ", -1)
+	}
+	return name
+}
+
 // Contains returns true if slice contains e
-func Contains(slice []interface{}, e interface{}) bool {
+func Contains(slice []string, e string) bool {
 	for _, v := range slice {
 		if e == v {
 			return true

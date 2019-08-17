@@ -1,10 +1,12 @@
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import axios from 'axios';
+import VueSlider from 'vue-slider-component';
 import { initDialogs } from './utils';
 import { VField, VHelp, VIcon, VInput, VTextarea } from './basics';
 
 Vue.use(BootstrapVue);
+Vue.component('VueSlider', VueSlider);
 Vue.component('VField', VField);
 Vue.component('VHelp', VHelp);
 Vue.component('VIcon', VIcon);

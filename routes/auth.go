@@ -13,7 +13,7 @@ import (
 // MiddleWare
 func authRequired() func(*gin.Context) {
 	return func(c *gin.Context) {
-		util.Assert(c.GetString("group") == "api")
+		util.Assert(util.Contains([]string{"api", "static"}, c.GetString("group")))
 		session := sessions.Default(c)
 		userID, ok := session.Get("UserID").(uint)
 		if !ok {

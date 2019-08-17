@@ -69,6 +69,13 @@ func GetSongs() []Song {
 	return songs
 }
 
+// GetAlbum returns album which the song is recorded
+func (song Song) GetAlbum() Album {
+	var album Album
+	db.First(&album, song.AlbumID)
+	return album
+}
+
 // ScanAll scans all mp3 files in the music directory
 func ScanAll(dir string) error {
 	scanErrors := make(map[string]error)
@@ -271,9 +278,9 @@ func getfiles(dir string) ([]string, error) {
 
 func genFilename(artist *Artist, album *Album, song *Song, originalName string) string {
 	// Set filename
-	artistName := escapeFilename(artist.Name)
-	albumTitle := escapeFilename(album.Title)
-	songTitle := escapeFilename(song.Title)
+	artistName := util.EscapeFilename(artist.Name)
+	albumTitle := util.EscapeFilename(album.Title)
+	songTitle := util.EscapeFilename(song.Title)
 	if artist.Name != "" {
 		if album.Title != "" {
 			if song.Title != "" {
@@ -292,14 +299,6 @@ func genFilename(artist *Artist, album *Album, song *Song, originalName string) 
 	return fmt.Sprintf("Unknown Artist/%s", originalName)
 }
 
-func escapeFilename(name string) string {
-	// 環境によってファイル名に使えない文字を取り除く
-	for _, c := range []string{"\\", "/", "|", ":", "*", "?", "\"", "<", ">"} {
-		name = strings.Replace(name, c, " ", -1)
-	}
-	return name
-}
-
 func getID3String(f *v2.Framer) string {
 	return strings.TrimRight((*f).String(), string(byte(0)))
 }
@@ -312,7 +311,7 @@ func GetPath(hash, name string) (string, error) {
 	if err != nil {
 		return path, err
 	}
-	if name != escapeFilename(song.Title) {
+	if name != util.EscapeFilename(song.Title)+".mp3" {
 		return path, errors.New("Not found")
 	}
 

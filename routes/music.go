@@ -49,8 +49,14 @@ func getAll(c *gin.Context) {
 	ret := make([]map[string]interface{}, len(songs))
 
 	for i, song := range songs {
+		album := song.GetAlbum()
 		ret[i] = gin.H{
-			"title": song.Title,
+			"title":    song.Title,
+			"artist":   song.Artist,
+			"album":    album.Title,
+			"time":     song.Length,
+			"hash":     song.Hash,
+			"filename": util.EscapeFilename(song.Title) + ".mp3",
 		}
 	}
 	c.JSON(http.StatusOK, ret)
