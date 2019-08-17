@@ -8,48 +8,46 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import { noop } from 'lodash';
 import { waitUntil } from '@/utils';
 
-export default Vue.extend({
-  props: {
-    label: {
-      type: String,
-      default: null,
-    },
-    help: {
-      type: String,
-      default: null,
-    },
-    feedback: {
-      type: [String, Object], // if type is String, interpreted as invalid feedback
-      default: null,
-    },
-    horizontal: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data(): { labelFor: string | null } {
-    return {
-      labelFor: null,
-    };
-  },
-  computed: {
-    validFeedback(): string | null {
-      if (this.feedback && this.feedback.valid) return this.feedback.valid;
-      return null;
-    },
-    invalidFeedback(): string | null {
-      if (this.feedback) {
-        if (this.feedback.invalid) return this.feedback.invalid;
-        if (!this.feedback.valid) return this.feedback;
+@Component
+export default class extends Vue {
+  @Prop({ default: '' })
+  private label!: string;
+
+  @Prop({ default: '' })
+  private help!: string;
+
+  @Prop({ default: null })
+  private feedback!: string | { valid: string, invalid: string } | null;
+
+  @Prop({ default: false })
+  private horizontal!: boolean;
+
+  private labelFor = '';
+
+  get validFeedback() {
+    if (this.feedback && 'string' !== typeof this.feedback) {
+      return this.feedback.valid;
+    }
+    return null;
+  }
+
+  get invalidFeedback() {
+    if (this.feedback) {
+      if ('string' === typeof this.feedback) {
+        return this.feedback;
+      } else {
+        return this.feedback.invalid;
       }
-      return null;
-    },
-  },
-  mounted() {
+    }
+    return null;
+  }
+
+  private mounted() {
+    // set labelFor
     if (this.$slots.default && this.$slots.default.length === 1) {
       const inputTags = ['input', 'select', 'textarea'];
       const slotElm = this.$slots.default[0].elm as HTMLElement;
@@ -59,8 +57,8 @@ export default Vue.extend({
         }, noop);
       }
     }
-  },
-});
+  }
+}
 </script>
 <style lang="scss" scoped>
 .horizontal {

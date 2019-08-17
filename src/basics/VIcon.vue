@@ -4,34 +4,28 @@
   </span>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-export default Vue.extend({
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: String,
-      default: null,
-      validator(val: string) {
-        return ['sm', 'lg', 'xl'].includes(val);
-      },
-    },
-  },
-  computed: {
-    classes() {
-      const classes: string[] = [];
-      classes.push(`fa-${this.name}`);
-      if (this.size) {
-        if (this.size === 'lg') classes.push('fa-lg');
-        else if (this.size === 'xl') classes.push('fa-2x');
-      }
-      return classes;
-    },
-  },
-});
+type Size = 'sm' | 'lg' | 'xl';
+
+@Component
+export default class extends Vue {
+  @Prop({ required: true })
+  private name!: string;
+
+  @Prop({ default: null })
+  private size!: Size | null;
+
+  get classes() {
+    const classes: string[] = [];
+    classes.push(`fa-${this.name}`);
+    if (this.size) {
+      if (this.size === 'lg') classes.push('fa-lg');
+      else if (this.size === 'xl') classes.push('fa-2x');
+    }
+    return classes;
+  }
+}
 </script>
 <style lang="scss" scoped>
 .icon {

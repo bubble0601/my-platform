@@ -10,46 +10,46 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { mixins } from 'vue-class-component';
+import { Vue, Component, Watch, Ref } from 'vue-property-decorator';
+import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
+import { Variant, MsgOptions } from '@/types';
 
-export default Vue.extend({
-  mixins: [DialogMixin],
-  data() {
-    return {
-      opened: false,
-      container: null,
-      title: null,
-      message: null,
-      variant: null,
-      dismissible: null,
+@Component
+export default class extends mixins(DialogMixin) {
+  private opened = false;
+  private container = null;
+  private title = '';
+  private message = '';
+  private variant: Variant = '';
+  private dismissible = false;
+
+  public open(rawOptions: MsgOptions) {
+    const defaultOptions = {
+      duration: 5000,
+      dismissible: false,
     };
-  },
-  methods: {
-    open(rawOptions: object) {
-      const defaultOptions = {
-        duration: 5000,
-        dismissible: false,
-      };
-      const options: { [key: string]: any } = {
-        ...defaultOptions,
-        ...rawOptions,
-      };
-      this.title = options.title;
-      this.message = options.message;
-      this.variant = options.variant;
-      this.dismissible = options.dismissible;
-      setTimeout(this.close, options.duration);
-      this.opened = true;
-    },
-    close() {
-      this.opened = false;
-    },
-    onClosed() {
-      this.$destroy();
-    },
-  },
-});
+    const options: MsgOptions = {
+      ...defaultOptions,
+      ...rawOptions,
+    };
+    this.title = options.title || '';
+    this.message = options.message || '';
+    this.variant = options.variant || '';
+    this.dismissible = options.dismissible === true;
+    setTimeout(this.close, options.duration);
+    this.opened = true;
+  }
+
+  public close() {
+    this.opened = false;
+  }
+
+  private onClosed() {
+    this.$destroy();
+  }
+}
 </script>
 <style lang="scss" scoped>
 .wrapper {

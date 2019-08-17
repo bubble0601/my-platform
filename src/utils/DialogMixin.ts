@@ -1,10 +1,12 @@
-import Vue from 'vue';
+import { Vue, Component } from 'vue-property-decorator';
 
-export default Vue.extend({
-  created() {
+@Component
+export default class extends Vue {
+  protected created() {
     document.body.appendChild(this.$mount().$el);
-  },
-  destroyed() {
+  }
+
+  protected destroyed() {
     document.body.removeChild(this.$el);
-  },
-});
+  }
+}

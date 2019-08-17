@@ -1,12 +1,23 @@
 import Vue from 'vue';
-import { Message, MessageBox } from '@/components';
 import { isObject } from 'lodash';
+import { Message, MessageBox } from '@/components';
+import { Variant, MsgOptions, MsgBoxOptions } from '@/types';
 
 const variants = ['primary', 'secondry', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
 
-function makeMessage(variant?: string) {
-  return (...args: [object] | [string, object?] | [string, string, object?] | [string, string, string, object?]) => {
-    let options: { [key: string]: any } = {};
+type MessageArgs =
+  [MsgOptions] |
+  [string, MsgOptions?] |
+  [string, string, MsgOptions?] |
+  [Variant, string, string, MsgOptions?];
+
+function isVariant(str: string): str is Variant {
+  return variants.includes(str);
+}
+
+function makeMessage(variant?: Variant) {
+  return (...args: MessageArgs) => {
+    let options: MsgOptions = {};
     /**
      * $message(options)
      * $message(message, options?)
@@ -34,7 +45,7 @@ function makeMessage(variant?: string) {
         message: a,
       };
     } else if (c === undefined) {
-      if (variant === undefined && variants.includes(a)) {
+      if (variant === undefined && isVariant(a)) {
         options = {
           variant: a,
           message: b,
@@ -46,7 +57,7 @@ function makeMessage(variant?: string) {
         };
       }
     } else if (isObject(c)) {
-      if (variant === undefined && variants.includes(a)) {
+      if (variant === undefined && isVariant(a)) {
         options = {
           ...c,
           variant: a,
@@ -61,21 +72,21 @@ function makeMessage(variant?: string) {
       }
     } else if (d === undefined) {
       options = {
-        variant: a,
+        variant: isVariant(a) ? a : '',
         title: b,
         message: c,
       };
     } else if (isObject(d)) {
       options = {
         ...d,
-        variant: a,
+        variant: isVariant(a) ? a : '',
         title: b,
         message: c,
       };
     }
     if (variant) options.variant = variant;
     // @ts-ignore
-    new Vue(Message).open(options);
+    new Message().open(options);
   };
 }
 
@@ -87,9 +98,14 @@ function initMessage() {
   Vue.prototype.$message.error = makeMessage('danger');
 }
 
-function makeMessageBox(type: string) {
-  return (...args: [object] | [string, object?] | [string, string, object?]) => {
-    let options: { [key: string]: any } = {};
+type MsgBoxArgs =
+  [MsgBoxOptions] |
+  [string, MsgBoxOptions?] |
+  [string, string, MsgBoxOptions];
+
+function makeMessageBox(type: 'confirm' | 'prompt') {
+  return (...args: MsgBoxArgs) => {
+    let options: MsgBoxOptions = {};
     const a = args[0];
     const b = args[1];
     const c = args[2];
@@ -125,7 +141,7 @@ function makeMessageBox(type: string) {
     }
     options.type = type;
     // @ts-ignore
-    return new Vue(MessageBox).open(options);
+    return new MessageBox().open(options);
   };
 }
 
@@ -141,6 +157,20 @@ function initDialogs() {
    */
   Vue.prototype.$confirm = makeMessageBox('confirm');
   Vue.prototype.$prompt = makeMessageBox('prompt');
+}
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    $message: {
+      (...args: MessageArgs): void,
+      info: (...args: MessageArgs) => void,
+      success: (...args: MessageArgs) => void,
+      warn: (...args: MessageArgs) => void,
+      error: (...args: MessageArgs) => void,
+    };
+    $confirm: (...args: MsgBoxArgs) => Promise<undefined>;
+    $prompt: (...args: MsgBoxArgs) => Promise<string>;
+  }
 }
 
 export default function() {

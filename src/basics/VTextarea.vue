@@ -2,80 +2,73 @@
   <b-form-textarea ref="input" v-bind="attrs" :style="textareaStyle" v-on="listeners"/>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { calcTextareaHeight } from '@/utils';
+import { Obj } from '@/types';
 
-export default Vue.extend({
-  props: {
-    autofocus: {
-      type: Boolean,
-      default: false,
-    },
-    autosize: {
-      type: [Boolean, Object],
-      default: true,
-    },
-    value: {
-      type: String,
-      default: null,
-    },
-    // disable auto height function of b-form-textarea
-    rows: {
-      type: [Number, String],
-      default: 3,
-    },
-    maxRows: {
-      type: [Number, String],
-      default: 0,
-    },
-  },
-  data() {
+@Component
+export default class extends Vue {
+  public focus!: () => void;
+  public blur!: () => void;
+  public select!: () => void;
+
+  @Prop({ default: false })
+  private autofocus!: boolean;
+
+  @Prop({ default: true })
+  private autosize!: boolean;
+
+  @Prop({ default: '' })
+  private value!: string;
+
+  @Prop({ default: 3 })
+  private rows!: number;
+
+  @Prop({ default: 0 })
+  private maxRows!: number;
+
+  @Ref() private input!: HTMLInputElement;
+
+  private textareaStyle = {};
+
+  get attrs() {
     return {
-      textareaStyle: {},
+      rows: 3,
+      noResize: true,
+      value: this.value,
+      ...this.$attrs,
     };
-  },
-  computed: {
-    attrs(): object {
-      return {
-        rows: 3,
-        noResize: true,
-        value: this.value,
-        ...this.$attrs,
-      };
-    },
-    listeners(): object {
-      return {
-        ...this.$listeners,
-        keydown(e: Event) {
-          e.stopPropagation();
-        },
-      };
-    },
-  },
-  watch: {
-    value() {
-      if (this.autosize) this.$nextTick(this.resizeTextarea);
-    },
-  },
-  mounted() {
-    ['focus', 'blur', 'select'].forEach((method) => {
-      // @ts-ignore
-      this[method] = this.$refs.input[method];
-    });
+  }
+
+  get listeners() {
+    return {
+      ...this.$listeners,
+      keydown(e: Event) {
+        e.stopPropagation();
+      },
+    };
+  }
+
+  @Watch('value')
+  private onValueChanged() {
+    if (this.autosize) this.$nextTick(this.resizeTextarea);
+  }
+
+  private mounted() {
+    this.focus = this.input.focus;
+    this.blur = this.input.blur;
+    this.select = this.input.select;
     if (this.autofocus) {
-      // @ts-ignore
       this.focus();
     }
     if (this.autosize) {
       this.resizeTextarea();
     }
-  },
-  methods: {
-    resizeTextarea() {
-      const minRows = this.autosize.minRows || this.rows;
-      const maxRows = this.autosize.maxRows || this.maxRows || null;
-      this.textareaStyle = calcTextareaHeight(this.$el as HTMLTextAreaElement, minRows, maxRows);
-    },
-  },
-});
+  }
+  private resizeTextarea() {
+    const minRows = this.rows;
+    const maxRows = this.maxRows || null;
+    this.textareaStyle = calcTextareaHeight(this.$el as HTMLTextAreaElement, minRows, maxRows);
+  }
+}
 </script>

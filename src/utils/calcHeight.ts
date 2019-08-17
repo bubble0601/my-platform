@@ -59,7 +59,7 @@ function calculateNodeStyling(targetElement: HTMLTextAreaElement) {
   return { contextStyle, paddingSize, borderSize, boxSizing };
 }
 
-export function calcTextareaHeight(targetElement: HTMLTextAreaElement, minRows = 1, maxRows = null) {
+export function calcTextareaHeight(targetElement: HTMLTextAreaElement, minRows = 1, maxRows: number | null = null) {
   if (!hiddenTextarea) {
     hiddenTextarea = document.createElement('textarea');
     document.body.appendChild(hiddenTextarea);

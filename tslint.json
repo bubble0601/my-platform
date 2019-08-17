@@ -15,6 +15,20 @@
     "ordered-imports": false,
     "object-literal-sort-keys": false,
     "no-consecutive-blank-lines": true,
-    "curly": [true, "ignore-same-line"]
+    "curly": [true, "ignore-same-line"],
+    "variable-name": [true, "allow-leading-underscore"],
+    "member-ordering": [true, {
+      "order": [
+        "public-static-field",
+        "protected-static-field",
+        "private-static-field",
+        "public-static-method",
+        "protected-static-method",
+        "private-static-method",
+        "instance-field",
+        "constractor",
+        "instance-method"
+      ]
+    }]
   }
 }

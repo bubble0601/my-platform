@@ -1,89 +1,79 @@
-import { ActionContext } from 'vuex';
-import axios, { AxiosRequestConfig } from 'axios';
+import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators';
+import axios from 'axios';
+import store from '@/store';
 
-export const AUTH_INIT = 'AUTH_INIT';
-export const AUTH_REQUEST = 'AUTH_REQUEST';
-export const AUTH_SUCCESS = 'AUTH_SUCCESS';
-export const AUTH_ERROR = 'AUTH_ERROR';
-export const AUTH_SIGNOUT = 'AUTH_SIGNOUT';
+type Status = '' | 'loading' | 'success' | 'fail' | 'signout';
 
 export interface User {
   name: string;
 }
 
-interface State {
-  status: string;
-  user: User;
+@Module({ dynamic: true, store, name: 'auth' })
+class Auth extends VuexModule {
+  public status: Status = '';
+  public user: User | null = null;
+
+  get isInitialized() {
+    return this.status !== '';
+  }
+  get isAuthenticated() {
+    return this.status === 'success';
+  }
+
+  @Mutation
+  private REQUEST() {
+    this.status = 'loading';
+  }
+
+  @Mutation
+  private SUCCESS(user: User) {
+    this.status = 'success';
+    this.user = user;
+  }
+
+  @Mutation
+  private FAIL() {
+    this.status = 'fail';
+  }
+
+  @Mutation
+  private SIGNOUT() {
+    this.status = 'signout';
+    this.user = null;
+  }
+
+  @Action
+  public async Init() {
+    this.REQUEST();
+    const res = await axios.get<{ user: User, token: string }>('/api/user/init');
+    axios.interceptors.request.use((config) => {
+      if (config.method && ['get', 'head', 'options'].includes(config.method.toLowerCase())) return config;
+      config.headers['X-CSRF-TOKEN'] = res.data.token;
+      return config;
+    });
+    if (res.data.user) this.SUCCESS(res.data.user);
+    else this.SIGNOUT();
+    return res;
+  }
+
+  @Action
+  public async SignIn(data: { username: string, password: string }) {
+    this.REQUEST();
+    await axios.post<{ user: User }>('/api/user/signin', data).then((res) => {
+      this.SUCCESS(res.data.user);
+      return res;
+    }).catch((err) => {
+      this.FAIL();
+      throw err;
+    });
+  }
+
+  @Action
+  public async SignOut() {
+    await axios.get('/api/user/signout').then(() => {
+      this.SIGNOUT();
+    });
+  }
 }
 
-export default {
-  state: {
-    status: '',
-    user: null,
-  },
-  getters: {
-    isInitialized(state: State): boolean {
-      return state.status !== '';
-    },
-    isAuthenticated(state: State): boolean {
-      return state.status === 'success';
-    },
-    user(state: State): User {
-      return state.user;
-    },
-  },
-  mutations: {
-    [AUTH_REQUEST](state: State) {
-      state.status = 'loading';
-    },
-    [AUTH_SUCCESS](state: State, user: User) {
-      state.status = 'success';
-      state.user = user;
-    },
-    [AUTH_ERROR](state: State) {
-      state.status = 'error';
-    },
-    [AUTH_SIGNOUT](state: State) {
-      state.status = 'signout';
-    },
-  },
-  actions: {
-    [AUTH_INIT]({ commit }: ActionContext<State, any>, data: any) {
-      return new Promise((resolve) => {
-        commit(AUTH_REQUEST);
-        axios.get('/api/user/init').then((res) => {
-          axios.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
-            if (config.method && ['get', 'head', 'options'].includes(config.method.toLowerCase())) return config;
-            config.headers['X-CSRF-TOKEN'] = res.data.token;
-            return config;
-          });
-          if (res.data.user) commit(AUTH_SUCCESS, res.data.user);
-          else commit(AUTH_SIGNOUT);
-          resolve(res);
-        });
-      });
-    },
-    [AUTH_REQUEST]({ commit }: ActionContext<State, any>, data: any) {
-      return new Promise((resolve, reject) => {
-        commit(AUTH_REQUEST);
-        axios.post('/api/user/signin', data).then((res) => {
-          commit(AUTH_SUCCESS, res.data.user);
-          resolve(res);
-        }).catch((err) => {
-          commit(AUTH_ERROR);
-          reject(err);
-        });
-      });
-    },
-    [AUTH_SIGNOUT]({ commit }: ActionContext<State, any>) {
-      return new Promise((resolve, reject) => {
-        axios.get('/api/user/signout').then(() => {
-          commit(AUTH_SIGNOUT);
-          resolve();
-        }).catch((err) => {
-          reject(err);
-        });
-      });
-    },
-  },
-};
+export default getModule(Auth);

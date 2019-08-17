@@ -11,7 +11,7 @@
   <b-modal ref="modal" v-else :title="title" @shown="$refs.input.focus(); $refs.input.select()" @hidden="settle" @keydown.shift.enter.native="onOK">
     <p v-if="message">{{ message }}</p>
     <v-field :label="label" feedback="入力が必要です">
-      <v-input ref="input" v-model="value" :requried="required" :state="state" :placeholder="placeholder"/>
+      <v-input ref="input" v-model="inputValue" :requried="required" :state="inputState" :placeholder="placeholder"/>
     </v-field>
     <template #modal-footer>
       <div class="d-flex justify-content-end">
@@ -22,99 +22,79 @@
   </b-modal>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { mixins } from 'vue-class-component';
+import { Vue, Component, Watch, Ref } from 'vue-property-decorator';
+import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
+import { Variant, MsgBoxOptions } from '@/types';
 
-interface DataType {
-  show: boolean;
-  result: boolean | null;
-  resolve: ((value?: any) => void) | null;
-  reject: ((reason?: any) => void) | null;
-  type: string | null;
-  title: string | null;
-  variant: string | null;
-  message: string | null;
-  value: string | null;
-  state: boolean | null;
-  label: string | null;
-  required: boolean;
-  placeholder: string | null;
-}
+export default class extends mixins(DialogMixin) {
+  private show = false;
+  private result = false;
+  private resolve: ((value?: any) => void) | null = null;
+  private reject: ((reason?: any) => void) | null = null;
+  private type: 'confirm' | 'prompt' = 'confirm';
+  private title = '';
+  private variant: Variant = '';
+  private message = '';
+  private inputLabel = '';
+  private inputValue = '';
+  private inputState: boolean | null = null;  // true: valid, false: invalid
+  private required = false;
+  private placeholder = '';
 
-export default Vue.extend({
-  mixins: [DialogMixin],
-  data(): DataType {
-    return {
-      show: false,
-      result: null,
-      resolve: null,
-      reject: null,
+  @Ref() private modal!: BModal;
 
-      type: null,
-      title: null,
-      variant: null,
-      message: null,
+  @Watch('inputValue')
+  private onValueChanged(val: string) {
+    if (val && this.inputState === false) this.inputState = true;
+    else if (!val && this.inputState === true) this.inputState = false;
+  }
 
-      value: null,
-      state: null,
-      label: null,
-      required: true,
-      placeholder: null,
-    };
-  },
-  watch: {
-    value(newVal) {
-      if (newVal && this.state === false) this.state = true;
-      else if (!newVal && this.state === true) this.state = false;
-    },
-  },
-  methods: {
-    open(options: { [key: string]: any }) {
-      this.type = options.type === 'prompt' ? 'prompt' : 'confirm';
-      this.title = options.title || (this.type === 'confirm' ? '確認' : '入力');
-      this.variant = options.variant || (this.type === 'confirm' ? 'danger' : 'primary');
-      this.message = options.message;
-      this.value = options.value;
-      this.label = options.label;
-      this.placeholder = options.placeholder;
-      this.required = options.required !== false;
-      this.$nextTick(() => {
-        // @ts-ignore
-        this.$refs.modal.show();
-      });
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      });
-    },
-    onOK() {
-      if (this.type === 'confirm') {
-        this.result = true;
-        // @ts-ignore
-        this.$refs.modal.hide();
-      } else if (this.type === 'prompt') {
-        if (this.required && !this.value) {
-          this.state = false;
-        } else {
-          this.result = true;
-          // @ts-ignore
-          this.$refs.modal.hide();
-        }
-      }
-    },
-    onCancel() {
-      // @ts-ignore
-      this.$refs.modal.hide();
-    },
-    settle() {
-      if (this.result) {
-        if (this.type === 'confirm') this.resolve!();
-        else this.resolve!(this.value);
+  public open(options: MsgBoxOptions) {
+    this.type = options.type === 'prompt' ? 'prompt' : 'confirm';
+    this.title = options.title || (this.type === 'confirm' ? '確認' : '入力');
+    this.variant = options.variant || (this.type === 'confirm' ? 'danger' : 'primary');
+    this.message = options.message || '';
+    this.inputValue = options.inputValue || '';
+    this.inputLabel = options.inputLabel || '';
+    this.placeholder = options.placeholder || '';
+    this.required = options.required !== false;
+    this.$nextTick(() => {
+      this.modal.show();
+    });
+    return new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+
+  private onOK() {
+    if (this.type === 'confirm') {
+      this.result = true;
+      this.modal.hide();
+    } else if (this.type === 'prompt') {
+      if (this.required && !this.inputValue) {
+        this.inputState = false;
       } else {
-        this.reject!();
+        this.result = true;
+        this.modal.hide();
       }
-      this.$destroy();
-    },
-  },
-});
+    }
+  }
+
+  private onCancel() {
+    this.modal.hide();
+  }
+
+  private settle() {
+    if (this.result) {
+      if (this.type === 'confirm') this.resolve!();
+      else this.resolve!(this.inputValue);
+    } else {
+      this.reject!();
+    }
+    this.$destroy();
+  }
+}
 </script>

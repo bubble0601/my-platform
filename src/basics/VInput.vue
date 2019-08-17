@@ -2,23 +2,27 @@
   <b-form-input ref="input" v-bind="$attrs" v-on="$listeners"/>
 </template>
 <script lang="ts">
-import Vue from 'vue';
-export default Vue.extend({
-  props: {
-    autofocus: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  mounted() {
-    ['focus', 'blur', 'select'].forEach((method) => {
-      // @ts-ignore
-      this[method] = this.$refs.input[method];
-    });
+import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
+import { BFormInput } from 'bootstrap-vue';
+
+@Component
+export default class extends Vue {
+  public focus!: () => void;
+  public blur!: () => void;
+  public select!: () => void;
+
+  @Prop({ default: false })
+  private autofocus!: boolean;
+
+  @Ref() private input!: BFormInput;
+
+  private mounted() {
+    this.focus = this.input.focus;
+    this.blur = this.input.blur;
+    this.select = this.input.select;
     if (this.autofocus) {
-      // @ts-ignore
       this.focus();
     }
-  },
-});
+  }
+}
 </script>

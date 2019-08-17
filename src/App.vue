@@ -7,14 +7,15 @@
   </div>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import Navbar from './containers/Navbar.vue';
 
-export default Vue.extend({
+@Component({
   components: {
     Navbar,
   },
-});
+})
+export default class extends Vue {}
 </script>
 <style lang="scss">
 @import 'assets/scss/common';
