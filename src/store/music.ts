@@ -1,5 +1,4 @@
-import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators';
-import store from '@/store';
+import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
 
 export interface Song {
@@ -16,8 +15,8 @@ const api = {
   fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/${tab}`),
 };
 
-@Module({ dynamic: true, store, name: 'music' })
-class Music extends VuexModule {
+@Module({ name: 'music' })
+export default class Music extends VuexModule {
   public data: Song[] = [];
   public queue: Song[] = [];
   public current: Song | null = null;
@@ -57,5 +56,3 @@ class Music extends VuexModule {
     this.SET_QUEUE(data.songs);
   }
 }
-
-export default getModule(Music);

@@ -41,16 +41,12 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
-import MusicModule, { Song } from '@/store/music';
+import { audioModule, musicModule } from '@/store';
+import { Song } from '@/store/music';
+import { REPEAT } from '@/store/audio';
 import { convertTime } from '@/utils';
 
-enum REPEAT {
-  NONE,
-  ALL,
-  ONE,
-}
-
-const MAX = 300;
+const PROGRESS_MAX = 300;
 
 @Component
 export default class AudioPlayer extends Vue {
@@ -58,17 +54,17 @@ export default class AudioPlayer extends Vue {
 
   private canplay = false;
   private playing = false;
-  private max = MAX;
-  private progress = 0; // 0 to MAX
+  private max = PROGRESS_MAX;
+  private progress = 0; // 0 to PROGRESS_MAX
   private currentTime = 0;  // 0 to duration(second)
   private duration = 0; // (second)
 
   private REPEAT = REPEAT;
-  private repeat = REPEAT.NONE;
-  private shuffle = false;
+  // private repeat = REPEAT.NONE;
+  // private shuffle = false;
 
   private mute = false;
-  private volume = 100;
+  // private volume = 100;
 
   private convertTime = convertTime;
 
@@ -77,14 +73,35 @@ export default class AudioPlayer extends Vue {
     'margin-top': '.3rem',
   };
 
+  get repeat() {
+    return audioModule.repeat;
+  }
+  set repeat(val) {
+    audioModule.SET_REPEAT(val);
+  }
+
+  get shuffle() {
+    return audioModule.shuffle;
+  }
+  set shuffle(val) {
+    audioModule.SET_SHUFFLE(val);
+  }
+
+  get volume() {
+    return audioModule.volume;
+  }
+  set volume(val) {
+    audioModule.SET_VOLUME(val);
+  }
+
   get file() {
-    return MusicModule.filename;
+    return musicModule.filename;
   }
 
   get timeLabel() {
     return {
-      [MAX * 0.01]: convertTime(this.currentTime),
-      [MAX * 0.99]: convertTime(this.duration),
+      [PROGRESS_MAX * 0.01]: convertTime(this.currentTime),
+      [PROGRESS_MAX * 0.99]: convertTime(this.duration),
     };
   }
 
@@ -118,7 +135,7 @@ export default class AudioPlayer extends Vue {
 
   private onUpdate() {
     this.currentTime = Math.floor(this.audio.currentTime);
-    this.progress = Math.floor(this.currentTime / this.duration * MAX);
+    this.progress = Math.floor(this.currentTime / this.duration * PROGRESS_MAX);
   }
 
   private onEnd() {
@@ -132,7 +149,7 @@ export default class AudioPlayer extends Vue {
 
   private seek(pos: number) {
     if (this.progress === pos) return;
-    this.audio.currentTime = this.duration * pos / MAX;
+    this.audio.currentTime = this.duration * pos / PROGRESS_MAX;
     this.progress = pos;
   }
 
@@ -149,7 +166,7 @@ export default class AudioPlayer extends Vue {
   }
 
   private convertPosToTime(pos: number) {
-    const time = this.duration * pos / MAX;
+    const time = this.duration * pos / PROGRESS_MAX;
     return convertTime(time);
   }
 }

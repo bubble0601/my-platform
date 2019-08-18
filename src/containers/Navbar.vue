@@ -42,7 +42,8 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
-import AuthModule, { User } from '@/store/auth';
+import { authModule } from '@/store';
+import { User } from '@/store/auth';
 
 @Component
 export default class Navbar extends Vue {
@@ -53,11 +54,11 @@ export default class Navbar extends Vue {
   @Ref() private usernameInput!: HTMLInputElement;
 
   get isAuthenticated(): boolean {
-    return AuthModule.isAuthenticated;
+    return authModule.isAuthenticated;
   }
 
   get user(): User | null {
-    return AuthModule.user;
+    return authModule.user;
   }
 
   @Watch('showUserInfo')
@@ -82,11 +83,11 @@ export default class Navbar extends Vue {
       username: this.username,
       password: this.password,
     };
-    await AuthModule.SignIn(data);
+    await authModule.SignIn(data);
     this.hideUserInfo();
   }
   private async signOut() {
-    await AuthModule.SignOut();
+    await authModule.SignOut();
     this.hideUserInfo();
   }
 }

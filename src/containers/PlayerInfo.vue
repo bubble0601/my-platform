@@ -29,8 +29,9 @@
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
 import { find } from 'lodash';
+import { musicModule } from '@/store';
+import { Song } from '@/store/music';
 import { VTab } from '@/components';
-import MusicModule, { Song } from '@/store/music';
 
 @Component({
   components: {
@@ -50,12 +51,12 @@ export default class PlayerInfo extends Vue {
   }
 
   get song() {
-    if (MusicModule.filename) {
-      mm.fetchFromUrl(MusicModule.filename, { native: true }).then((metadata) => {
+    if (musicModule.filename) {
+      mm.fetchFromUrl(musicModule.filename, { native: true }).then((metadata) => {
         this.tag = metadata;
       });
     }
-    return MusicModule.current;
+    return musicModule.current;
   }
 
   get lyrics() {

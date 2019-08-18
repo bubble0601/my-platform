@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import AuthModule from '@/store/auth';
+import { authModule } from '@/store';
 import Home from '@/pages/Home.vue';
 import music from './music';
 
@@ -28,8 +28,8 @@ const router = new Router({
 
 // Authentication check
 router.beforeEach((to, from, next) => {
-  if (AuthModule.isInitialized) {
-    if (to.meta.public || AuthModule.isAuthenticated) {
+  if (authModule.isInitialized) {
+    if (to.meta.public || authModule.isAuthenticated) {
       next();
     } else {
       // next('/login?redirect=' + to.path);
@@ -39,10 +39,10 @@ router.beforeEach((to, from, next) => {
   } else {
     if (to.meta.public) {
       next();
-      AuthModule.Init();
+      authModule.Init();
     } else {
-      AuthModule.Init().then(() => {
-        if (AuthModule.isAuthenticated) {
+      authModule.Init().then(() => {
+        if (authModule.isAuthenticated) {
           next();
         } else {
           Vue.prototype.$message.error('Sign in required');

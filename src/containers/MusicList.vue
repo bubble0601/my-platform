@@ -16,7 +16,8 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
-import MusicModule, { Song } from '@/store/music';
+import { musicModule } from '@/store';
+import { Song } from '@/store/music';
 import { convertTime } from '@/utils';
 
 @Component
@@ -36,16 +37,16 @@ export default class MusicList extends Vue {
   }
 
   get songs() {
-    return MusicModule.data;
+    return musicModule.data;
   }
 
   @Watch('tab', { immediate: true })
   private onTabChanged() {
-    MusicModule.FetchSongs(this.tab);
+    musicModule.FetchSongs(this.tab);
   }
 
   private play(item: Song) {
-    MusicModule.Play({ song: item, songs: this.displayedSongs });
+    musicModule.Play({ song: item, songs: this.displayedSongs });
   }
 }
 </script>

@@ -1,6 +1,5 @@
-import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
-import store from '@/store';
 
 type Status = '' | 'loading' | 'success' | 'fail' | 'signout';
 
@@ -14,8 +13,8 @@ const api = {
   signOut: () => axios.get('/api/user/signout'),
 };
 
-@Module({ dynamic: true, store, name: 'auth' })
-class Auth extends VuexModule {
+@Module({ name: 'auth' })
+export default class Auth extends VuexModule {
   public status: Status = '';
   public user: User | null = null;
 
@@ -80,5 +79,3 @@ class Auth extends VuexModule {
     this.SIGNOUT();
   }
 }
-
-export default getModule(Auth);

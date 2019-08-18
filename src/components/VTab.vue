@@ -1,6 +1,6 @@
 <template>
   <b-nav tabs>
-    <b-nav-item v-for="tab in tabs" :active="tab.key === currentTab" @click="currentTab = tab.key">
+    <b-nav-item v-for="tab in tabs" :key="tab.key" :active="tab.key === currentTab" @click="currentTab = tab.key">
       {{ tab.title }}
     </b-nav-item>
   </b-nav>
