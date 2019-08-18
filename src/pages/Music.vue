@@ -27,7 +27,7 @@ import { PlayerInfo } from '@/containers';
     PlayerInfo,
   },
 })
-export default class extends Vue {
+export default class Music extends Vue {
   private height = 'auto';
   private tabs = [
     { key: 'all', name: 'All' },

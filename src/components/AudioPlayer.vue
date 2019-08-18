@@ -53,7 +53,7 @@ enum REPEAT {
 const MAX = 300;
 
 @Component
-export default class extends Vue {
+export default class AudioPlayer extends Vue {
   @Ref() private audio!: HTMLAudioElement;
 
   private canplay = false;

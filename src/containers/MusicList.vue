@@ -20,7 +20,7 @@ import MusicModule, { Song } from '@/store/music';
 import { convertTime } from '@/utils';
 
 @Component
-export default class extends Vue {
+export default class MusicList extends Vue {
   @Prop({ required: true })
   private tab!: string;
 

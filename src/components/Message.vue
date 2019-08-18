@@ -17,7 +17,7 @@ import { DialogMixin } from '@/utils';
 import { Variant, MsgOptions } from '@/types';
 
 @Component
-export default class extends mixins(DialogMixin) {
+export default class Message extends mixins(DialogMixin) {
   private opened = false;
   private container = null;
   private title = '';

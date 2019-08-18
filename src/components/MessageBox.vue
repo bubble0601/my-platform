@@ -29,7 +29,7 @@ import { DialogMixin } from '@/utils';
 import { Variant, MsgBoxOptions } from '@/types';
 
 @Component
-export default class extends mixins(DialogMixin) {
+export default class MessageBox extends mixins(DialogMixin) {
   private show = false;
   private result = false;
   private resolve: ((value?: any) => void) | null = null;

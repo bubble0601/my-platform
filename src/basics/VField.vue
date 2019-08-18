@@ -13,7 +13,7 @@ import { noop } from 'lodash';
 import { waitUntil } from '@/utils';
 
 @Component
-export default class extends Vue {
+export default class VField extends Vue {
   @Prop({ default: '' })
   private label!: string;
 

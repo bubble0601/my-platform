@@ -15,7 +15,7 @@ import Navbar from './containers/Navbar.vue';
     Navbar,
   },
 })
-export default class extends Vue {}
+export default class App extends Vue {}
 </script>
 <style lang="scss">
 @import 'assets/scss/common';

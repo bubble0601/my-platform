@@ -45,7 +45,7 @@ import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import AuthModule, { User } from '@/store/auth';
 
 @Component
-export default class extends Vue {
+export default class Navbar extends Vue {
   private showUserInfo = false;
   private username = '';
   private password = '';

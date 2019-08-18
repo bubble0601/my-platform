@@ -9,7 +9,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 type Size = 'sm' | 'lg' | 'xl';
 
 @Component
-export default class extends Vue {
+export default class VIcon extends Vue {
   @Prop({ required: true })
   private name!: string;
 

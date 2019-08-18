@@ -9,7 +9,7 @@
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 
 @Component
-export default class extends Vue {
+export default class VTab extends Vue {
   @Prop({ required: true })
   private tabs!: Array<{ key: string, title: string }>;
 

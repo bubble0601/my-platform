@@ -7,7 +7,7 @@ import { calcTextareaHeight } from '@/utils';
 import { Obj } from '@/types';
 
 @Component
-export default class extends Vue {
+export default class VTextarea extends Vue {
   public focus!: () => void;
   public blur!: () => void;
   public select!: () => void;

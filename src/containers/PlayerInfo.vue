@@ -33,12 +33,11 @@ import { VTab } from '@/components';
 import MusicModule, { Song } from '@/store/music';
 
 @Component({
-  name: 'PlayerInfo',
   components: {
     VTab,
   },
 })
-export default class  extends Vue {
+export default class PlayerInfo extends Vue {
   private tab: string | null = 'song';
   private tag: mm.IAudioMetadata | null = null;
   private artwork: string | null = null;

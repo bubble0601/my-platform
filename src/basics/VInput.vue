@@ -6,7 +6,7 @@ import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
 import { BFormInput } from 'bootstrap-vue';
 
 @Component
-export default class extends Vue {
+export default class VInput extends Vue {
   public focus!: () => void;
   public blur!: () => void;
   public select!: () => void;
