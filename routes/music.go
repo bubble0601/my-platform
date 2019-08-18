@@ -57,6 +57,7 @@ func getAll(c *gin.Context) {
 			"time":     song.Length,
 			"hash":     song.Hash,
 			"filename": util.EscapeFilename(song.Title) + ".mp3",
+			"year":     album.Year,
 		}
 	}
 	c.JSON(http.StatusOK, ret)

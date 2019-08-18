@@ -9,6 +9,7 @@ export interface Song {
   hash: string;
   filename: string;
   time: number;
+  year: number;
 }
 
 const api = {
@@ -20,6 +21,14 @@ class Music extends VuexModule {
   public data: Song[] = [];
   public queue: Song[] = [];
   public current: Song | null = null;
+
+  get filename() {
+    const s = this.current;
+    if (s != null) {
+      return `/static/music/${s.hash}/${s.title}.mp3`;
+    }
+    return null;
+  }
 
   @Mutation
   private SET_DATA(data: Song[]) {

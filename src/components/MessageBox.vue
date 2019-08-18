@@ -28,6 +28,7 @@ import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
 import { Variant, MsgBoxOptions } from '@/types';
 
+@Component
 export default class extends mixins(DialogMixin) {
   private show = false;
   private result = false;

@@ -9,8 +9,8 @@
       <div class="flex-grow-1 overflow-auto">
         <router-view/>
       </div>
-      <div class="sidemenu-right ml-auto">
-
+      <div class="sidemenu-right">
+        <player-info/>
       </div>
     </div>
     <audio-player class="mt-auto"/>
@@ -18,12 +18,13 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
-// import MusicModule, { Song } from '@/store/music';
 import { AudioPlayer } from '@/components';
+import { PlayerInfo } from '@/containers';
 
 @Component({
   components: {
     AudioPlayer,
+    PlayerInfo,
   },
 })
 export default class extends Vue {
@@ -61,7 +62,8 @@ export default class extends Vue {
   font-size: smaller;
 }
 .sidemenu-right {
+  width: 16rem;
   border-left: 2px solid #dee2e6;
-  min-width: 20vw;
+  overflow-x: auto;
 }
 </style>

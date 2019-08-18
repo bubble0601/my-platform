@@ -4,6 +4,7 @@
     responsive
     small
     striped
+    outlined
     hover
     selectable
     select-mode="range"

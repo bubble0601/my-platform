@@ -76,6 +76,13 @@ func (song Song) GetAlbum() Album {
 	return album
 }
 
+// GetArtist returns artist of the song
+func (song Song) GetArtist() Artist {
+	var artist Artist
+	db.First(&artist, song.ArtistID)
+	return artist
+}
+
 // ScanAll scans all mp3 files in the music directory
 func ScanAll(dir string) error {
 	scanErrors := make(map[string]error)

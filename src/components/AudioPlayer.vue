@@ -78,11 +78,7 @@ export default class extends Vue {
   };
 
   get file() {
-    const s = MusicModule.current;
-    if (s != null) {
-      return `/static/music/${s.hash}/${s.title}.mp3`;
-    }
-    return null;
+    return MusicModule.filename;
   }
 
   get timeLabel() {
@@ -100,11 +96,6 @@ export default class extends Vue {
     } else {
       this.audio.pause();
     }
-  }
-
-  @Watch('progress')
-  private a(val: number) {
-    console.log(val);
   }
 
   @Watch('mute')
@@ -166,6 +157,7 @@ export default class extends Vue {
 <style lang="scss" scoped>
 .player {
   background-color: #567e;
+  min-height: 4rem;
   height: 4rem;
   box-shadow: 0 -0.25rem .5rem rgba(0, 0, 0, 0.15);
 }
