@@ -19,9 +19,9 @@
           </small>
         </div>
       </template>
-      <template v-else-if="tab === 'queue'">
-        <!-- {{ tag }} -->
-      </template>
+      <b-list-group v-else-if="tab === 'queue'" flush :class="{ 'border-bottom': queue.length }">
+        <b-list-group-item v-for="song in queue" :key="song.id">{{ song.title }}</b-list-group-item>
+      </b-list-group>
     </div>
   </div>
 </template>
@@ -66,6 +66,10 @@ export default class PlayerInfo extends Vue {
         return uslt.value.text;
       }
     }
+  }
+
+  get queue() {
+    return musicModule.queue;
   }
 
   @Watch('tag')

@@ -51,6 +51,7 @@ func getAll(c *gin.Context) {
 	for i, song := range songs {
 		album := song.GetAlbum()
 		ret[i] = gin.H{
+			"id":       song.ID,
 			"title":    song.Title,
 			"artist":   song.Artist,
 			"album":    album.Title,

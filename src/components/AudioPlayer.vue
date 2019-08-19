@@ -41,9 +41,8 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
-import { audioModule, musicModule } from '@/store';
-import { Song } from '@/store/music';
-import { REPEAT } from '@/store/audio';
+import { musicModule } from '@/store';
+import { Song, REPEAT } from '@/store/music';
 import { convertTime } from '@/utils';
 
 const PROGRESS_MAX = 300;
@@ -52,19 +51,13 @@ const PROGRESS_MAX = 300;
 export default class AudioPlayer extends Vue {
   @Ref() private audio!: HTMLAudioElement;
 
+  private REPEAT = REPEAT;
+
   private canplay = false;
-  private playing = false;
   private max = PROGRESS_MAX;
   private progress = 0; // 0 to PROGRESS_MAX
   private currentTime = 0;  // 0 to duration(second)
   private duration = 0; // (second)
-
-  private REPEAT = REPEAT;
-  // private repeat = REPEAT.NONE;
-  // private shuffle = false;
-
-  private mute = false;
-  // private volume = 100;
 
   private convertTime = convertTime;
 
@@ -73,25 +66,39 @@ export default class AudioPlayer extends Vue {
     'margin-top': '.3rem',
   };
 
+  get playing() {
+    return musicModule.playing;
+  }
+  set playing(val: boolean) {
+    musicModule.SET_PLAYING(val);
+  }
+
   get repeat() {
-    return audioModule.repeat;
+    return musicModule.repeat;
   }
   set repeat(val) {
-    audioModule.SET_REPEAT(val);
+    musicModule.SetControl({ repeat: val });
   }
 
   get shuffle() {
-    return audioModule.shuffle;
+    return musicModule.shuffle;
   }
   set shuffle(val) {
-    audioModule.SET_SHUFFLE(val);
+    musicModule.SetControl({ shuffle: val });
+  }
+
+  get mute() {
+    return musicModule.mute;
+  }
+  set mute(val) {
+    musicModule.SET_MUTE(val);
   }
 
   get volume() {
-    return audioModule.volume;
+    return musicModule.volume;
   }
   set volume(val) {
-    audioModule.SET_VOLUME(val);
+    musicModule.SET_VOLUME(val);
   }
 
   get file() {
@@ -121,12 +128,42 @@ export default class AudioPlayer extends Vue {
   @Watch('volume')
   private onVolumeChanged = this.setVolume;
 
+  private mounted() {
+    document.addEventListener('keydown', this.setKeyEvents, true);
+    this.setVolume();
+  }
+
+  private activated() {
+    document.addEventListener('keydown', this.setKeyEvents, true);
+  }
+
+  private deactivated() {
+    document.removeEventListener('keydown', this.setKeyEvents, true);
+  }
+
+  private beforeDestroy() {
+    document.removeEventListener('keydown', this.setKeyEvents, true);
+  }
+
+  private setKeyEvents(e: KeyboardEvent) {
+    switch (e.key) {
+      case ' ':
+        this.playing = !this.playing;
+        break;
+      case 'ArrowLeft':
+        this.audio.currentTime -= 5;
+        break;
+      case 'ArrowRight':
+        this.audio.currentTime += 5;
+        break;
+    }
+  }
+
   private onLoad() {
     if (this.audio.readyState >= this.audio.HAVE_CURRENT_DATA) {
       this.duration = Math.floor(this.audio.duration);
       this.progress = 0;
       this.canplay = true;
-      this.playing = true;
     } else {
       this.canplay = false;
       this.playing = false;
@@ -147,6 +184,12 @@ export default class AudioPlayer extends Vue {
     this.canplay = false;
   }
 
+  private onArrowKey(e: KeyboardEvent) {
+    if (e.target === document && e.key === 'Left') {
+      this.playing = !this.playing;
+    }
+  }
+
   private seek(pos: number) {
     if (this.progress === pos) return;
     this.audio.currentTime = this.duration * pos / PROGRESS_MAX;
@@ -158,11 +201,11 @@ export default class AudioPlayer extends Vue {
   }
 
   private next() {
-    // this.canplay = true;
+    musicModule.PlayNext();
   }
 
   private prev() {
-
+    musicModule.PlayPrev();
   }
 
   private convertPosToTime(pos: number) {

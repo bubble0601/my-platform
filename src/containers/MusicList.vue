@@ -4,11 +4,10 @@
     responsive
     small
     striped
-    outlined
     hover
     selectable
     select-mode="range"
-    class="music-list"
+    class="music-list border-bottom"
     :items="songs"
     :fields="fields"
     @row-dblclicked="play"
@@ -25,8 +24,6 @@ export default class MusicList extends Vue {
   @Prop({ required: true })
   private tab!: string;
 
-  private displayedSongs: Song[] = [];
-
   get fields() {
     return [
       { key: 'title', sortable: true },
@@ -40,13 +37,20 @@ export default class MusicList extends Vue {
     return musicModule.data;
   }
 
+  get displayedSongs() {
+    return musicModule.displayedSongs;
+  }
+  set displayedSongs(val: Song[]) {
+    musicModule.SET_DISPLAYED_SONGS(val);
+  }
+
   @Watch('tab', { immediate: true })
   private onTabChanged() {
     musicModule.FetchSongs(this.tab);
   }
 
   private play(item: Song) {
-    musicModule.Play({ song: item, songs: this.displayedSongs });
+    musicModule.Play(item);
   }
 }
 </script>

@@ -2,20 +2,17 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { getModule } from 'vuex-module-decorators';
 import createPersistedState from 'vuex-persistedstate';
-import audio, { paths as audioPaths } from './audio';
+import { concat } from 'lodash';
 import auth from './auth';
-import music from './music';
+import music, { paths as musicPaths } from './music';
 
 Vue.use(Vuex);
 
-const paths = [
-  ...audioPaths,
-];
+const paths = concat(musicPaths);
 
 const store = new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   modules: {
-    audio,
     auth,
     music,
   },
@@ -27,6 +24,5 @@ const store = new Vuex.Store({
 });
 
 export default store;
-export const audioModule = getModule(audio, store);
 export const authModule = getModule(auth, store);
 export const musicModule = getModule(music, store);
