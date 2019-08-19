@@ -69,18 +69,34 @@ func GetSongs() []Song {
 	return songs
 }
 
+// FetchByID fetches song by id, returns error if not exists
+func (song *Song) FetchByID(id int) error {
+	return db.First(song, id).Error
+}
+
+// Update updates db
+func (song *Song) Update(data interface{}) error {
+	return db.Model(song).Updates(data).Error
+}
+
+// UpdateSong updates db
+// func () UpdateSong(data Song, where ...interface{}) error {
+// 	// db.Where(where...)
+// 	return db.Model(song).Updates(data).Error
+// }
+
 // GetAlbum returns album which the song is recorded
-func (song Song) GetAlbum() Album {
+func (song *Song) GetAlbum() (Album, error) {
 	var album Album
-	db.First(&album, song.AlbumID)
-	return album
+	err := db.First(&album, song.AlbumID).Error
+	return album, err
 }
 
 // GetArtist returns artist of the song
-func (song Song) GetArtist() Artist {
+func (song *Song) GetArtist() (Artist, error) {
 	var artist Artist
-	db.First(&artist, song.ArtistID)
-	return artist
+	err := db.First(&artist, song.ArtistID).Error
+	return artist, err
 }
 
 // ScanAll scans all mp3 files in the music directory

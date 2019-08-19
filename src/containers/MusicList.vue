@@ -11,15 +11,24 @@
     :items="songs"
     :fields="fields"
     @row-dblclicked="play"
-  />
+  >
+    <template slot="[rate]" slot-scope="{ item, value }">
+      <rate :value="value" @input="updateRate(item.id, $event)"/>
+    </template>
+  </b-table>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
+import { Rate } from '@/components';
 import { convertTime } from '@/utils';
 
-@Component
+@Component({
+  components: {
+    Rate,
+  },
+})
 export default class MusicList extends Vue {
   @Prop({ required: true })
   private tab!: string;
@@ -30,6 +39,7 @@ export default class MusicList extends Vue {
       { key: 'artist', sortable: true },
       { key: 'album', sortable: true },
       { key: 'time', sortable: true, formatter: convertTime },
+      { key: 'rate', sortable: true },
     ];
   }
 
@@ -51,6 +61,10 @@ export default class MusicList extends Vue {
 
   private play(item: Song) {
     musicModule.Play(item);
+  }
+
+  private updateRate(id: number, val: number) {
+    musicModule.UpdateRate({ id, val });
   }
 }
 </script>

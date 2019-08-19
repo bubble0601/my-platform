@@ -1,6 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
-import { concat, shuffle as sh, last } from 'lodash';
+import { concat, findIndex, last, shuffle as sh } from 'lodash';
 
 export interface Song {
   id: number;
@@ -11,6 +11,7 @@ export interface Song {
   filename: string;
   time: number;
   year: number;
+  rate: number;
 }
 
 export enum REPEAT {
@@ -20,6 +21,8 @@ export enum REPEAT {
 }
 const api = {
   fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/${tab}`),
+  fetchSong: (id: number) => axios.get<Song>(`/api/music/getsong?id=${id}`),
+  updateRate: (id: number, val: number) => axios.post('/api/music/updaterate', { id, val }),
 };
 
 @Module({ name: 'music' })
@@ -47,6 +50,16 @@ export default class Music extends VuexModule {
   @Mutation
   private SET_DATA(data: Song[]) {
     this.data = data;
+  }
+
+  @Mutation
+  private UPDATE_DATA(id: number, song: Song) {
+    const i = findIndex(this.data, { id });
+    if (i >= 0) {
+      this.data[i] = song;
+    } else {
+      this.data.push(song);
+    }
   }
 
   @Mutation
@@ -147,6 +160,12 @@ export default class Music extends VuexModule {
   }
 
   @Action
+  private async updateSong(id: number) {
+    const { data } = await api.fetchSong(id);
+    this.UPDATE_DATA(id, data);
+  }
+
+  @Action
   public SetControl(data: { shuffle?: boolean, repeat?: REPEAT }) {
     const { shuffle, repeat } = data;
     if (shuffle != null) {
@@ -193,6 +212,13 @@ export default class Music extends VuexModule {
       this.SET_CURRENT(prev);
       this.OP_HISTORY('pop');
     }
+  }
+
+  @Action
+  public async UpdateRate(data: { id: number, val: number }) {
+    const { id, val } = data;
+    await api.updateRate(id, val);
+    this.updateSong(id);
   }
 }
 
