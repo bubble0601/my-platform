@@ -8,9 +8,9 @@ export interface User {
 }
 
 const api = {
-  init: () => axios.get<{ user: User, token: string }>('/api/user/init'),
-  signIn: (data: { username: string, password: string }) => axios.post<{ user: User }>('/api/user/signin', data),
-  signOut: () => axios.get('/api/user/signout'),
+  init: () => axios.get<{ user: User, token: string }>('/api/auth/init'),
+  signIn: (data: { username: string, password: string }) => axios.post<{ user: User }>('/api/auth/login', data),
+  signOut: () => axios.get('/api/auth/logout'),
 };
 
 @Module({ name: 'auth' })

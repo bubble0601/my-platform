@@ -20,9 +20,10 @@ export enum REPEAT {
   ONE,
 }
 const api = {
-  fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/${tab}`),
-  fetchSong: (id: number) => axios.get<Song>(`/api/music/getsong?id=${id}`),
-  updateRate: (id: number, val: number) => axios.post('/api/music/updaterate', { id, val }),
+  fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/songs?tab=${tab}`),
+  fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
+  uploadSong: (data: FormData) => axios.post('/api/musci/songs/new'),
+  updateRate: (id: number, val: number) => axios.put(`/api/music/songs/${id}`, { rate: val }),
 };
 
 @Module({ name: 'music' })
