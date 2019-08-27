@@ -10,8 +10,17 @@ export default [
         redirect: '/music/all',
       },
       {
+        path: 'artist',
+        component: () => import(/* webpackChunkName: "music" */ '../containers/ArtistList.vue'),
+      },
+      {
+        path: 'artist/:id',
+        component: () => import(/* webpackChunkName: "music" */ '../containers/ArtistList.vue'),
+        props: true,
+      },
+      {
         path: ':tab',
-        component: () => import(/* webpackChunkName: "music" */ '../containers/MusicList.vue'),
+        component: () => import(/* webpackChunkName: "music" */ '../containers/SongList.vue'),
         props: true,
       },
     ],

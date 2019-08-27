@@ -10,7 +10,8 @@
           </b-dropdown>
         </template>
         <b-form-file v-model="files" accept="audio/*" multiple :directory="!isFile"
-                     :placeholder="`No ${isFile ? 'File'  : 'Folder'} chosen`"/>
+                     :placeholder="`No ${isFile ? 'File'  : 'Folder'} chosen`"
+                     class="overflow-hidden text-nowrap"/>
       </b-input-group>
       <v-field>
         <v-input v-model="uTitle" placeholder="Title"/>

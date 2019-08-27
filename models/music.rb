@@ -3,8 +3,8 @@ require 'digest/md5'
 require 'fileutils'
 
 class Song < Sequel::Model(:songs)
-  many_to_one :album
-  many_to_one :artist
+  many_to_one :album, order: [:year, :title]
+  many_to_one :artist, order: [:name]
 
   def self.to_id3v2(mp3)
     # to ID3v2.3

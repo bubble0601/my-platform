@@ -5,9 +5,15 @@
         <div class="p-2">
           <b-button pill variant="success" size="sm" @click="addSong">＋ Add</b-button>
         </div>
-        <router-link v-for="t in tabs" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
+        <template v-for="t in tabs">
+          <router-link v-if="t.name" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
+            {{ t.name }}
+          </router-link>
+          <hr v-else class="mt-2 mb-1">
+        </template>
+        <!-- <router-link v-for="t in tabs" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
           {{ t.name }}
-        </router-link>
+        </router-link> -->
       </div>
       <div class="flex-grow-1 overflow-auto">
         <router-view/>
@@ -33,7 +39,13 @@ export default class Music extends Vue {
   private height = 'auto';
   private tabs = [
     { key: 'all', name: 'All' },
-    { key: 'fav', name: 'Favorite' },
+    { key: 'artist', name: 'Artist' },
+    { key: 'div1' },
+    { key: 'fabulous', name: 'Fabulous' },
+    { key: 'excellent', name: 'Excellent' },
+    { key: 'great', name: 'Great' },
+    { key: 'good', name: 'Good' },
+    { key: 'unrated', name: 'Unrated' },
   ];
 
   private mounted() {
@@ -50,17 +62,18 @@ export default class Music extends Vue {
 </script>
 <style lang="scss" scoped>
 .sidemenu-left {
-  border-right: 2px solid #dee2e6;
+  background-color: #dee2e655;
   .menu-item {
     display: block;
     color: #6c757d;
     cursor: pointer;
     &:hover {
       color: #595e63;
+      background-color: #9993;
     }
     &.active {
       color: #494d50;
-      background-color: #9999;
+      background-color: #9995;
       cursor: default;
     }
   }

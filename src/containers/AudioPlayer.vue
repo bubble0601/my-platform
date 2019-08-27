@@ -1,7 +1,7 @@
 <template>
   <div class="player">
-    <audio ref="audio" :src="file" :loop="repeat === REPEAT.ONE" class="d-none"
-           @loadeddata="onLoad" @timeupdate="onUpdate" @pause="playing = false" @ended="onEnd" @emptied="onEmpty"/>
+    <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
+           @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd"/>
     <div class="player-controls d-none d-sm-flex align-items-center">
       <div class="control-btn ml-4" @click="prev">
         <v-icon name="step-backward"/>
@@ -14,7 +14,7 @@
         <v-icon name="step-forward"/>
       </div>
       <div class="player-progress ml-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="file === null" :labelStyle="labelStyle" @change="seek"/>
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn btn-repeat position-relative ml-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
         <v-icon name="sync"/>
@@ -53,7 +53,6 @@ export default class AudioPlayer extends Vue {
 
   private REPEAT = REPEAT;
 
-  private canplay = false;
   private max = PROGRESS_MAX;
   private progress = 0; // 0 to PROGRESS_MAX
   private currentTime = 0;  // 0 to duration(second)
@@ -101,8 +100,8 @@ export default class AudioPlayer extends Vue {
     musicModule.SET_VOLUME(val);
   }
 
-  get file() {
-    return musicModule.filename;
+  get audioSrc() {
+    return musicModule.audioSrc;
   }
 
   get timeLabel() {
@@ -115,8 +114,7 @@ export default class AudioPlayer extends Vue {
   @Watch('playing')
   private onPlayingChanged(val: boolean) {
     if (val) {
-      if (this.canplay) this.audio.play();
-      else this.playing = false;
+      this.audio.play();
     } else {
       this.audio.pause();
     }
@@ -146,6 +144,9 @@ export default class AudioPlayer extends Vue {
   }
 
   private setKeyEvents(e: KeyboardEvent) {
+    if (e.target && e.target instanceof Element) {
+      if (['input', 'select', 'textarea'].includes(e.target.tagName.toLowerCase())) return;
+    }
     switch (e.key) {
       case ' ':
         this.playing = !this.playing;
@@ -163,10 +164,7 @@ export default class AudioPlayer extends Vue {
     if (this.audio.readyState >= this.audio.HAVE_CURRENT_DATA) {
       this.duration = Math.floor(this.audio.duration);
       this.progress = 0;
-      this.canplay = true;
-    } else {
-      this.canplay = false;
-      this.playing = false;
+      if (this.playing) this.audio.play();
     }
   }
 
@@ -177,17 +175,6 @@ export default class AudioPlayer extends Vue {
 
   private onEnd() {
     this.next();
-  }
-
-  private onEmpty() {
-    this.playing = false;
-    this.canplay = false;
-  }
-
-  private onArrowKey(e: KeyboardEvent) {
-    if (e.target === document && e.key === 'Left') {
-      this.playing = !this.playing;
-    }
   }
 
   private seek(pos: number) {

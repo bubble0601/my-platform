@@ -10,7 +10,7 @@
         <div v-if="song" class="text-center">
           <h4 class="mb-1">{{ song.title }}</h4>
         </div>
-        <div v-if="song" class="text-center overflow-auto">
+        <div v-if="song" class="text-center overflow-auto pb-3">
           <small>
             <span>{{ song.artist }} / {{ song.album }}</span><span v-if="song.year">({{ song.year }})</span>
           </small>
@@ -20,7 +20,10 @@
         </div>
       </template>
       <b-list-group v-else-if="tab === 'queue'" flush :class="{ 'border-bottom': queue.length }">
-        <b-list-group-item v-for="song in queue" :key="song.id">{{ song.title }}</b-list-group-item>
+        <b-list-group-item v-for="(song, i) in queue" :key="song.id">
+          <span>{{ song.title }}</span>
+          <b-button-close class="ml-auto" @click="remove(i)"/>
+        </b-list-group-item>
       </b-list-group>
     </div>
   </div>
@@ -51,8 +54,8 @@ export default class PlayerInfo extends Vue {
   }
 
   get song() {
-    if (musicModule.filename) {
-      mm.fetchFromUrl(musicModule.filename, { native: true, duration: true }).then((metadata) => {
+    if (musicModule.audioData) {
+      mm.parseBlob(musicModule.audioData, { native: true }).then((metadata) => {
         this.tag = metadata;
       }).catch(() => {
         musicModule.SET_CURRENT(null);
@@ -87,6 +90,10 @@ export default class PlayerInfo extends Vue {
       }
     }
     this.artwork = null;
+  }
+
+  private remove(i: number) {
+    musicModule.REMOVE_FROM_QUEUE(i);
   }
 
   private onLoadArtworkError() {

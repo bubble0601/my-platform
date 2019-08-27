@@ -1,6 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosRequestConfig } from 'axios';
-import { concat, findIndex, last, shuffle as sh } from 'lodash';
+import { concat, findIndex, last, shuffle as sh, isEmpty } from 'lodash';
 import { Obj } from '@/types';
 
 export interface Song {
@@ -15,26 +15,49 @@ export interface Song {
   rate: number;
 }
 
+export interface Artist {
+  id: number;
+  name: string;
+}
+
+interface FetchSongParams {
+  tab?: string;
+  artist?: number;
+}
+
 export enum REPEAT {
   NONE,
   ALL,
   ONE,
 }
+
+const getFilename = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
+
 const api = {
-  fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/songs?tab=${tab}`),
+  fetchSongs: (params: FetchSongParams) => {
+    return axios.get<Song[]>('/api/music/songs', { params });
+  },
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
+  fetchAudio: (song: Song) => axios.get<Blob>(getFilename(song), { responseType: 'blob' }),
   uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post('/api/music/songs/new', data, config),
   downloadSong: (data: { url: string, metadata: Obj<string> }) => axios.post('/api/music/songs/new', data),
-  updateRate: (id: number, val: number) => axios.put(`/api/music/songs/${id}`, { rate: val }),
+  updateSong: (id: number, data: Obj<any>) => axios.put(`/api/music/songs/${id}`, data),
+
+  fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
 };
 
 @Module({ name: 'music' })
 export default class Music extends VuexModule {
   private tab = '';  // for FetchSongs
 
-  public data: Song[] = [];
+  public songs: Song[] = [];
   public displayedSongs: Song[] = [];
+
+  public artists: Artist[] = [];
+
   public current: Song | null = null;
+  public audioData: Blob | null = null;
+  public audioSrc: string | null = null;
   public queue: Song[] = [];
   public history: Song[] = [];
 
@@ -44,33 +67,30 @@ export default class Music extends VuexModule {
   public mute = false;
   public volume = 100;
 
-  get filename() {
-    const s = this.current;
-    if (s != null) {
-      return `/static/music/${s.digest}/${s.title}.mp3`;
-    }
-    return null;
-  }
-
   @Mutation
   private SET_TAB(tab: string) {
     this.tab = tab;
   }
 
   @Mutation
-  private SET_DATA(data: Song[]) {
-    this.data = data;
+  private SET_SONGS(songs: Song[]) {
+    this.songs = songs;
   }
 
   @Mutation
-  private UPDATE_DATA(data: { id: number, song: Song }) {
+  private UPDATE_SONGS(data: { id: number, song: Song }) {
     const { id, song } = data;
-    const n = findIndex(this.data, { id });
+    const n = findIndex(this.songs, { id });
     if (n >= 0) {
-      this.data = this.data.map((v, i) => n === i ? song : v);
+      this.songs = this.songs.map((v, i) => n === i ? song : v);
     } else {
-      this.data.push(song);
+      this.songs.push(song);
     }
+  }
+
+  @Mutation
+  private SET_ARTISTS(artists: Artist[]) {
+    this.artists = artists;
   }
 
   @Mutation
@@ -84,8 +104,25 @@ export default class Music extends VuexModule {
   }
 
   @Mutation
+  private SET_AUDIO(data: Blob | null) {
+    if (data) {
+      this.audioData = data;
+      this.audioSrc = URL.createObjectURL(data);
+    } else {
+      if (this.audioSrc) URL.revokeObjectURL(this.audioSrc);
+      this.audioData = null;
+      this.audioSrc = null;
+    }
+  }
+
+  @Mutation
   private SET_QUEUE(songs: Song[]) {
     this.queue = songs;
+  }
+
+  @Mutation
+  public REMOVE_FROM_QUEUE(i: number) {
+    this.queue = concat(this.queue.slice(0, i), this.queue.slice(i + 1));
   }
 
   @Mutation
@@ -165,16 +202,35 @@ export default class Music extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async FetchSongs(tab: string = this.tab) {
-    this.SET_TAB(tab);
-    const { data } = await api.fetchSongs(tab);
-    this.SET_DATA(data);
+  public async FetchSongs(params: FetchSongParams = {}) {
+    if (params.tab) {
+      this.SET_TAB(params.tab);
+    } else if (isEmpty(params)) {
+      params.tab = this.tab;
+    }
+    const { data } = await api.fetchSongs(params);
+    this.SET_SONGS(data);
+  }
+
+  @Action
+  public async FetchArtists() {
+    const { data } = await api.fetchArtists();
+    this.SET_ARTISTS(data);
+  }
+
+  @Action({ rawError: true })
+  public async FetchAudio(song: Song) {
+    if (!song) return;
+    const res = await api.fetchAudio(song).catch(this.PlayNext);
+    if (res) {
+      this.SET_AUDIO(res.data);
+    }
   }
 
   @Action
   private async updateSong(id: number) {
     const { data } = await api.fetchSong(id);
-    this.UPDATE_DATA({ id, song: data });
+    this.UPDATE_SONGS({ id, song: data });
   }
 
   @Action
@@ -194,9 +250,12 @@ export default class Music extends VuexModule {
     }
   }
 
-  @Action
-  public Play(song: Song) {
+  @Action({ rawError: true })
+  public Play(song: Song | undefined) {
+    if (!song) return;
     this.SET_CURRENT(song);
+    this.SET_AUDIO(null);
+    this.FetchAudio(song);
     this.SET_PLAYING(true);
     this.setQueue(song);
   }
@@ -207,6 +266,8 @@ export default class Music extends VuexModule {
     const next = this.queue[0];
     if (next) {
       this.SET_CURRENT(next);
+      this.SET_AUDIO(null);
+      this.FetchAudio(next);
       this.OP_QUEUE('shift');
     } else if (this.repeat === REPEAT.ALL && this.history.length > 0) {
       this.setQueue(null, this.history);
@@ -222,14 +283,16 @@ export default class Music extends VuexModule {
     if (prev) {
       this.OP_QUEUE('unshift');
       this.SET_CURRENT(prev);
+      this.SET_AUDIO(null);
+      this.FetchAudio(prev);
       this.OP_HISTORY('pop');
     }
   }
 
   @Action
-  public async UpdateRate(data: { id: number, val: number }) {
-    const { id, val } = data;
-    await api.updateRate(id, val);
+  public async UpdateSong(payload: { id: number, data: Obj<any> }) {
+    const { id, data } = payload;
+    await api.updateSong(id, data);
     this.updateSong(id);
   }
 
