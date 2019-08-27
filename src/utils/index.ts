@@ -21,11 +21,11 @@ export function unsetBeforeUnload(name: string) {
   window.removeEventListener('beforeunload', beforeUnloads[name]);
 }
 
-export function waitUntil(check: () => boolean, timeout: number) {
+export function waitUntil(check: () => boolean, timeout: number = 1000) {
   const end = now() + timeout;
   const exec = (resolve: (...args: any) => void, reject: (...args: any) => void) => {
     if (check()) resolve();
-    else if (now() > end) reject();
+    else if (now() > end) reject('timeout');
     else setTimeout(exec, 50, resolve, reject);
   };
   return new Promise(exec);

@@ -1,3 +1,5 @@
+require 'date'
+
 class MainApp < Sinatra::Base
   namespace '/api/music/songs' do
     helpers do
@@ -5,12 +7,12 @@ class MainApp < Sinatra::Base
         {
           id: song.id,
           title: song.title,
-          artist: song.artist_name,
-          album: song.album.title,
+          artist: song.artist_name || 'Unknown Artist',
+          album: song.album&.title || 'Unknown Album',
           time: song.length,
-          hash: song.hash,
+          digest: song.digest,
           filename: File.basename(song.filename),
-          year: song.album.year,
+          year: song.album&.year,
           rate: song.rate,
         }
       end
@@ -21,14 +23,34 @@ class MainApp < Sinatra::Base
     end
 
     post '/new' do
-      case params[:file]
-      when Array
-        params[:file].each do |f|
+      if @json # from media url
+        now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
+        path = "#{ROOT}/#{CONF.storage.temp}/temp#{now}"
+        output = "#{path}.%(ext)s".escape_shell
+        out = `youtube-dl -f bestaudio -x --audio-format 'mp3' -o #{output} #{@json[:url].escape_shell} 1>/dev/null 2>&1`
+        path += '.mp3'
+        if $?.success?
+          p `ffprobe -i #{path}`
+          Song.set_tags(path, @json[:metadata])
+          p `ffprobe -i #{path}`
+          Song.create_from_file(path)
+        else
+          logger.error('youtube-dl'){out}
+          halt 400, 'Failed to download from the url'
+        end
+      else # upload file
+        metadata = if params[:data] then JSON.parse(params[:data], symbolize_names: true) else nil end
+        case params[:file]
+        when Array
+          params[:file].each do |f|
+            Song.set_tags(f[:tempfile].path, metadata)
+            Song.create_from_file(f[:tempfile].path, f[:filename])
+          end
+        else
+          f = params[:file]
+          Song.set_tags(f[:tempfile].path, metadata)
           Song.create_from_file(f[:tempfile].path, f[:filename])
         end
-      else
-        f = params[:file]
-        Song.create_from_file(f[:tempfile].path, f[:filename])
       end
       status 204
     end
@@ -55,8 +77,8 @@ class MainApp < Sinatra::Base
   end
 
   namespace '/static/music' do
-    get '/:hash/:name' do
-      path = Song.get_path(params[:hash], params[:name])
+    get '/:digest/:name' do
+      path = Song.get_path(params[:digest], params[:name])
       halt 404 if path.nil?
       send_file path
     end

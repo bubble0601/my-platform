@@ -129,20 +129,20 @@ export default class AudioPlayer extends Vue {
   private onVolumeChanged = this.setVolume;
 
   private mounted() {
-    document.addEventListener('keydown', this.setKeyEvents, true);
+    document.addEventListener('keydown', this.setKeyEvents);
     this.setVolume();
   }
 
   private activated() {
-    document.addEventListener('keydown', this.setKeyEvents, true);
+    document.addEventListener('keydown', this.setKeyEvents);
   }
 
   private deactivated() {
-    document.removeEventListener('keydown', this.setKeyEvents, true);
+    document.removeEventListener('keydown', this.setKeyEvents);
   }
 
   private beforeDestroy() {
-    document.removeEventListener('keydown', this.setKeyEvents, true);
+    document.removeEventListener('keydown', this.setKeyEvents);
   }
 
   private setKeyEvents(e: KeyboardEvent) {

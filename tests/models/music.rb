@@ -2,7 +2,7 @@ require_relative '../init'
 
 class MusicTest < TestBase
   def test_to_filename
-    song = Song.create(title: 'test song', filename: 'test song.mp3', hash: 'a62d12e', length: 420)
+    song = Song.create(title: 'test song', filename: 'test song.mp3', digest: 'a62d12e', length: 420)
     assert song.to_filename == 'Unknown Artist/Unknown Album/test song.mp3'
 
     artist = Artist.create(name: 'test artist')

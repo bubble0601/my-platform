@@ -20,17 +20,17 @@ export default class VForm extends Vue {
     return attrs;
   }
 
-  private validate() {
+  public validate() {
     if (this.checkValidity()) return true;
     this.validated = true;
     return false;
   }
 
-  private checkValidity(): boolean {
+  public checkValidity(): boolean {
     return (this.$el as HTMLFormElement).checkValidity();
   }
 
-  private reset() {
+  public reset() {
     this.validated = false;
   }
 }

@@ -1,6 +1,6 @@
 Sequel.migration do
   change do
-    create_table!(:artists, :ignore_index_errors=>true) do
+    create_table(:artists, :ignore_index_errors=>true) do
       primary_key :id, :type=>:Bignum
       DateTime :created_at
       DateTime :updated_at
@@ -8,7 +8,7 @@ Sequel.migration do
       String :ruby, :size=>255
     end
 
-    create_table!(:albums, :ignore_index_errors=>true) do
+    create_table(:albums, :ignore_index_errors=>true) do
       primary_key :id, :type=>:Bignum
       DateTime :created_at
       DateTime :updated_at
@@ -24,12 +24,12 @@ Sequel.migration do
       check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:disc_count), 0)
     end
 
-    create_table!(:songs, :ignore_index_errors=>true) do
+    create_table(:songs, :ignore_index_errors=>true) do
       primary_key :id, :type=>:Bignum
       DateTime :created_at
       DateTime :updated_at
       String :filename, :size=>255, :null=>false
-      String :hash, :size=>255, :null=>false
+      String :digest, :size=>255, :null=>false
       String :title, :size=>255, :null=>false
       String :artist_name, :size=>255
       foreign_key :artist_id, :artists, :type=>:Bignum
@@ -48,7 +48,7 @@ Sequel.migration do
       check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:length), 0)
       check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:rate), 0)
 
-      index [:hash], :name=>:hash, :unique=>true
+      index [:digest], :name=>:digest, :unique=>true
     end
   end
 end

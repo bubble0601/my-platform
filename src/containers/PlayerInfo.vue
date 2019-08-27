@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column h-100">
-    <v-tab v-model="tab" :tabs="tabs" class="px-2"/>
+    <v-nav v-model="tab" :items="tabs" tabs class="px-2"/>
     <div class="flex-grow-1 bg-white overflow-auto">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
@@ -31,15 +31,15 @@ import * as mm from 'music-metadata-browser';
 import { find } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { VTab } from '@/components';
+import { VNav } from '@/components';
 
 @Component({
   components: {
-    VTab,
+    VNav,
   },
 })
 export default class PlayerInfo extends Vue {
-  private tab: string | null = 'song';
+  private tab = 'song';
   private tag: mm.IAudioMetadata | null = null;
   private artwork: string | null = null;
 
@@ -52,8 +52,10 @@ export default class PlayerInfo extends Vue {
 
   get song() {
     if (musicModule.filename) {
-      mm.fetchFromUrl(musicModule.filename, { native: true }).then((metadata) => {
+      mm.fetchFromUrl(musicModule.filename, { native: true, duration: true }).then((metadata) => {
         this.tag = metadata;
+      }).catch(() => {
+        musicModule.SET_CURRENT(null);
       });
     }
     return musicModule.current;

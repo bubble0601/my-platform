@@ -1,7 +1,10 @@
 <template>
   <div class="d-flex flex-column" :style="{ height }">
     <div class="d-flex flex-grow-1 overflow-hidden">
-      <div class="sidemenu-left py-2">
+      <div class="sidemenu-left">
+        <div class="p-2">
+          <b-button pill variant="success" size="sm" @click="addSong">＋ Add</b-button>
+        </div>
         <router-link v-for="t in tabs" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
           {{ t.name }}
         </router-link>
@@ -18,8 +21,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { AudioPlayer } from '@/components';
-import { PlayerInfo } from '@/containers';
+import { AddSongDialog, AudioPlayer, PlayerInfo } from '@/containers';
 
 @Component({
   components: {
@@ -38,6 +40,11 @@ export default class Music extends Vue {
     if (this.$el instanceof HTMLElement) {
       this.height = `calc(100vh - ${this.$el.offsetTop}px)`;
     }
+  }
+
+  private addSong() {
+    // @ts-ignore
+    new AddSongDialog().open();
   }
 }
 </script>

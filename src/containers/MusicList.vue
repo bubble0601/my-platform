@@ -1,6 +1,7 @@
 <template>
   <b-table
     v-model="displayedSongs"
+    ref="table"
     responsive
     small
     striped
@@ -57,6 +58,12 @@ export default class MusicList extends Vue {
   @Watch('tab', { immediate: true })
   private onTabChanged() {
     musicModule.FetchSongs(this.tab);
+  }
+
+  @Watch('songs')
+  private onChanged() {
+    // @ts-ignore
+    this.$refs.table.refresh();
   }
 
   private play(item: Song) {

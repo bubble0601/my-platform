@@ -1,6 +1,6 @@
 <template>
   <span class="icon" :class="size ? size : ''">
-    <i class="fas" :class="classes"/>
+    <i :class="classes"/>
   </span>
 </template>
 <script lang="ts">
@@ -16,8 +16,12 @@ export default class VIcon extends Vue {
   @Prop({ default: null })
   private size!: Size | null;
 
+  @Prop({ default: 'fas' })
+  private iconStyle!: string;
+
   get classes() {
     const classes: string[] = [];
+    classes.push(this.iconStyle);
     classes.push(`fa-${this.name}`);
     if (this.size) {
       if (this.size === 'lg') classes.push('fa-lg');

@@ -1,13 +1,14 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { concat, findIndex, last, shuffle as sh } from 'lodash';
+import { Obj } from '@/types';
 
 export interface Song {
   id: number;
   title: string;
   artist: string;
   album: string;
-  hash: string;
+  digest: string;
   filename: string;
   time: number;
   year: number;
@@ -22,12 +23,15 @@ export enum REPEAT {
 const api = {
   fetchSongs: (tab: string) => axios.get<Song[]>(`/api/music/songs?tab=${tab}`),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
-  uploadSong: (data: FormData) => axios.post('/api/musci/songs/new'),
+  uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post('/api/music/songs/new', data, config),
+  downloadSong: (data: { url: string, metadata: Obj<string> }) => axios.post('/api/music/songs/new', data),
   updateRate: (id: number, val: number) => axios.put(`/api/music/songs/${id}`, { rate: val }),
 };
 
 @Module({ name: 'music' })
 export default class Music extends VuexModule {
+  private tab = '';  // for FetchSongs
+
   public data: Song[] = [];
   public displayedSongs: Song[] = [];
   public current: Song | null = null;
@@ -43,9 +47,14 @@ export default class Music extends VuexModule {
   get filename() {
     const s = this.current;
     if (s != null) {
-      return `/static/music/${s.hash}/${s.title}.mp3`;
+      return `/static/music/${s.digest}/${s.title}.mp3`;
     }
     return null;
+  }
+
+  @Mutation
+  private SET_TAB(tab: string) {
+    this.tab = tab;
   }
 
   @Mutation
@@ -54,10 +63,11 @@ export default class Music extends VuexModule {
   }
 
   @Mutation
-  private UPDATE_DATA(id: number, song: Song) {
-    const i = findIndex(this.data, { id });
-    if (i >= 0) {
-      this.data[i] = song;
+  private UPDATE_DATA(data: { id: number, song: Song }) {
+    const { id, song } = data;
+    const n = findIndex(this.data, { id });
+    if (n >= 0) {
+      this.data = this.data.map((v, i) => n === i ? song : v);
     } else {
       this.data.push(song);
     }
@@ -154,8 +164,9 @@ export default class Music extends VuexModule {
     }
   }
 
-  @Action
-  public async FetchSongs(tab: string) {
+  @Action({ rawError: true })
+  public async FetchSongs(tab: string = this.tab) {
+    this.SET_TAB(tab);
     const { data } = await api.fetchSongs(tab);
     this.SET_DATA(data);
   }
@@ -163,7 +174,7 @@ export default class Music extends VuexModule {
   @Action
   private async updateSong(id: number) {
     const { data } = await api.fetchSong(id);
-    this.UPDATE_DATA(id, data);
+    this.UPDATE_DATA({ id, song: data });
   }
 
   @Action
@@ -220,6 +231,19 @@ export default class Music extends VuexModule {
     const { id, val } = data;
     await api.updateRate(id, val);
     this.updateSong(id);
+  }
+
+  @Action({ rawError: true })
+  public async Upload(payload: { data: FormData, onUploadProgress: (e: ProgressEvent) => void }) {
+    const { data, onUploadProgress } = payload;
+    const config: AxiosRequestConfig = {};
+    if (onUploadProgress) config.onUploadProgress = onUploadProgress;
+    await api.uploadSong(data, config);
+  }
+
+  @Action({ rawError: true })
+  public async Download(data: { url: string, metadata: Obj<string> }) {
+    await api.downloadSong(data);
   }
 }
 

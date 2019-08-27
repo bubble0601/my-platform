@@ -1,6 +1,11 @@
-export { default as AudioPlayer } from './AudioPlayer.vue';
 export { default as Message } from './Message.vue';
 export { default as MessageBox } from './MessageBox.vue';
 export { default as Rate } from './Rate.vue';
+export { default as VField } from './VField.vue';
 export { default as VForm } from './VForm.vue';
-export { default as VTab } from './VTab.vue';
+export { default as VHelp } from './VHelp.vue';
+export { default as VInfo } from './VInfo.vue';
+export { default as VIcon } from './VIcon.vue';
+export { default as VInput } from './VInput.vue';
+export { default as VNav } from './VNav.vue';
+export { default as VTextarea } from './VTextarea.vue';

@@ -1,6 +1,7 @@
 <template>
   <div class="d-flex rate" @click.stop>
-    <v-icon v-for="i in 5" :key="i" name="star" :class="{ enabled: i <= value, hovered: i <= hover }"
+    <v-icon v-for="i in 5" :key="i" name="star" size="sm" :class="{ enabled: i <= value, hovered: i <= hover }"
+            :icon-style="(i <= value || i <= hover) ? 'fas' : 'far'"
             @click.native="setRate(i)" @mouseenter.native="hover = i" @mouseleave.native="hover = -1"/>
   </div>
 </template>
@@ -23,12 +24,12 @@ export default class Rate extends Vue {
 </script>
 <style lang="scss" scoped>
 .rate {
-  color: lightgray;
+  color: lightslategray;
   .enabled {
-    color: yellow;
+    color: #efc20f;
   }
   .hovered:not(.enabled) {
-    color: lightyellow;
+    color: #efc20faa;
   }
   .icon {
     cursor: pointer;
