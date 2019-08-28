@@ -15,13 +15,13 @@ Sequel.migration do
       String :title, :size=>255, :null=>false
       foreign_key :artist_id, :artists, :type=>:Bignum, :null=>false
       Integer :year
-      Integer :track_count
-      Integer :disc_count, :default=>1
+      Integer :num_tracks
+      Integer :num_discs, :default=>1
 
       check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:artist_id), 0)
       check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:year), 0)
-      check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:track_count), 0)
-      check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:disc_count), 0)
+      check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:num_tracks), 0)
+      check Sequel::SQL::BooleanExpression.new(:>=, Sequel::SQL::Identifier.new(:num_discs), 0)
     end
 
     create_table(:songs, :ignore_index_errors=>true) do

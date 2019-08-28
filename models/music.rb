@@ -78,7 +78,7 @@ class Song < Sequel::Model(:songs)
             n = values[0].to_i
             total = values[1].to_i
             song.track_num = n if n > 0
-            album.track_count = total if total > 0
+            album.num_tracks = total if total > 0
           end
         when 'TPOS' # Disc number
           values = val.split('/')
@@ -88,7 +88,7 @@ class Song < Sequel::Model(:songs)
             n = values[0].to_i
             total = values[1].to_i
             song.disc_num = n if n > 0
-            album.disc_count = total if total > 0
+            album.num_discs = total if total > 0
           end
         when 'USLT' # Lyrics
           song.has_lyric = true
@@ -112,7 +112,7 @@ class Song < Sequel::Model(:songs)
       if album.artist_id and album.title
         song.album = Album.first(album.to_hash.slice(:artist_id, :title))
         if song.album
-          [:year, :track_count, :disc_count].each{|k|
+          [:year, :num_tracks, :num_discs].each{|k|
             song.album[k] = album[k] if song.album[k].nil? and album[k]
           }
         else

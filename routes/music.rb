@@ -5,15 +5,15 @@ class MainApp < Sinatra::Base
     helpers do
       def to_data(song)
         {
-          id: song.id,
-          title: song.title,
-          artist: song.artist_name || 'Unknown Artist',
-          album: song.album&.title || 'Unknown Album',
-          time: song.length,
-          digest: song.digest,
-          filename: File.basename(song.filename),
-          year: song.album&.year,
-          rate: song.rate,
+          id: song[:id],
+          title: song[:title],
+          artist: song[:artist_name] || 'Unknown Artist',
+          album: song[:album_title] || 'Unknown Album',
+          time: song[:length],
+          digest: song[:digest],
+          filename: File.basename(song[:filename]),
+          year: song[:year],
+          rate: song[:rate],
         }
       end
     end
@@ -21,7 +21,12 @@ class MainApp < Sinatra::Base
     namespace '/songs' do
       get %r(/?) do
         if params[:tab]
-          query = Song.eager(:album)
+          query = Song.eager_graph(:album, :artist)
+                      .order{artist[:ruby]}
+                      .order_append{artist[:name]}
+                      .order_append{album[:year]}
+                      .order_append{album[:title]}
+                      .order_append(:track_num, :title)
           case params[:tab]
           when 'fabulous'
             query = query.where(rate: 5)
@@ -36,8 +41,16 @@ class MainApp < Sinatra::Base
           end
           query.map(&method(:to_data))
         elsif params[:artist]
-          Song.eager(:album).where(artist_id: params[:artist]).map(&method(:to_data))
+          Song.eager_graph(:album)
+              .order{album[:year]}
+              .order_append{album[:title]}
+              .order_append(:track_num, :title)
+              .where(Sequel[:songs][:artist_id] =~ params[:artist])
+              .map(&method(:to_data))
         end
+      rescue => e
+        logger.error e
+        halt 500, 'Failed to load songs'
       end
 
       post '/new' do

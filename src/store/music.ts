@@ -203,6 +203,7 @@ export default class Music extends VuexModule {
 
   @Action({ rawError: true })
   public async FetchSongs(params: FetchSongParams = {}) {
+    this.SET_SONGS([]);
     if (params.tab) {
       this.SET_TAB(params.tab);
     } else if (isEmpty(params)) {
