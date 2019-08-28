@@ -11,9 +11,6 @@
           </router-link>
           <hr v-else class="mt-2 mb-1">
         </template>
-        <!-- <router-link v-for="t in tabs" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
-          {{ t.name }}
-        </router-link> -->
       </div>
       <div class="flex-grow-1 overflow-auto">
         <router-view/>
@@ -28,6 +25,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from '@/containers';
+import { musicModule } from '@/store';
 
 @Component({
   components: {
@@ -52,6 +50,7 @@ export default class Music extends Vue {
     if (this.$el instanceof HTMLElement) {
       this.height = `calc(100vh - ${this.$el.offsetTop}px)`;
     }
+    if (musicModule.current) musicModule.FetchAudio(musicModule.current);
   }
 
   private addSong() {

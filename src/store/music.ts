@@ -1,7 +1,7 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosRequestConfig } from 'axios';
-import { concat, findIndex, last, shuffle as sh, isEmpty } from 'lodash';
-import { Obj } from '@/types';
+import { clone, concat, isEmpty, findIndex, last, shuffle as sh, takeRight } from 'lodash';
+import { Dict } from '@/types';
 
 export interface Song {
   id: number;
@@ -11,8 +11,10 @@ export interface Song {
   digest: string;
   filename: string;
   time: number;
-  year: number;
+  year: number | null;
   rate: number;
+  album_artist: string;
+  weight?: number;
 }
 
 export interface Artist {
@@ -34,14 +36,13 @@ export enum REPEAT {
 const getFilename = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
 
 const api = {
-  fetchSongs: (params: FetchSongParams) => {
-    return axios.get<Song[]>('/api/music/songs', { params });
-  },
+  fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilename(song), { responseType: 'blob' }),
   uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post('/api/music/songs/new', data, config),
-  downloadSong: (data: { url: string, metadata: Obj<string> }) => axios.post('/api/music/songs/new', data),
-  updateSong: (id: number, data: Obj<any>) => axios.put(`/api/music/songs/${id}`, data),
+  downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post('/api/music/songs/new', data),
+  updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
+  updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
 };
@@ -59,6 +60,7 @@ export default class Music extends VuexModule {
   public audioData: Blob | null = null;
   public audioSrc: string | null = null;
   public queue: Song[] = [];
+  public queueSet: Song[] = [];
   public history: Song[] = [];
 
   public playing = false;
@@ -116,13 +118,18 @@ export default class Music extends VuexModule {
   }
 
   @Mutation
-  private SET_QUEUE(songs: Song[]) {
+  public SET_QUEUE(songs: Song[]) {
     this.queue = songs;
   }
 
   @Mutation
   public REMOVE_FROM_QUEUE(i: number) {
     this.queue = concat(this.queue.slice(0, i), this.queue.slice(i + 1));
+  }
+
+  @Mutation
+  private SET_QUEUE_SET(songs: Song[]) {
+    this.queueSet = songs;
   }
 
   @Mutation
@@ -140,11 +147,17 @@ export default class Music extends VuexModule {
   }
 
   @Mutation
+  private PUSH_QUEUE(songs: Song[]) {
+    this.queue.push(...songs);
+  }
+
+  @Mutation
   private OP_HISTORY(op: string) {
     switch (op) {
       case 'push':
         if (this.current) {
           this.history.push(this.current);
+          if (this.history.length > 100) this.history = takeRight(this.history, 100);
         }
         break;
       case 'pop':
@@ -181,12 +194,19 @@ export default class Music extends VuexModule {
     this.volume = val;
   }
 
+  // Queueにセットする
+  // REPEAT=ALLの場合、Queueが30以上になるようにする
   @Action
-  private setQueue(song: Song | null, songs: Song[] = this.displayedSongs) {
-    if (this.repeat === REPEAT.ONE) {
+  private setQueue(data: { song: Song | null, songs?: Song[]} | Song | null) {
+    const song = data && 'song' in data ? data.song : data;
+    let songs = data && 'songs' in data ? data.songs : null;
+    if (songs) this.SET_QUEUE_SET(clone(songs));
+    songs = songs || this.queueSet;
+
+    if (this.repeat === REPEAT.ONE || songs.length === 0) {
       this.SET_QUEUE([]);
     } else {
-      let queue = songs;
+      let queue = clone(songs);
       if (song) {
         const i = songs.indexOf(song);
         if (i >= 0) {
@@ -194,10 +214,32 @@ export default class Music extends VuexModule {
         }
       }
       if (this.shuffle) {
-        this.SET_QUEUE(sh(queue));
+        queue = sh(queue);
+        if (this.repeat === REPEAT.ALL) {
+          while (queue.length < 30) {
+            queue.push(...sh(songs));
+          }
+        }
+        this.SET_QUEUE(queue);
       } else {
+        if (this.repeat === REPEAT.ALL) {
+          while (queue.length < 30) {
+            queue.push(...songs);
+          }
+        }
         this.SET_QUEUE(queue);
       }
+    }
+  }
+
+  // REPEAT=ALLの場合、Queueが30以下になったら補充
+  @Action
+  private updateQueue() {
+    if (this.repeat !== REPEAT.ALL) return;
+    const queue = this.queueSet;
+    if (!queue.length) return;
+    while (this.queue.length < 30) {
+      this.PUSH_QUEUE(this.shuffle ? sh(queue) : queue);
     }
   }
 
@@ -222,6 +264,7 @@ export default class Music extends VuexModule {
   @Action({ rawError: true })
   public async FetchAudio(song: Song) {
     if (!song) return;
+    this.SET_AUDIO(null);
     const res = await api.fetchAudio(song).catch(this.PlayNext);
     if (res) {
       this.SET_AUDIO(res.data);
@@ -229,7 +272,7 @@ export default class Music extends VuexModule {
   }
 
   @Action
-  private async updateSong(id: number) {
+  private async reloadSong(id: number) {
     const { data } = await api.fetchSong(id);
     this.UPDATE_SONGS({ id, song: data });
   }
@@ -255,10 +298,18 @@ export default class Music extends VuexModule {
   public Play(song: Song | undefined) {
     if (!song) return;
     this.SET_CURRENT(song);
-    this.SET_AUDIO(null);
     this.FetchAudio(song);
     this.SET_PLAYING(true);
-    this.setQueue(song);
+    this.setQueue({ song, songs: this.displayedSongs });
+  }
+
+  @Action
+  public PlayFromQueue(i: number) {
+    const song = this.queue[i];
+    this.SET_CURRENT(song);
+    this.FetchAudio(song);
+    this.SET_QUEUE(this.queue.slice(i + 1));
+    this.updateQueue();
   }
 
   @Action
@@ -267,14 +318,12 @@ export default class Music extends VuexModule {
     const next = this.queue[0];
     if (next) {
       this.SET_CURRENT(next);
-      this.SET_AUDIO(null);
       this.FetchAudio(next);
       this.OP_QUEUE('shift');
-    } else if (this.repeat === REPEAT.ALL && this.history.length > 0) {
-      this.setQueue(null, this.history);
-      this.PlayNext();
+      this.updateQueue();
     } else {
       this.SET_CURRENT(null);
+      this.SET_AUDIO(null);
     }
   }
 
@@ -284,17 +333,23 @@ export default class Music extends VuexModule {
     if (prev) {
       this.OP_QUEUE('unshift');
       this.SET_CURRENT(prev);
-      this.SET_AUDIO(null);
       this.FetchAudio(prev);
       this.OP_HISTORY('pop');
     }
   }
 
   @Action
-  public async UpdateSong(payload: { id: number, data: Obj<any> }) {
+  public async UpdateSong(payload: { id: number, data: Partial<Song> }) {
     const { id, data } = payload;
     await api.updateSong(id, data);
-    this.updateSong(id);
+    this.reloadSong(id);
+  }
+
+  @Action({ rawError: true })
+  public async UpdateSongTag(payload: { id: number, data: Dict<string> }) {
+    const { id, data } = payload;
+    await api.updateSongTag(id, data);
+    this.reloadSong(id);
   }
 
   @Action({ rawError: true })
@@ -306,7 +361,7 @@ export default class Music extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async Download(data: { url: string, metadata: Obj<string> }) {
+  public async Download(data: { url: string, metadata: Dict<string> }) {
     await api.downloadSong(data);
   }
 }
@@ -314,6 +369,7 @@ export default class Music extends VuexModule {
 const keys = [
   'current',
   'queue',
+  'queueSet',
   'history',
   'shuffle',
   'repeat',

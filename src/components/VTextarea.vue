@@ -4,7 +4,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { calcTextareaHeight } from '@/utils';
-import { Obj } from '@/types';
+import { Dict } from '@/types';
 
 @Component
 export default class VTextarea extends Vue {

@@ -1,6 +1,9 @@
 <template>
-  <div class="form-group" :class="{ horizontal }">
-    <label v-if="label" :for="labelFor">{{ label }}</label>
+  <div class="form-group" :class="{ horizontal, 'mb-1': size === 'sm' }">
+    <label v-if="label" :for="labelFor" :class="{ 'mb-0': size === 'sm' }">
+      <span v-if="size === 'md'">{{ label }}</span>
+      <small v-else-if="size === 'sm'">{{ label }}</small>
+    </label>
     <slot/>
     <small v-if="help" class="form-text text-muted">{{ help }}</small>
     <div v-if="validFeedback" class="valid-feedback">{{ validFeedback }}</div>
@@ -25,6 +28,9 @@ export default class VField extends Vue {
 
   @Prop({ default: false })
   private horizontal!: boolean;
+
+  @Prop({ default: 'md' })
+  private size!: string;
 
   private labelFor = '';
 

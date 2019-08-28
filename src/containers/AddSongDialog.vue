@@ -31,7 +31,7 @@
           {{ uploadProgress }}%
         </span>
         <b-button class="ml-auto" variant="success" :disabled="uploading" @click="upload">
-          <b-spinner v-if="uploading" small/>
+          <b-spinner v-if="uploading" small class="mr-2"/>
           <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
         </b-button>
       </div>
@@ -57,7 +57,7 @@
       <div class="d-flex align-items-center">
         <b-button variant="outline-danger" @click="dReset">Reset</b-button>
         <b-button class="ml-auto" variant="success" :disabled="downloading" @click="download">
-          <b-spinner v-if="downloading" small/>
+          <b-spinner v-if="downloading" small class="mr-2"/>
           <span>{{ downloading ? 'Downloading...' : 'Download' }}</span>
         </b-button>
       </div>
@@ -153,6 +153,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }).then(() => {
       this.uReset();
       musicModule.FetchSongs();
+      musicModule.FetchArtists();
     }).catch(() => {
       this.$message.error('Failed to upload');
       this.uReset(false);
@@ -175,7 +176,12 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     musicModule.Download(data).then(() => {
       this.dReset();
       musicModule.FetchSongs();
+      musicModule.FetchArtists();
       this.$message.success('Completed');
+      this.$bvToast.toast('Complated', {
+        variant: 'success',
+        autoHideDelay: 15000,
+      });
     }).catch(() => {
       this.$message.error('Failed to download');
       this.dReset(false);

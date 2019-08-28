@@ -4,17 +4,33 @@ class MainApp < Sinatra::Base
   namespace '/api/music' do
     helpers do
       def to_data(song)
-        {
-          id: song[:id],
-          title: song[:title],
-          artist: song[:artist_name] || 'Unknown Artist',
-          album: song[:album_title] || 'Unknown Album',
-          time: song[:length],
-          digest: song[:digest],
-          filename: File.basename(song[:filename]),
-          year: song[:year],
-          rate: song[:rate],
-        }
+        if song.is_a?(Song)
+          {
+            id: song[:id],
+            title: song[:title],
+            artist: song[:artist_name] || song.artist&.name || 'Unknown Artist',
+            album: song.album&.title || 'Unknown Album',
+            album_artist: song.artist&.name,
+            time: song[:length],
+            digest: song[:digest],
+            filename: File.basename(song[:filename]),
+            year: song.album&.year,
+            rate: song[:rate],
+          }
+        else
+          {
+            id: song[:id],
+            title: song[:title],
+            artist: song[:artist_name] || song[:name] || 'Unknown Artist',
+            album: song[:album_title] || 'Unknown Album',
+            album_artist: song[:name],
+            time: song[:length],
+            digest: song[:digest],
+            filename: File.basename(song[:filename]),
+            year: song[:year],
+            rate: song[:rate],
+          }
+        end
       end
     end
 
@@ -41,7 +57,7 @@ class MainApp < Sinatra::Base
           end
           query.map(&method(:to_data))
         elsif params[:artist]
-          Song.eager_graph(:album)
+          Song.eager_graph(:album, :artist)
               .order{album[:year]}
               .order_append{album[:title]}
               .order_append(:track_num, :title)
@@ -97,6 +113,13 @@ class MainApp < Sinatra::Base
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
         song.update(@json)
+        status 204
+      end
+
+      put '/:id/tag' do
+        song = Song[params[:id].to_i]
+        halt 404, 'The requested resource not found' if song.nil?
+        song.updateTag(@json.transform_keys(&:to_s).filter{|k, v| v && v.length > 0})
         status 204
       end
 

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-export interface Obj<T = any> {
+export interface Dict<T = any> {
   [key: string]: T;
 }
 export type Variant = '' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'light' | 'dark';
