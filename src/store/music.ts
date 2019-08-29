@@ -1,6 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosRequestConfig } from 'axios';
-import { clone, concat, isEmpty, findIndex, last, shuffle as sh, takeRight } from 'lodash';
+import { clone, concat, isEmpty, fill, findIndex, last, shuffle as sh, takeRight } from 'lodash';
 import { Dict } from '@/types';
 
 export interface Song {
@@ -22,9 +22,16 @@ export interface Artist {
   name: string;
 }
 
+export interface Playlist {
+  id: number;
+  name: string;
+  songs?: Song[];
+}
+
 interface FetchSongParams {
   tab?: string;
   artist?: number;
+  playlist?: number;
 }
 
 export enum REPEAT {
@@ -45,6 +52,15 @@ const api = {
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
+
+  fetchPlaylists: () => axios.get<Playlist[]>('/api/music/playlists'),
+  fetchPlaylist: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}`),
+  createPlaylist: (name: string) => axios.post<Playlist>('/api/music/playlists/new', { name }),
+  fetchPlaylistSong: (id: number, songId: number) => axios.get(`/api/music/playlists/${id}/songs/${songId}`),
+  addPlaylistSong: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
+  updatePlaylistSong: (id: number, songId: number, weight: number) =>
+                        axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
+  removePlaylistSong: (id: number, songId: number) => axios.delete(`/api/music/playlists/${id}/songs/${songId}`),
 };
 
 @Module({ name: 'music' })
@@ -55,6 +71,9 @@ export default class Music extends VuexModule {
   public displayedSongs: Song[] = [];
 
   public artists: Artist[] = [];
+  public artistId: number | null = null;
+  public playlists: Playlist[] = [];
+  public playlistId: number | null = null;
 
   public current: Song | null = null;
   public audioData: Blob | null = null;
@@ -93,6 +112,21 @@ export default class Music extends VuexModule {
   @Mutation
   private SET_ARTISTS(artists: Artist[]) {
     this.artists = artists;
+  }
+
+  @Mutation
+  private SET_ARTIST_ID(id: number) {
+    this.artistId = id;
+  }
+
+  @Mutation
+  private SET_PLAYLISTS(playlists: Playlist[]) {
+    this.playlists = playlists;
+  }
+
+  @Mutation
+  private SET_PLAYLIST_ID(id: number) {
+    this.playlistId = id;
   }
 
   @Mutation
@@ -200,6 +234,15 @@ export default class Music extends VuexModule {
   private setQueue(data: { song: Song | null, songs?: Song[]} | Song | null) {
     const song = data && 'song' in data ? data.song : data;
     let songs = data && 'songs' in data ? data.songs : null;
+
+    if (songs && songs.length > 0 && songs[0].weight) {
+      const rsongs = songs as Array<Required<Song>>;
+      songs = [];
+      rsongs.forEach((s) => {
+        songs!.push(...fill(Array(s.weight), s));
+      });
+    }
+
     if (songs) this.SET_QUEUE_SET(clone(songs));
     songs = songs || this.queueSet;
 
@@ -246,6 +289,8 @@ export default class Music extends VuexModule {
   @Action({ rawError: true })
   public async FetchSongs(params: FetchSongParams = {}) {
     this.SET_SONGS([]);
+    if (params.artist) this.SET_ARTIST_ID(params.artist);
+    if (params.playlist) this.SET_PLAYLIST_ID(params.playlist);
     if (params.tab) {
       this.SET_TAB(params.tab);
     } else if (isEmpty(params)) {
@@ -259,6 +304,12 @@ export default class Music extends VuexModule {
   public async FetchArtists() {
     const { data } = await api.fetchArtists();
     this.SET_ARTISTS(data);
+  }
+
+  @Action
+  public async FetchPlaylists() {
+    const { data } = await api.fetchPlaylists();
+    this.SET_PLAYLISTS(data);
   }
 
   @Action({ rawError: true })
@@ -275,6 +326,13 @@ export default class Music extends VuexModule {
   private async reloadSong(id: number) {
     const { data } = await api.fetchSong(id);
     this.UPDATE_SONGS({ id, song: data });
+  }
+
+  @Action
+  private async reloadPlaylistSong(payload: { pid: number, sid: number }) {
+    const { pid, sid } = payload;
+    const { data } = await api.fetchPlaylistSong(pid, sid);
+    this.UPDATE_SONGS({ id: sid, song: data });
   }
 
   @Action
@@ -364,6 +422,40 @@ export default class Music extends VuexModule {
   public async Download(data: { url: string, metadata: Dict<string> }) {
     await api.downloadSong(data);
   }
+
+  @Action
+  public async CreatePlaylist(data: { name: string, songs: Song[]}) {
+    const res = await api.createPlaylist(data.name);
+    if (this.songs.length === 0) return;
+    await api.addPlaylistSong(res.data.id, data.songs.map((s) => s.id));
+  }
+
+  @Action
+  public AddPlaylistSong(data: { id: number, songs: Song[] }) {
+    if (this.songs.length === 0) return;
+    api.addPlaylistSong(data.id, data.songs.map((s) => s.id));
+  }
+
+  @Action
+  public async UpdatePlaylistSong(payload: { id: number, data: { weight: number } }) {
+    const { id, data } = payload;
+    if (this.playlistId) {
+      await api.updatePlaylistSong(this.playlistId, id, data.weight);
+      this.reloadPlaylistSong({ pid: this.playlistId, sid: id });
+    } else {
+      /* tslint:disable-next-line */
+      console.error('Invalid operation');
+    }
+  }
+
+  @Action
+  public RemovePlaylistSong(data: { songs: Song[] }) {
+    if (this.songs.length === 0) return;
+    if (!this.playlistId) return;
+    data.songs.forEach((song) => {
+      api.removePlaylistSong(this.playlistId!, song.id);
+    });
+  }
 }
 
 const keys = [
@@ -375,5 +467,7 @@ const keys = [
   'repeat',
   'mute',
   'volume',
+  'artistId',
+  'playlistId',
 ];
 export const paths = keys.map((str) => `music.${str}`);

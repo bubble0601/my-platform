@@ -38,6 +38,7 @@ export default class Music extends Vue {
   private tabs = [
     { key: 'all', name: 'All' },
     { key: 'artist', name: 'Artist' },
+    { key: 'playlist', name: 'Playlist' },
     { key: 'div1' },
     { key: 'fabulous', name: 'Fabulous' },
     { key: 'excellent', name: 'Excellent' },

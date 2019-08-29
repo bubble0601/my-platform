@@ -11,7 +11,11 @@
         </template>
         <b-form-file v-model="files" accept="audio/*" multiple :directory="!isFile"
                      :placeholder="`No ${isFile ? 'File'  : 'Folder'} chosen`"
-                     class="overflow-hidden text-nowrap"/>
+                     class="overflow-hidden text-nowrap">
+          <template #file-name="{ files }">
+            {{ files.length === 1 ? files[0].name : `${files.length} files selected` }}
+          </template>
+        </b-form-file>
       </b-input-group>
       <v-field>
         <v-input v-model="uTitle" placeholder="Title"/>

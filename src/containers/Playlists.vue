@@ -1,13 +1,13 @@
 <template>
   <div class="d-flex h-100">
-    <div class="artist-list dropdown-menu overflow-hidden mt-0 py-0">
-      <router-link v-for="artist in artists" :key="artist.id" :to="`/music/artist/${artist.id}`"
+    <div class="playlists dropdown-menu overflow-hidden mt-0 py-0">
+      <router-link v-for="playlist in playlists" :key="playlist.id" :to="`/music/playlist/${playlist.id}`"
                    class="dropdown-item px-3 py-1" active-class="active"
                    @dblclick.native="shuffleAndPlay">
-        <small>{{ artist.name }}</small>
+        <small>{{ playlist.name }}</small>
       </router-link>
     </div>
-    <song-list ref="songList" context="artist" class="w-100"/>
+    <song-list ref="songList" context="playlist" class="w-100"/>
   </div>
 </template>
 <script lang="ts">
@@ -21,10 +21,10 @@ import SongList from './SongList.vue';
     SongList,
   },
   beforeRouteEnter(to, from, next) {
-    const id = musicModule.artistId;
-    if (!to.params.id && id) next(`/music/artist/${id}`);
+    const id = musicModule.playlistId;
+    if (!to.params.id && id) next(`/music/playlist/${id}`);
     else next();
-  },
+  }
 })
 export default class ArtistList extends Vue {
   @Prop({ default: 0 })
@@ -32,17 +32,17 @@ export default class ArtistList extends Vue {
 
   @Ref() private songList!: SongList;
 
-  get artists() {
-    return musicModule.artists;
+  get playlists() {
+    return musicModule.playlists;
   }
 
   @Watch('id', { immediate: true })
   private onIdChanged() {
-    musicModule.FetchSongs({ artist: this.id });
+    musicModule.FetchSongs({ playlist: this.id });
   }
 
   private created() {
-    musicModule.FetchArtists();
+    musicModule.FetchPlaylists();
   }
 
   private shuffleAndPlay() {
@@ -51,7 +51,7 @@ export default class ArtistList extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-.artist-list {
+.playlists {
   display: block;
   position: static;
   min-width: 0;

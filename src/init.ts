@@ -1,9 +1,16 @@
 import Vue from 'vue';
+import Component from 'vue-class-component';
 import BootstrapVue from 'bootstrap-vue';
 import axios from 'axios';
 import VueSlider from 'vue-slider-component';
 import { initDialogs } from './utils';
 import { VField, VHelp, VIcon, VInput, VTextarea } from './components';
+
+Component.registerHooks([
+  'beforeRouteEnter',
+  'beforeRouteLeave',
+  'beforeRouteUpdate',
+]);
 
 Vue.use(BootstrapVue);
 Vue.component('VueSlider', VueSlider);

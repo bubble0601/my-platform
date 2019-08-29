@@ -10,7 +10,7 @@
   </b-modal>
   <b-modal ref="modal" v-else :title="title" @shown="$refs.input.focus(); $refs.input.select()" @hidden="settle" @keydown.shift.enter.native="onOK">
     <p v-if="message">{{ message }}</p>
-    <v-field :label="label" feedback="入力が必要です">
+    <v-field :label="inputLabel" feedback="入力が必要です">
       <v-input ref="input" v-model="inputValue" :requried="required" :state="inputState" :placeholder="placeholder"/>
     </v-field>
     <template #modal-footer>

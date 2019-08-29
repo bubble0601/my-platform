@@ -19,6 +19,15 @@ export default [
         props: true,
       },
       {
+        path: 'playlist',
+        component: () => import(/* webpackChunkName: "music" */ '../containers/Playlists.vue'),
+      },
+      {
+        path: 'playlist/:id',
+        component: () => import(/* webpackChunkName: "music" */ '../containers/Playlists.vue'),
+        props: true,
+      },
+      {
         path: ':tab',
         component: () => import(/* webpackChunkName: "music" */ '../containers/SongList.vue'),
         props: true,

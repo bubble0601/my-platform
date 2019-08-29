@@ -1,0 +1,23 @@
+<template>
+  <b-button v-b-tooltip="tooltip ? { title: tooltip, delay: { show: 1000, hide: 0 } } : tooltip"
+                variant="link" class="icon-button" @click="$emit('click', $event)">
+    <v-icon :name="icon"/>
+  </b-button>
+</template>
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator';
+
+@Component
+export default class IconButton extends Vue {
+  @Prop({ required: true })
+  private icon!: string;
+
+  @Prop({ default: null })
+  private tooltip!: string | null;
+}
+</script>
+<style lang="scss" scoped>
+.icon-button {
+  text-decoration: none!important;
+}
+</style>

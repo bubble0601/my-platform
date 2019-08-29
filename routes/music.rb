@@ -3,7 +3,7 @@ require 'date'
 class MainApp < Sinatra::Base
   namespace '/api/music' do
     helpers do
-      def to_data(song)
+      def to_song_data(song)
         if song.is_a?(Song)
           {
             id: song[:id],
@@ -16,6 +16,20 @@ class MainApp < Sinatra::Base
             filename: File.basename(song[:filename]),
             year: song.album&.year,
             rate: song[:rate],
+          }
+        elsif song[:weight]
+          {
+            id: song[:id],
+            title: song[:title],
+            artist: song[:artist_name] || song[:name] || 'Unknown Artist',
+            album: song[:album_title] || 'Unknown Album',
+            album_artist: song[:name],
+            time: song[:length],
+            digest: song[:digest],
+            filename: File.basename(song[:filename]),
+            year: song[:year],
+            rate: song[:rate],
+            weight: song[:weight],
           }
         else
           {
@@ -33,7 +47,6 @@ class MainApp < Sinatra::Base
         end
       end
     end
-
     namespace '/songs' do
       get %r(/?) do
         if params[:tab]
@@ -55,18 +68,30 @@ class MainApp < Sinatra::Base
           when 'unrated'
             query = query.where(rate: 0)
           end
-          query.map(&method(:to_data))
+          query.map(&method(:to_song_data))
         elsif params[:artist]
           Song.eager_graph(:album, :artist)
+              .where(Sequel[:songs][:artist_id] =~ params[:artist])
               .order{album[:year]}
               .order_append{album[:title]}
               .order_append(:track_num, :title)
-              .where(Sequel[:songs][:artist_id] =~ params[:artist])
-              .map(&method(:to_data))
+              .map(&method(:to_song_data))
+        elsif params[:playlist]
+          items = PlaylistSong.select(:song_id, :weight).where(playlist_id: params[:playlist].to_i).all
+          w_items = {}
+          items.each{|e| w_items[e.song_id] = e.weight}
+
+          Song
+            .eager_graph(:album, :artist)
+            .where(Sequel[:songs][:id] => w_items.keys)
+            .order{artist[:ruby]}
+            .order_append{artist[:name]}
+            .order_append{album[:year]}
+            .order_append{album[:title]}
+            .order_append(:track_num, :title)
+            .map{|s| s[:weight] = w_items[s[:id]]; s}
+            .map(&method(:to_song_data))
         end
-      rescue => e
-        logger.error e
-        halt 500, 'Failed to load songs'
       end
 
       post '/new' do
@@ -106,7 +131,7 @@ class MainApp < Sinatra::Base
       get '/:id' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
-        to_data(song)
+        to_song_data(song)
       end
 
       put '/:id' do
@@ -134,6 +159,69 @@ class MainApp < Sinatra::Base
     namespace '/artists' do
       get %r(/?) do
         Artist.order(:name).all.map{|artist| artist.slice(:id, :name)}
+      end
+    end
+
+    namespace '/playlists' do
+      get %r(/?) do
+        Playlist.order(:id).all.map{|list| list.slice(:id, :name)}
+      end
+
+      post '/new' do
+        new_list = Playlist.create(name: @json[:name])
+        new_list.to_hash
+      end
+
+      get '/:id' do
+        list = Playlist[params[:id].to_i]
+        halt 404 if list.nil?
+        {
+          id: list.id,
+          name: list.name,
+          songs: list.songs,
+        }
+      end
+
+      post '/:id/songs' do
+        list = Playlist[params[:id].to_i]
+        halt 404 if list.nil?
+        errors = []
+        @json.each do |id|
+          list.add_song(id)
+        rescue
+          errors.push(id)
+        end
+        if errors.empty?
+          status 204
+        else
+          halt 400, 'Some songs are already added to the playlist'
+        end
+      end
+
+      get '/:id/songs/:sid' do
+        pid = params[:id].to_i
+        sid = params[:sid].to_i
+        ps = PlaylistSong.first(playlist_id: pid, song_id: sid)
+        halt 404 if ps.nil?
+        song = Song[sid]
+        to_song_data(song).merge({ weight: ps.weight })
+      end
+
+      put '/:id/songs/:sid' do
+        pid = params[:id].to_i
+        sid = params[:sid].to_i
+        ps = PlaylistSong.first(playlist_id: pid, song_id: sid)
+        halt 404 if ps.nil?
+        ps.update(@json)
+        status 204
+      end
+
+      delete '/:id/songs/:sid' do
+        song = Song[params[:sid].to_i]
+        pl = Playlist[params[:id].to_i]
+        halt 404 if song.nil? or pl.nil?
+        pl.remove_song(song)
+        status 204
       end
     end
   end

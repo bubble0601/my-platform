@@ -5,6 +5,7 @@ require 'fileutils'
 class Song < Sequel::Model(:songs)
   many_to_one :album, order: [:year, :title]
   many_to_one :artist, order: [:name]
+  many_to_many :playlists
 
   def self.to_id3v2(mp3)
     # to ID3v2.3
@@ -150,17 +151,6 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
-  # def _update(data)
-  #   self.set_tags(self.to_fullpath, data)
-  #   song_data = data.slice(:title, :rate)
-  #   album_data = {}
-  #   artist_data = {}
-  #   song_data[:artist_name] = data[:artist] if data[:artist]
-  #   album_data[:title] = data[:album] if data[:album]
-  #   album_data[:year] = data[:year].to_i if data[:year]
-  #   artist_data[:name] = data[:artist] if data
-  # end
-
   def updateTag(tags)
     path = self.to_fullpath
     Mp3Info.open(path) do |mp3|
@@ -244,4 +234,13 @@ end
 class Artist < Sequel::Model(:artists)
   one_to_many :songs
   one_to_many :albums
+end
+
+class Playlist < Sequel::Model(:playlists)
+  many_to_many :songs
+end
+
+class PlaylistSong < Sequel::Model(:playlists_songs)
+  many_to_one :playlists
+  many_to_one :songs
 end
