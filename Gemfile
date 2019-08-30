@@ -1,7 +1,7 @@
 source :rubygems
 
 # Http Server
-# gem 'unicorn'
+gem 'unicorn'
 
 # WEB Framework
 gem 'sinatra'
