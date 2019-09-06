@@ -24,7 +24,7 @@ import SongList from './SongList.vue';
     const id = musicModule.playlistId;
     if (!to.params.id && id) next(`/music/playlist/${id}`);
     else next();
-  }
+  },
 })
 export default class ArtistList extends Vue {
   @Prop({ default: 0 })

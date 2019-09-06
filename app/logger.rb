@@ -2,11 +2,6 @@ class MainApp < Sinatra::Base
   enable :logging
   configure :production do
     use Rack::CommonLogger, Logger.new(File.join(ROOT, CONF.log.access), shift_age='daily')
-    err_log  = Logger.new(File.join(ROOT, CONF.log.error), shift_age='monthly')
-    def err_log.write(msg)
-      self << msg
-    end
-    $stderr = err_log
   end
   def logger
     return super if settings.development?
