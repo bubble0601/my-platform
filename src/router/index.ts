@@ -3,7 +3,6 @@ import Router, { RouteConfig } from 'vue-router';
 import { authModule } from '@/store';
 import Home from '@/pages/Home.vue';
 import music from './music';
-import note from './note';
 
 Vue.use(Router);
 
