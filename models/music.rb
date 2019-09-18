@@ -160,7 +160,7 @@ class Song < Sequel::Model(:songs)
         mp3.tag2[k] = nil unless tags[k]
       end
     end
-    # self.class.fix_mp3(path)
+    self.class.fix_mp3(path)
 
     song, album, artist = self.class.load_from_tags(tags)
 
@@ -180,7 +180,7 @@ class Song < Sequel::Model(:songs)
     elsif album.artist_id == nil
       # nop
     elsif self.album.title != album.title
-      _album = Album.first(album.to_hash.slice(:artist_id, :title))
+      _album = Album.first(album.slice(:artist_id, :title))
       if _album
         self.album = _album
         [:year, :num_tracks, :num_discs].each{|k|
@@ -207,6 +207,10 @@ class Song < Sequel::Model(:songs)
 
     self.save
     self.update(song.to_hash)
+  end
+
+  def fix
+    self.class.fix_mp3(self.filename)
   end
 
   def to_filename(original_name = nil)

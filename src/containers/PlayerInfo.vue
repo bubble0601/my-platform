@@ -50,6 +50,9 @@
           <b-button variant="outline-danger" class="mr-auto" @click="setEdit">Cancel</b-button>
           <b-button variant="success" @click="save">Save</b-button>
         </div>
+        <div class="mt-1 mb-2">
+          <b-button variant="success" @click="fix">Fix</b-button>
+        </div>
       </div>
     </div>
   </div>
@@ -198,9 +201,15 @@ export default class PlayerInfo extends Vue {
   }
 
   private save() {
-    const song = musicModule.current as any;
+    const song = musicModule.current;
     if (!song) return;
     musicModule.UpdateSongTag({ id: song.id, data: this.edit });
+  }
+
+  private fix() {
+    const song = musicModule.current;
+    if (!song) return;
+    musicModule.Fix(song.id);
   }
 }
 </script>

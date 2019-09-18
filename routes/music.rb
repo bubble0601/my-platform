@@ -146,6 +146,13 @@ class MainApp < Sinatra::Base
         status 204
       end
 
+      put '/:id/fix' do
+        song = Song[params[:id].to_i]
+        halt 404, 'The requested resource not found' if song.nil?
+        song.fix
+        status 204
+      end
+
       delete '/:id' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?

@@ -51,6 +51,7 @@ const api = {
   downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post('/api/music/songs', data),
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
+  fixSong: (id: number) => axios.put(`/api/music/songs/${id}/fix`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
 
@@ -455,6 +456,11 @@ export default class MusicModule extends VuexModule {
     data.songs.forEach((song) => {
       api.removePlaylistSong(this.playlistId!, song.id);
     });
+  }
+
+  @Action
+  public Fix(id: number) {
+    api.fixSong(id);
   }
 }
 
