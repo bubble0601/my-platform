@@ -48,7 +48,7 @@ class MainApp < Sinatra::Base
       end
     end
     namespace '/songs' do
-      get %r(/?) do
+      get '' do
         if params[:tab]
           query = Song.eager_graph(:album, :artist)
                       .order{artist[:ruby]}
@@ -94,7 +94,7 @@ class MainApp < Sinatra::Base
         end
       end
 
-      post '/new' do
+      post '' do
         if @json # from media url
           now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
           path = "#{ROOT}/#{CONF.storage.temp}/temp#{now}"
@@ -102,9 +102,7 @@ class MainApp < Sinatra::Base
           out = `youtube-dl -f bestaudio -x --audio-format 'mp3' -o #{output} #{@json[:url].escape_shell} 1>/dev/null 2>&1`
           path += '.mp3'
           if $?.success?
-            p `ffprobe -i #{path}`
             Song.set_tags(path, @json[:metadata])
-            p `ffprobe -i #{path}`
             Song.create_from_file(path)
           else
             logger.error('youtube-dl'){out}
@@ -157,17 +155,17 @@ class MainApp < Sinatra::Base
     end
 
     namespace '/artists' do
-      get %r(/?) do
+      get '' do
         Artist.order(:name).all.map{|artist| artist.slice(:id, :name)}
       end
     end
 
     namespace '/playlists' do
-      get %r(/?) do
+      get '' do
         Playlist.order(:id).all.map{|list| list.slice(:id, :name)}
       end
 
-      post '/new' do
+      post '' do
         new_list = Playlist.create(name: @json[:name])
         new_list.to_hash
       end

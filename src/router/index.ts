@@ -1,10 +1,33 @@
 import Vue from 'vue';
-import Router from 'vue-router';
+import Router, { RouteConfig } from 'vue-router';
 import { authModule } from '@/store';
 import Home from '@/pages/Home.vue';
 import music from './music';
+import note from './note';
 
 Vue.use(Router);
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home,
+    meta: { title: 'Home', public: true },
+  },
+  ...music,
+];
+
+const inheritMeta = (route: RouteConfig) => {
+  if (route.meta && route.children) {
+    route.children.forEach((r) => {
+      if (!r.meta) r.meta = route.meta;
+      else r.meta = { ...route.meta, ...r.meta };
+      inheritMeta(r);
+    });
+  }
+};
+
+routes.forEach(inheritMeta);
 
 const router = new Router({
   mode: 'history',
@@ -15,15 +38,7 @@ const router = new Router({
       return { x: 0, y: 0 };
     }
   },
-  routes: [
-    {
-      path: '/',
-      name: 'home',
-      component: Home,
-      meta: { title: 'Home', public: true },
-    },
-    ...music,
-  ],
+  routes,
 });
 
 // Authentication check
@@ -56,6 +71,8 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to) => {
   if (to.meta && to.meta.title) {
     document.title = `${to.meta.title} | iBubble`;
+  } else {
+    document.title = 'iBubble';
   }
 });
 

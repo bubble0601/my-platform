@@ -3,6 +3,7 @@ import { now, isDate } from 'lodash';
 import store from '@/store';
 
 export { calcTextareaHeight } from './calcHeight';
+export { default as HeightMixin } from './HeightMixin';
 export { default as DialogMixin } from './DialogMixin';
 export { default as initDialogs } from './Dialogs';
 

@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column h-100">
     <v-nav v-model="tab" :items="tabs" tabs class="px-2"/>
-    <div class="flex-grow-1 bg-white overflow-auto">
+    <div class="flex-grow-1 bg-white overflow-auto px-2">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
           <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>

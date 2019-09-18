@@ -95,7 +95,6 @@ class Song < Sequel::Model(:songs)
         song.has_artwork = true
       end
     end
-    p song
     [song, album, artist]
   end
 

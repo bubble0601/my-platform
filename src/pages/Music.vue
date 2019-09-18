@@ -23,9 +23,11 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
+import { mixins } from 'vue-class-component';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from '@/containers';
 import { musicModule } from '@/store';
+import { HeightMixin } from '@/utils';
 
 @Component({
   components: {
@@ -33,8 +35,7 @@ import { musicModule } from '@/store';
     PlayerInfo,
   },
 })
-export default class Music extends Vue {
-  private height = 'auto';
+export default class Music extends mixins(HeightMixin) {
   private tabs = [
     { key: 'all', name: 'All' },
     { key: 'artist', name: 'Artist' },
@@ -47,10 +48,7 @@ export default class Music extends Vue {
     { key: 'unrated', name: 'Unrated' },
   ];
 
-  private mounted() {
-    if (this.$el instanceof HTMLElement) {
-      this.height = `calc(100vh - ${this.$el.offsetTop}px)`;
-    }
+  protected mounted() {
     if (musicModule.current) musicModule.FetchAudio(musicModule.current);
   }
 

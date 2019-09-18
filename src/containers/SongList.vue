@@ -105,7 +105,7 @@ export default class SongList extends Vue {
   }
 
   private createPlaylist() {
-    this.$prompt('List name').then((res) => {
+    this.$prompt('Playlist name').then((res) => {
       musicModule.CreatePlaylist({ name: res, songs: this.selected });
     });
   }
@@ -141,13 +141,19 @@ export default class SongList extends Vue {
     musicModule.Play(item);
   }
 
-  private updateRate(id: number, val: number) {
-    musicModule.UpdateSong({ id, data: { rate: val } });
+  private async updateRate(id: number, val: number) {
+    await musicModule.UpdateSong({ id, data: { rate: val } });
+    if (this.context === 'playlist') {
+      musicModule.ReloadPlaylistSong(id);
+    } else {
+      musicModule.ReloadSong(id);
+    }
   }
 
   private updateWeight(id: number, val: number) {
     if (val < 0) return;
     musicModule.UpdatePlaylistSong({ id, data: { weight: val } });
+    musicModule.ReloadPlaylistSong(id);
   }
 }
 </script>

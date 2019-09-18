@@ -90,12 +90,15 @@ function makeMessage(variant?: Variant) {
   };
 }
 
+export const message = Object.assign(makeMessage(), {
+  info: makeMessage('info'),
+  success: makeMessage('success'),
+  warn: makeMessage('warning'),
+  error: makeMessage('danger'),
+});
+
 function initMessage() {
-  Vue.prototype.$message = makeMessage();
-  Vue.prototype.$message.info = makeMessage('info');
-  Vue.prototype.$message.success = makeMessage('success');
-  Vue.prototype.$message.warn = makeMessage('warning');
-  Vue.prototype.$message.error = makeMessage('danger');
+  Vue.prototype.$message = message;
 }
 
 type MsgBoxArgs =

@@ -181,8 +181,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       this.dReset();
       musicModule.FetchSongs();
       musicModule.FetchArtists();
-      this.$message.success('Completed');
-      this.$bvToast.toast('Complated', {
+      this.$bvToast.toast('Completed', {
         variant: 'success',
         autoHideDelay: 15000,
       });
