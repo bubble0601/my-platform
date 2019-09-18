@@ -210,7 +210,7 @@ class Song < Sequel::Model(:songs)
   end
 
   def fix
-    self.class.fix_mp3(self.filename)
+    self.class.fix_mp3(self.to_fullpath)
   end
 
   def to_filename(original_name = nil)

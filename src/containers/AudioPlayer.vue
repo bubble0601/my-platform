@@ -111,6 +111,12 @@ export default class AudioPlayer extends Vue {
     };
   }
 
+  @Watch('mute')
+  private onMuteChanged = this.setVolume;
+
+  @Watch('volume')
+  private onVolumeChanged = this.setVolume;
+
   @Watch('playing')
   private onPlayingChanged(val: boolean) {
     if (val) {
@@ -119,12 +125,6 @@ export default class AudioPlayer extends Vue {
       this.audio.pause();
     }
   }
-
-  @Watch('mute')
-  private onMuteChanged = this.setVolume;
-
-  @Watch('volume')
-  private onVolumeChanged = this.setVolume;
 
   private mounted() {
     document.addEventListener('keydown', this.setKeyEvents);
