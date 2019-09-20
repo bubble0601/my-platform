@@ -51,6 +51,7 @@ const api = {
   downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post('/api/music/songs', data),
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
+  deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
   fixSong: (id: number) => axios.put(`/api/music/songs/${id}/fix`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
@@ -105,13 +106,17 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private UPDATE_SONGS(data: { id: number, song: Song }) {
+  private UPDATE_SONGS(data: { id: number, song: Song | null }) {
     const { id, song } = data;
     const n = findIndex(this.songs, { id });
-    if (n >= 0) {
-      this.songs = this.songs.map((v, i) => n === i ? song : v);
+    if (song) {
+      if (n >= 0) {
+        this.songs = this.songs.map((v, i) => n === i ? song : v);
+      } else {
+        this.songs.push(song);
+      }
     } else {
-      this.songs.push(song);
+      this.songs = this.songs.filter((v, i) => n !== i);
     }
   }
 
@@ -420,6 +425,12 @@ export default class MusicModule extends VuexModule {
   public async UpdateSongTag(payload: { id: number, data: Dict<string> }) {
     const { id, data } = payload;
     await api.updateSongTag(id, data);
+  }
+
+  @Action
+  public DeleteSong(id: number) {
+    api.deleteSong(id);
+    this.UPDATE_SONGS({ id, song: null });
   }
 
   @Action({ rawError: true })

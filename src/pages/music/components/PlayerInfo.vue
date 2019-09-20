@@ -51,7 +51,8 @@
           <b-button variant="success" @click="save">Save</b-button>
         </div>
         <div class="mt-1 mb-2">
-          <b-button variant="success" @click="fix">Fix</b-button>
+          <b-button variant="warning" class="mr-2" @click="fix">Fix</b-button>
+          <b-button variant="danger" class="mr-2" @click="deleteSong">Delete</b-button>
         </div>
       </div>
     </div>
@@ -217,6 +218,15 @@ export default class PlayerInfo extends Vue {
     const song = musicModule.current;
     if (!song) return;
     musicModule.Fix(song.id);
+  }
+
+  private deleteSong() {
+    this.$confirm('Do you really delete this song?').then(() => {
+      const song = musicModule.current;
+      if (!song) return;
+      musicModule.DeleteSong(song.id);
+      musicModule.PlayNext();
+    });
   }
 }
 </script>
