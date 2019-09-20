@@ -63,6 +63,7 @@ export default class AudioPlayer extends Vue {
   private labelStyle = {
     'color': 'white',
     'margin-top': '.3rem',
+    'font-size': '1rem',
   };
 
   get playing() {

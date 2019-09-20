@@ -103,7 +103,8 @@ class MainApp < Sinatra::Base
           path += '.mp3'
           if $?.success?
             Song.set_tags(path, @json[:metadata])
-            Song.create_from_file(path)
+            res = Song.create_from_file(path)
+            logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
           else
             logger.error('youtube-dl'){out}
             halt 400, 'Failed to download from the url'
@@ -115,12 +116,14 @@ class MainApp < Sinatra::Base
             params[:file].each do |f|
               return unless f[:filename].end_with?('.mp3')
               Song.set_tags(f[:tempfile].path, metadata)
-              Song.create_from_file(f[:tempfile].path, f[:filename])
+              res = Song.create_from_file(f[:tempfile].path, f[:filename])
+              logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
             end
           else
             f = params[:file]
             Song.set_tags(f[:tempfile].path, metadata)
-            Song.create_from_file(f[:tempfile].path, f[:filename])
+            res = Song.create_from_file(f[:tempfile].path, f[:filename])
+            logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
           end
         end
         status 204
@@ -142,7 +145,7 @@ class MainApp < Sinatra::Base
       put '/:id/tag' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
-        song.updateTag(@json.transform_keys(&:to_s).filter{|k, v| v && v.length > 0})
+        song.update_tag(@json.transform_keys(&:to_s).filter{|k, v| v && v.length > 0})
         status 204
       end
 
@@ -233,28 +236,37 @@ class MainApp < Sinatra::Base
     namespace '/sync' do
       get '/testrun' do
         unless CONF.respond_to? :remote
-          halt 400, 'Disabled'
+          halt 400, 'Not Configured'
         end
-        local_dir = "#{CONF.storage.music}/".escape_shell
+        local_dir = "#{ROOT}/#{CONF.storage.music}/".escape_shell
         remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
         r1 = `rsync -avhunz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
         r2 = `rsync -avhunz -e ssh #{remote_dir} #{local_dir}`
-        {
-          output: "#{r1}\n\n#{r2}"
-        }
+        { output: "#{r1}\n\n#{r2}" }
       end
 
       post '/run' do
         unless CONF.respond_to? :remote
-          halt 400, 'Disabled'
+          halt 400, 'Not Configured'
         end
-        local_dir = "#{CONF.storage.music}/".escape_shell
+        local_dir = "#{ROOT}/#{CONF.storage.music}/".escape_shell
         remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
         r1 = `rsync -avhuz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
         r2 = `rsync -avhuz -e ssh #{remote_dir} #{local_dir}`
-        {
-          output: "#{r1}\n\n#{r2}"
-        }
+        { output: "#{r1}\n\n#{r2}" }
+      end
+    end
+
+    namespace '/scan' do
+      post '' do
+        results = []
+        Dir["#{ROOT}/#{CONF.storage.music}/**/*.mp3"].each do |f|
+          p f
+          s = Song.create_from_file(f)
+          p s
+          results.push(s.filename) if s
+        end
+        { output: results.join("\n") }
       end
     end
   end

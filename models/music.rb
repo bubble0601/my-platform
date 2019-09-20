@@ -136,10 +136,14 @@ class Song < Sequel::Model(:songs)
     song.digest = Digest::MD5.file(path).hexdigest[0,8]
 
     new_filename = "#{ROOT}/#{CONF.storage.music}/#{song.filename}"
-    dir = File.dirname(new_filename)
-    FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
-    File.rename(path, new_filename)
-
+    if File.exist?(new_filename)
+      return nil
+    end
+    if File.realpath(path) != new_filename
+      dir = File.dirname(new_filename)
+      FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+      File.rename(path, new_filename)
+    end
     song.save
   end
 
@@ -150,7 +154,7 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
-  def updateTag(tags)
+  def update_tag(tags)
     path = self.to_fullpath
     Mp3Info.open(path) do |mp3|
       tags.each do |k, v|

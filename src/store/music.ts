@@ -66,6 +66,7 @@ const api = {
 
   prepareSync: () => axios.get<{ output: string }>('/api/music/sync/testrun'),
   sync: () => axios.post<{ output: string }>('/api/music/sync/run'),
+  scan: () => axios.post<{ output: string }>('/api/music/scan'),
 };
 
 @Module({ name: 'music' })
@@ -475,6 +476,12 @@ export default class MusicModule extends VuexModule {
   @Action
   public async Sync() {
     const { data } = await api.sync();
+    return data;
+  }
+
+  @Action
+  public async Scan() {
+    const { data } = await api.scan();
     return data;
   }
 }

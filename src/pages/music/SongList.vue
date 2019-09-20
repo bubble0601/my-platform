@@ -28,10 +28,10 @@
       @row-selected="onSelectedRows"
       @row-dblclicked="play"
     >
-      <template slot="[rate]" slot-scope="{ item, value }">
+      <template #cell(rate)="{ item, value }">
         <rate :value="value" @input="updateRate(item.id, $event)"/>
       </template>
-      <template slot="[weight]" slot-scope="{ item, value }">
+      <template #cell(weight)="{ item, value }">
         <icon-button icon="minus" class="p-0" @click="updateWeight(item.id, value - 1)"/>
         <span class="mx-2">{{ value }}</span>
         <icon-button icon="plus" class="p-0" @click="updateWeight(item.id, value + 1)"/>
