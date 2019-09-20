@@ -1,6 +1,7 @@
 <template>
   <b-modal ref="modal" v-if="type === 'confirm'" :title="title" @hidden="settle" @keydown.enter.native="onOK">
-    <span>{{ message }}</span>
+    <pre v-if="pre">{{ message }}</pre>
+    <span v-else>{{ message }}</span>
     <template #modal-footer>
       <div class="d-flex justify-content-end">
         <b-button variant="outline-secondary" class="mr-1" @click="onCancel">キャンセル</b-button>
@@ -38,6 +39,7 @@ export default class MessageBox extends mixins(DialogMixin) {
   private title = '';
   private variant: Variant = '';
   private message = '';
+  private pre = false;
   private inputLabel = '';
   private inputValue = '';
   private inputState: boolean | null = null;  // true: valid, false: invalid
@@ -57,6 +59,7 @@ export default class MessageBox extends mixins(DialogMixin) {
     this.title = options.title || (this.type === 'confirm' ? '確認' : '入力');
     this.variant = options.variant || (this.type === 'confirm' ? 'danger' : 'primary');
     this.message = options.message || '';
+    this.pre = options.pre !== false;
     this.inputValue = options.inputValue || '';
     this.inputLabel = options.inputLabel || '';
     this.placeholder = options.placeholder || '';

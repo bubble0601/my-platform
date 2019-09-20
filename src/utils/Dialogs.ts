@@ -104,7 +104,7 @@ function initMessage() {
 type MsgBoxArgs =
   [MsgBoxOptions] |
   [string, MsgBoxOptions?] |
-  [string, string, MsgBoxOptions];
+  [string, string, MsgBoxOptions?];
 
 function makeMessageBox(type: 'confirm' | 'prompt') {
   return (...args: MsgBoxArgs) => {

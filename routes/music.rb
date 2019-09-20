@@ -229,6 +229,34 @@ class MainApp < Sinatra::Base
         status 204
       end
     end
+
+    namespace '/sync' do
+      get '/testrun' do
+        unless CONF.respond_to? :remote
+          halt 400, 'Disabled'
+        end
+        local_dir = "#{CONF.storage.music}/".escape_shell
+        remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
+        r1 = `rsync -avhunz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
+        r2 = `rsync -avhunz -e ssh #{remote_dir} #{local_dir}`
+        {
+          output: "#{r1}\n\n#{r2}"
+        }
+      end
+
+      post '/run' do
+        unless CONF.respond_to? :remote
+          halt 400, 'Disabled'
+        end
+        local_dir = "#{CONF.storage.music}/".escape_shell
+        remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
+        r1 = `rsync -avhuz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
+        r2 = `rsync -avhuz -e ssh #{remote_dir} #{local_dir}`
+        {
+          output: "#{r1}\n\n#{r2}"
+        }
+      end
+    end
   end
 
   namespace '/static/music' do

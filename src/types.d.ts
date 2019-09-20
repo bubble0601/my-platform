@@ -10,6 +10,7 @@ export interface MsgBoxOptions {
   title?: string;
   variant?: Variant;
   message?: string;
+  pre?: boolean;
   inputLabel?: string;
   inputValue?: string;
   placeholder?: string;

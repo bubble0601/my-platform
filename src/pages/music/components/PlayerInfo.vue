@@ -5,7 +5,7 @@
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
           <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
-          <img v-else src="../assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
+          <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
         <div v-if="song" class="text-center">
           <h4 class="mb-1">{{ song.title }}</h4>
@@ -120,7 +120,9 @@ export default class PlayerInfo extends Vue {
   }
 
   get filteredEdit() {
-    return omitBy(this.edit, (v, k) => Object.keys(this.basicTags).includes(k));
+    // TSSE(Software/Hardware and settings used for encoding) is automatically added by ffmpeg
+    const excludedTags = Object.keys(this.basicTags).concat(['TSSE']);
+    return omitBy(this.edit, (v, k) => excludedTags.includes(k));
   }
 
   @Watch('audioData')

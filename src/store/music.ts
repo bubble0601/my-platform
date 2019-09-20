@@ -63,6 +63,9 @@ const api = {
   updatePlaylistSong: (id: number, songId: number, weight: number) =>
                         axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
   removePlaylistSong: (id: number, songId: number) => axios.delete(`/api/music/playlists/${id}/songs/${songId}`),
+
+  prepareSync: () => axios.get<{ output: string }>('/api/music/sync/testrun'),
+  sync: () => axios.post<{ output: string }>('/api/music/sync/run'),
 };
 
 @Module({ name: 'music' })
@@ -461,6 +464,18 @@ export default class MusicModule extends VuexModule {
   @Action
   public Fix(id: number) {
     api.fixSong(id);
+  }
+
+  @Action
+  public async PrepareSync() {
+    const { data } = await api.prepareSync();
+    return data;
+  }
+
+  @Action
+  public async Sync() {
+    const { data } = await api.sync();
+    return data;
   }
 }
 

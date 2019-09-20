@@ -1,14 +1,15 @@
 <template>
   <div class="d-flex flex-column" :style="{ height }">
     <div class="d-flex flex-grow-1 overflow-hidden">
-      <div class="sidemenu-left">
-        <div class="p-2">
+      <div class="sidemenu-left py-2">
+        <div class="px-2 pb-2">
           <b-button pill variant="success" size="sm" @click="addSong">＋ Add</b-button>
         </div>
         <template v-for="t in tabs">
           <router-link v-if="t.name" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
             {{ t.name }}
           </router-link>
+          <div v-else-if="t.key === 'space'" class="mt-auto"/>
           <hr v-else class="mt-2 mb-1">
         </template>
       </div>
@@ -25,9 +26,9 @@
 <script lang="ts">
 import { Component, Prop } from 'vue-property-decorator';
 import { mixins } from 'vue-class-component';
-import { AddSongDialog, AudioPlayer, PlayerInfo } from '@/containers';
 import { musicModule } from '@/store';
 import { HeightMixin } from '@/utils';
+import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 
 @Component({
   components: {
@@ -46,6 +47,8 @@ export default class Music extends mixins(HeightMixin) {
     { key: 'great', name: 'Great' },
     { key: 'good', name: 'Good' },
     { key: 'unrated', name: 'Unrated' },
+    { key: 'space' },
+    { key: 'settings', name: 'Settings' },
   ];
 
   protected mounted() {
@@ -60,6 +63,8 @@ export default class Music extends mixins(HeightMixin) {
 </script>
 <style lang="scss" scoped>
 .sidemenu-left {
+  display: flex;
+  flex-direction: column;
   background-color: #dee2e655;
   .menu-item {
     display: block;
