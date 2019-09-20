@@ -135,7 +135,7 @@ class Song < Sequel::Model(:songs)
     end
     song.digest = Digest::MD5.file(path).hexdigest[0,8]
 
-    new_filename = "#{ROOT}/#{CONF.storage.music}/#{song.filename}"
+    new_filename = "#{CONF.storage.music}/#{song.filename}"
     if File.exist?(new_filename)
       return nil
     end
@@ -183,7 +183,7 @@ class Song < Sequel::Model(:songs)
       self.album = nil
     elsif album.artist_id == nil
       # nop
-    elsif self.album.title != album.title
+    elsif self.album&.title != album.title
       _album = Album.first(album.slice(:artist_id, :title))
       if _album
         self.album = _album
@@ -193,7 +193,7 @@ class Song < Sequel::Model(:songs)
       else
         self.album = album.save
       end
-    else
+    elsif self.album
       self.album.update(album.to_hash)
     end
 
@@ -203,7 +203,7 @@ class Song < Sequel::Model(:songs)
 
     if self.filename != self.to_filename
       self.filename = self.to_filename
-      new_filename = "#{ROOT}/#{CONF.storage.music}/#{self.filename}"
+      new_filename = "#{CONF.storage.music}/#{self.filename}"
       dir = File.dirname(new_filename)
       FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
       File.rename(path, new_filename)
@@ -229,7 +229,7 @@ class Song < Sequel::Model(:songs)
   end
 
   def to_fullpath
-    "#{ROOT}/#{CONF.storage.music}/#{self.filename}"
+    "#{CONF.storage.music}/#{self.filename}"
   end
 end
 

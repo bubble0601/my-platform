@@ -202,10 +202,15 @@ export default class PlayerInfo extends Vue {
     this.$delete(this.edit, k);
   }
 
-  private save() {
+  private async save() {
     const song = musicModule.current;
     if (!song) return;
-    musicModule.UpdateSongTag({ id: song.id, data: this.edit });
+    await musicModule.UpdateSongTag({ id: song.id, data: this.edit });
+    if (musicModule.playlistId === null) {
+      await musicModule.ReloadSong(song.id);
+    } else {
+      await musicModule.ReloadPlaylistSong(song.id);
+    }
   }
 
   private fix() {

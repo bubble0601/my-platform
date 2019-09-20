@@ -121,7 +121,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private SET_ARTIST_ID(id: number) {
+  private SET_ARTIST_ID(id: number | null) {
     this.artistId = id;
   }
 
@@ -131,7 +131,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private SET_PLAYLIST_ID(id: number) {
+  private SET_PLAYLIST_ID(id: number | null) {
     this.playlistId = id;
   }
 
@@ -296,12 +296,17 @@ export default class MusicModule extends VuexModule {
   public async FetchSongs(params: FetchSongParams = {}) {
     this.SET_SONGS([]);
     if (params.artist) this.SET_ARTIST_ID(params.artist);
+    else this.SET_ARTIST_ID(null);
+
     if (params.playlist) this.SET_PLAYLIST_ID(params.playlist);
+    else this.SET_PLAYLIST_ID(null);
+
     if (params.tab) {
       this.SET_TAB(params.tab);
     } else if (isEmpty(params)) {
       params.tab = this.tab;
     }
+
     const { data } = await api.fetchSongs(params);
     this.SET_SONGS(data);
   }

@@ -97,7 +97,7 @@ class MainApp < Sinatra::Base
       post '' do
         if @json # from media url
           now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
-          path = "#{ROOT}/#{CONF.storage.temp}/temp#{now}"
+          path = "#{CONF.storage.temp}/temp#{now}"
           output = "#{path}.%(ext)s".escape_shell
           out = `youtube-dl -f bestaudio -x --audio-format 'mp3' -o #{output} #{@json[:url].escape_shell} 1>/dev/null 2>&1`
           path += '.mp3'
@@ -238,7 +238,7 @@ class MainApp < Sinatra::Base
         unless CONF.respond_to? :remote
           halt 400, 'Not Configured'
         end
-        local_dir = "#{ROOT}/#{CONF.storage.music}/".escape_shell
+        local_dir = "#{CONF.storage.music}/".escape_shell
         remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
         r1 = `rsync -avhunz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
         r2 = `rsync -avhunz -e ssh #{remote_dir} #{local_dir}`
@@ -249,7 +249,7 @@ class MainApp < Sinatra::Base
         unless CONF.respond_to? :remote
           halt 400, 'Not Configured'
         end
-        local_dir = "#{ROOT}/#{CONF.storage.music}/".escape_shell
+        local_dir = "#{CONF.storage.music}/".escape_shell
         remote_dir = "#{CONF.remote.ssh.name}:#{CONF.remote.root}/#{CONF.remote.storage.music}/".escape_shell
         r1 = `rsync -avhuz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
         r2 = `rsync -avhuz -e ssh #{remote_dir} #{local_dir}`
@@ -260,7 +260,7 @@ class MainApp < Sinatra::Base
     namespace '/scan' do
       post '' do
         results = []
-        Dir["#{ROOT}/#{CONF.storage.music}/**/*.mp3"].each do |f|
+        Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
           p f
           s = Song.create_from_file(f)
           p s
