@@ -4,8 +4,14 @@ if [ $# -eq 0 ];then
   exit
 fi
 
+readlink_cmd="readlink"
+if [[ $OSTYPE == darwin* ]]; then
+  # Use greadlink on the mac
+  readlink_cmd="greadlink"
+fi
+
 PIDFILE="deploy/pid/unicorn.pid"
-cd "$(dirname $(readlink -f "$0"))"/..
+cd "$(dirname $("${readlink_cmd}" -f "$0"))"/..
 
 case "$1" in
 start)
@@ -13,7 +19,11 @@ start)
     echo "$PIDFILE found. maybe unicorn is already running"
     exit
   fi
-  bundle exec unicorn -E production -c deploy/unicorn.rb -D && echo "unicorn started"
+  if [ $# -ge 2 ]; then
+    bundle exec unicorn -E production -c deploy/unicorn.rb -l $2 -D && echo "unicorn started"
+  else
+    bundle exec unicorn -E production -c deploy/unicorn.rb -D && echo "unicorn started"
+  fi
   ;;
 stop)
   if ! [ -e "$PIDFILE" ];then
@@ -32,6 +42,10 @@ restart)
   pid=$(cat "$PIDFILE")
   echo "killing pid=$pid"
   kill $pid
-  bundle exec unicorn -E production -c deploy/unicorn.rb -D && echo "unicorn started"
+  if [ $# -ge 2 ]; then
+    bundle exec unicorn -E production -c deploy/unicorn.rb -l $2 -D && echo "unicorn started"
+  else
+    bundle exec unicorn -E production -c deploy/unicorn.rb -D && echo "unicorn started"
+  fi
   ;;
 esac
