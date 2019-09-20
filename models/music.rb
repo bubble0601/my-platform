@@ -136,7 +136,7 @@ class Song < Sequel::Model(:songs)
     song.digest = Digest::MD5.file(path).hexdigest[0,8]
 
     new_filename = "#{CONF.storage.music}/#{song.filename}"
-    if File.exist?(new_filename)
+    if File.exist?(new_filename) and Song.first(artist_name: song.artist_name, title: song.title) != nil
       return nil
     end
     if File.realpath(path) != new_filename

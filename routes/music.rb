@@ -70,6 +70,8 @@ class MainApp < Sinatra::Base
           end
           query.map(&method(:to_song_data))
         elsif params[:artist]
+          aid = params[:artist]
+          aid = nil if params[:artist] == 0
           Song.eager_graph(:album, :artist)
               .where(Sequel[:songs][:artist_id] =~ params[:artist])
               .order{album[:year]}
@@ -166,7 +168,9 @@ class MainApp < Sinatra::Base
 
     namespace '/artists' do
       get '' do
-        Artist.order(:name).all.map{|artist| artist.slice(:id, :name)}
+        artists = Artist.order(:name).all.map{|artist| artist.slice(:id, :name)}
+        artists.push({ id: 0, name: 'Unknown Artist' }) if Song.first(artist_id: nil)
+        artists
       end
     end
 
@@ -261,10 +265,16 @@ class MainApp < Sinatra::Base
       post '' do
         results = []
         Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
+          s = nil
           begin
             s = Song.create_from_file(f)
           rescue
-            results.push("Error: #{f}")
+            begin
+              Song.fix_mp3(f)
+              s = Song.create_from_file(f)
+            rescue => e
+              results.push("Error: #{e.message} at #{f}")
+            end
           end
           results.push(s.filename) if s
         end
