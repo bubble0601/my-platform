@@ -170,7 +170,7 @@ class Song < Sequel::Model(:songs)
 
     if artist.name == nil
       self.artist = nil
-    elsif self.artist.name != artist.name
+    elsif self.artist&.name != artist.name
       self.artist = Artist.first(artist.to_hash) || artist.save
       self.artist_name = artist.name unless self.artist_name or song.artist_name
       if self.album.title == album.title

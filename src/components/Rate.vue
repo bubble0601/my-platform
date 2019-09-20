@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex rate" @click.stop>
-    <v-icon v-for="i in 5" :key="i" name="star" size="sm" :class="{ enabled: i <= value, hovered: i <= hover }"
+    <v-icon v-for="i in 5" :key="i" name="star" :size="size" :class="{ enabled: i <= value, hovered: i <= hover }"
             :icon-style="(i <= value || i <= hover) ? 'fas' : 'far'"
             @click.native="setRate(i)" @mouseenter.native="hover = i" @mouseleave.native="hover = -1"/>
   </div>
@@ -12,6 +12,9 @@ import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 export default class Rate extends Vue {
   @Prop({ default: 0 })
   private value!: number;
+
+  @Prop({ default: null })
+  private size!: string | null;
 
   private hover: number = -1;
 

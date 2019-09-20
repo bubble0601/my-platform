@@ -32,7 +32,7 @@
       @row-dblclicked="play"
     >
       <template #cell(rate)="{ item, value }">
-        <rate :value="value" @input="updateRate(item.id, $event)"/>
+        <rate :value="value" size="sm" @input="updateRate(item.id, $event)"/>
       </template>
       <template #cell(weight)="{ item, value }">
         <icon-button icon="minus" class="p-0" @click="updateWeight(item.id, value - 1)"/>

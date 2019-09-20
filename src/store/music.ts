@@ -342,6 +342,9 @@ export default class MusicModule extends VuexModule {
   public async ReloadSong(id: number) {
     const { data } = await api.fetchSong(id);
     this.UPDATE_SONGS({ id, song: data });
+    if (this.current && this.current.id === id) {
+      this.SET_CURRENT(data);
+    }
   }
 
   @Action
@@ -349,6 +352,9 @@ export default class MusicModule extends VuexModule {
     if (this.playlistId) {
       const { data } = await api.fetchPlaylistSong(this.playlistId, sid);
       this.UPDATE_SONGS({ id: sid, song: data });
+      if (this.current && this.current.id === sid) {
+        this.SET_CURRENT(data);
+      }
     } else {
       message.error('An error occurred');
     }

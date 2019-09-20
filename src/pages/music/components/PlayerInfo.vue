@@ -7,6 +7,9 @@
           <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
           <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
+        <div v-if="song">
+          <rate :value="song.rate" size="lg" class="justify-content-center" @input="updateRate"/>
+        </div>
         <div v-if="song" class="text-center">
           <h4 class="mb-1">{{ song.title }}</h4>
         </div>
@@ -64,13 +67,14 @@ import * as mm from 'music-metadata-browser';
 import { capitalize, clone, find, isEmpty, omitBy, pick } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { VNav, VForm } from '@/components';
+import { VNav, VForm, Rate, } from '@/components';
 import { Dict } from '@/types';
 
 @Component({
   components: {
     VNav,
     VForm,
+    Rate,
   },
 })
 export default class PlayerInfo extends Vue {
@@ -165,6 +169,17 @@ export default class PlayerInfo extends Vue {
     this.artwork = null;
   }
 
+  private async updateRate(val: number) {
+    if (!this.song) return;
+    const id = this.song.id;
+    await musicModule.UpdateSong({ id, data: { rate: val } });
+    if (musicModule.playlistId === null) {
+      musicModule.ReloadSong(id);
+    } else {
+      musicModule.ReloadPlaylistSong(id);
+    }
+  }
+
   // Queue
   private play(i: number) {
     musicModule.PlayFromQueue(i);
@@ -215,16 +230,14 @@ export default class PlayerInfo extends Vue {
   }
 
   private fix() {
-    const song = musicModule.current;
-    if (!song) return;
-    musicModule.Fix(song.id);
+    if (!this.song) return;
+    musicModule.Fix(this.song.id);
   }
 
   private deleteSong() {
     this.$confirm('Do you really delete this song?').then(() => {
-      const song = musicModule.current;
-      if (!song) return;
-      musicModule.DeleteSong(song.id);
+      if (!this.song) return;
+      musicModule.DeleteSong(this.song.id);
       musicModule.PlayNext();
     });
   }
