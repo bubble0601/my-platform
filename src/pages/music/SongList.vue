@@ -12,6 +12,7 @@
           Create new playlist
         </b-dropdown-item>
       </b-dropdown>
+      <b-pagination v-model="currentPage" :total-rows="songs.length" :per-page="perPage" size="sm" class="my-0 mr-2"/>
     </div>
     <b-table
       v-model="displayedSongs"
@@ -25,6 +26,8 @@
       class="music-list border-bottom"
       :items="songs"
       :fields="fields"
+      :current-page="currentPage"
+      :per-page="perPage"
       @row-selected="onSelectedRows"
       @row-dblclicked="play"
     >
@@ -62,6 +65,8 @@ export default class SongList extends Vue {
   private context!: string;
 
   private selected: Song[] = [];
+  private currentPage = 1;
+  private perPage = 100;
 
   @Ref() private table!: BTable;
 

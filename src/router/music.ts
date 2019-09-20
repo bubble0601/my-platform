@@ -7,7 +7,7 @@ export default [
     children: [
       {
         path: '',
-        redirect: '/music/all',
+        redirect: '/music/artist',
       },
       {
         path: 'artist',

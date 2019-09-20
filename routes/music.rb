@@ -71,7 +71,7 @@ class MainApp < Sinatra::Base
           query.map(&method(:to_song_data))
         elsif params[:artist]
           aid = params[:artist]
-          aid = nil if params[:artist] == 0
+          aid = nil if params[:artist] == '0'
           Song.eager_graph(:album, :artist)
               .where(Sequel[:songs][:artist_id] =~ params[:artist])
               .order{album[:year]}
