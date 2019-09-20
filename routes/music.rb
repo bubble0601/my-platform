@@ -261,9 +261,11 @@ class MainApp < Sinatra::Base
       post '' do
         results = []
         Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
-          p f
-          s = Song.create_from_file(f)
-          p s
+          begin
+            s = Song.create_from_file(f)
+          rescue
+            results.push("Error: #{f}")
+          end
           results.push(s.filename) if s
         end
         { output: results.join("\n") }
