@@ -67,7 +67,7 @@ import * as mm from 'music-metadata-browser';
 import { capitalize, clone, find, isEmpty, omitBy, pick } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { VNav, VForm, Rate, } from '@/components';
+import { VNav, VForm, Rate } from '@/components';
 import { Dict } from '@/types';
 
 @Component({
@@ -133,7 +133,7 @@ export default class PlayerInfo extends Vue {
   @Watch('audioData')
   private onDataChanged() {
     if (this.audioData) {
-      mm.parseBlob(this.audioData, { native: true }).then((metadata) => {
+      mm.parseBlob(this.audioData).then((metadata: mm.IAudioMetadata) => {
         this.tag = metadata;
         this.setEdit();
       }).catch(() => {
