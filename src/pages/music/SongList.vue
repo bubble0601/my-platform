@@ -1,8 +1,8 @@
 <template>
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center">
-      <icon-button icon="check-square" tooltip="check all / clear check" @click="toggleSelection"/>
-      <icon-button icon="random" tooltip="shuffle and play" class="mr-auto" @click="shuffleAndPlay"/>
+      <icon-button icon="check-box" tooltip="check all / clear check" @click="toggleSelection"/>
+      <icon-button icon="shuffle" tooltip="shuffle and play" class="mr-auto" @click="shuffleAndPlay"/>
       <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeSong">Remove song</b-button>
       <b-dropdown v-else size="sm" toggle-class="lh-1" variant="primary" text="Add to list" class="mr-2">
         <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addSong(l.id)">
@@ -32,10 +32,10 @@
       @row-dblclicked="play"
     >
       <template #cell(rate)="{ item, value }">
-        <rate :value="value" size="sm" @input="updateRate(item.id, $event)"/>
+        <rate :value="value" @input="updateRate(item.id, $event)"/>
       </template>
       <template #cell(weight)="{ item, value }">
-        <icon-button icon="minus" class="p-0" @click="updateWeight(item.id, value - 1)"/>
+        <icon-button icon="dash" class="p-0" @click="updateWeight(item.id, value - 1)"/>
         <span class="mx-2">{{ value }}</span>
         <icon-button icon="plus" class="p-0" @click="updateWeight(item.id, value + 1)"/>
       </template>
@@ -155,10 +155,10 @@ export default class SongList extends Vue {
     }
   }
 
-  private updateWeight(id: number, val: number) {
+  private async updateWeight(id: number, val: number) {
     if (val < 0) return;
-    musicModule.UpdatePlaylistSong({ id, data: { weight: val } });
-    musicModule.ReloadPlaylistSong(id);
+    await musicModule.UpdatePlaylistSong({ id, data: { weight: val } });
+    await musicModule.ReloadPlaylistSong(id);
   }
 }
 </script>

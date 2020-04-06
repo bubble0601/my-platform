@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import BootstrapVue from 'bootstrap-vue';
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
 import axios from 'axios';
 import VueSlider from 'vue-slider-component';
 import { initDialogs } from './utils';
-import { VField, VHelp, VIcon, VInput, VTextarea } from './components';
+import { VField, VHelp, VInput, VTextarea } from './components';
 
 Component.registerHooks([
   'beforeRouteEnter',
@@ -13,10 +13,10 @@ Component.registerHooks([
 ]);
 
 Vue.use(BootstrapVue);
+Vue.use(BootstrapVueIcons);
 Vue.component('VueSlider', VueSlider);
 Vue.component('VField', VField);
 Vue.component('VHelp', VHelp);
-Vue.component('VIcon', VIcon);
 Vue.component('VInput', VInput);
 Vue.component('VTextarea', VTextarea);
 initDialogs();

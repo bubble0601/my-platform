@@ -1,7 +1,7 @@
 <template>
   <b-button v-b-tooltip="tooltip ? { title: tooltip, delay: { show: 1000, hide: 0 } } : tooltip"
                 variant="link" class="icon-button" @click="$emit('click', $event)">
-    <v-icon :name="icon"/>
+    <b-icon :icon="icon"/>
   </b-button>
 </template>
 <script lang="ts">

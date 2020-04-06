@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline-block">
-    <v-icon ref="help" name="question-circle"/>
+    <b-icon ref="help" icon="question-circle"/>
     <b-tooltip :target="() => $refs.help" placement="bottom">
       <slot/>
     </b-tooltip>

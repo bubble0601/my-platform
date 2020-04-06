@@ -13,7 +13,7 @@
         <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown right menu-class="shadow-sm" @toggle="showUserInfo = !showUserInfo">
             <template #button-content>
-              <v-icon name="user" size="lg" :class="{ 'text-muted': !isAuthenticated }"/>
+              <b-icon icon="person-fill" size="1.5" :class="{ 'text-muted': !isAuthenticated }"/>
             </template>
             <b-dropdown-form v-if="!isAuthenticated" class="px-2">
               <b-form-group>

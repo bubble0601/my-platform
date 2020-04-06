@@ -3,30 +3,30 @@
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
            @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd"/>
     <div class="player-controls d-none d-sm-flex align-items-center">
-      <div class="control-btn ml-4" @click="prev">
-        <v-icon name="step-backward"/>
+      <div class="control-btn btn-skip ml-4" @click="prev">
+        <b-icon icon="skip-start-fill"/>
       </div>
-      <div class="control-btn btn-play ml-3" @click="playing = !playing">
-        <v-icon v-if="playing" name="pause"/>
-        <v-icon v-else name="play"/>
+      <div class="control-btn btn-play" @click="playing = !playing">
+        <b-icon v-if="playing" icon="pause-fill"/>
+        <b-icon v-else icon="caret-right-fill"/>
       </div>
-      <div class="control-btn ml-2 pl-1" @click="next">
-        <v-icon name="step-forward"/>
+      <div class="control-btn btn-skip" @click="next">
+        <b-icon icon="skip-end-fill"/>
       </div>
       <div class="player-progress ml-3">
         <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn btn-repeat position-relative ml-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
-        <v-icon name="sync"/>
+        <b-icon icon="arrow-repeat"/>
         <span v-show="repeat === REPEAT.ONE" class="repeat-one">1</span>
       </div>
       <div class="control-btn ml-3" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
-        <v-icon name="random"/>
+        <b-icon icon="shuffle"/>
       </div>
       <div class="control-btn ml-3" @click="mute = !mute">
-        <v-icon v-if="mute" name="volume-mute"/>
-        <v-icon v-else-if="volume > 0" name="volume-up"/>
-        <v-icon v-else name="volume-off"/>
+        <b-icon v-if="mute" icon="volume-mute-fill"/>
+        <b-icon v-else-if="volume > 30" icon="volume-up-fill"/>
+        <b-icon v-else icon="volume-down-fill"/>
       </div>
       <div class="volume-control ml-3 mr-4" style="width: 20vh;">
         <vue-slider v-model="volume" :disabled="mute"/>
@@ -214,8 +214,11 @@ export default class AudioPlayer extends Vue {
 }
 .control-btn {
   color: white;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   &.btn-play {
+    font-size: 2.5rem;
+  }
+  &.btn-skip {
     font-size: 1.8rem;
   }
   &.btn-repeat {

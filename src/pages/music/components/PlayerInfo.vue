@@ -28,7 +28,7 @@
                            @dragstart="dragging = { index: i, song }"
                            @dragenter.self="onDragEnter(i)"
                            @dragend="onDragOver">
-          <v-icon name="bars" size="lg" class="mover text-muted mr-1"/>
+          <b-icon icon="list" font-scale="1.6" class="mover text-muted mr-1"/>
           <div class="song-info" @mousedown.prevent @click="play(i)">
             <span>{{ song.title }}</span>
             <br>
@@ -255,6 +255,7 @@ export default class PlayerInfo extends Vue {
   .song-info {
     cursor: pointer;
     line-height: 1.2;
+    width: 85%;
   }
   form {
     font-size: 12px;
