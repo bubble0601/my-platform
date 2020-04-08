@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
-           @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd"/>
+           @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="playing = false"/>
     <div class="player-controls d-none d-sm-flex align-items-center">
       <div class="control-btn btn-skip ml-4" @click="prev">
         <b-icon icon="skip-start-fill"/>

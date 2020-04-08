@@ -96,7 +96,7 @@ export default class Navbar extends Vue {
 .navbar {
   box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
   position: relative;
-  z-index:  1;
+  z-index:  10;
 }
 .brand {
   max-height: 1.75rem;

@@ -8,7 +8,7 @@
           <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
         <div v-if="song">
-          <rate :value="song.rate" size="lg" class="justify-content-center" @input="updateRate"/>
+          <rate :value="song.rate" :size="1.5" class="justify-content-center" @input="updateRate"/>
         </div>
         <div v-if="song" class="text-center">
           <h4 class="mb-1">{{ song.title }}</h4>
