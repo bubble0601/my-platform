@@ -18,4 +18,4 @@ end
 
 Sequel::Model.plugin :timestamps, update_on_create: true
 
-Dir.glob('./models/*.rb').sort.each {|f| require f }
+Dir.glob(Pathname.new(__dir__).join('*.rb')).sort.each {|f| require f }

@@ -1,8 +1,10 @@
+require 'pathname'
 require 'yaml'
 
 # yamlからロードしたHashの値をメソッドでも取得できるようにする
 # e.g.) CONF['db'] === CONF.db
-CONF = YAML.load_file('conf.yml')
+path = Pathname.new(__dir__).join('../conf.yml')
+CONF = YAML.load_file(path)
 hash_method_define = Proc.new do |obj|
   obj.each do |k, v|
     if(v.kind_of?(Hash))
