@@ -38,11 +38,6 @@ export default [
         path: 'settings',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Settings.vue'),
       },
-      {
-        path: ':tab',
-        component: () => import(/* webpackChunkName: "music" */ '../pages/music/SongList.vue'),
-        props: true,
-      },
     ],
   },
 ];

@@ -7,7 +7,8 @@
         <small>{{ p.name }}</small>
       </router-link>
     </div>
-    <song-list ref="songList" context="playlist" class="w-100"/>
+    <song-list v-if="tab" ref="songList" :tab="tab" class="w-100"/>
+    <song-list v-else ref="songList" context="playlist" class="w-100"/>
   </div>
   <div v-else-if="tab">
     <song-list ref="songList" :tab="tab" class="w-100"/>
@@ -46,7 +47,7 @@ import SongList from './SongList.vue';
       return;
     }
     const id = musicModule.playlistId;
-    if (!to.params.id && id) next(`/music/playlist/${id}`);
+    if (!to.params.id && !to.params.tab && id) next(`/music/playlist/${id}`);
     else next();
   },
 })
