@@ -12,19 +12,19 @@ export default class VTextarea extends Vue {
   public blur!: () => void;
   public select!: () => void;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   private autofocus!: boolean;
 
-  @Prop({ default: true })
+  @Prop({ type: Boolean, default: true })
   private autosize!: boolean;
 
-  @Prop({ default: '' })
+  @Prop({ type: String, default: '' })
   private value!: string;
 
-  @Prop({ default: 3 })
+  @Prop({ type: Number, default: 3 })
   private rows!: number;
 
-  @Prop({ default: 0 })
+  @Prop({ type: Number, default: 0 })
   private maxRows!: number;
 
   @Ref() private input!: HTMLInputElement;

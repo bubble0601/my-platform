@@ -30,3 +30,15 @@ session:
 storage:
   music: './storage/music'
   temp: './storage/temp'
+
+# for local
+local:
+  enabled: true
+  # connect with remote
+  remote:
+    # ~/.ssh/config使用
+    ssh:
+      name: host_name
+    root: host_root
+    storage:
+      music: /path/to/host_music_storage

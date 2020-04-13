@@ -1,8 +1,8 @@
 <template>
-  <div class="player">
+  <div class="player" :class="{ 'player-mobile': !reduced && $mobile }">
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
            @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="playing = false"/>
-    <div class="player-controls d-none d-sm-flex align-items-center">
+    <div v-if="$pc" class="player-controls d-flex align-items-center">
       <div class="control-btn btn-skip ml-4" @click="prev">
         <b-icon icon="skip-start-fill"/>
       </div>
@@ -32,15 +32,50 @@
         <vue-slider v-model="volume" :disabled="mute"/>
       </div>
     </div>
-    <div class="player-controls d-flex d-sm-none align-items-center position-relative">
-      <div class="player-progress-mobile position-absolute px-3">
-        <!-- <vue-slider v-model="progress" :height="3"/> -->
+    <div v-else-if="reduced" class="player-controls d-flex align-items-center position-relative">
+      <div v-if="song" class="text-light ml-2">
+        <h5 class="mb-1">{{ song.title }}</h5>
+        <small>
+          <span>{{ song.artist }} / {{ song.album }}</span>
+        </small>
+      </div>
+      <div class="control-btn btn-skip ml-auto" @click.stop="prev">
+        <b-icon icon="skip-start-fill"/>
+      </div>
+      <div class="control-btn btn-play" @click.stop="playing = !playing">
+        <b-icon v-if="playing" icon="pause-fill"/>
+        <b-icon v-else icon="caret-right-fill"/>
+      </div>
+      <div class="control-btn btn-skip mr-2" @click.stop="next">
+        <b-icon icon="skip-end-fill"/>
+      </div>
+    </div>
+    <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
+      <div class="player-progress-mobile px-3">
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+      </div>
+      <div class="control-btn ml-3 mr-auto" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
+        <b-icon icon="shuffle"/>
+      </div>
+      <div class="control-btn btn-skip" @click="prev">
+        <b-icon icon="skip-start-fill" font-scale="1.8"/>
+      </div>
+      <div class="control-btn btn-play" @click="playing = !playing">
+        <b-icon v-if="playing" icon="pause-fill" font-scale="2.5"/>
+        <b-icon v-else icon="caret-right-fill" font-scale="2.5"/>
+      </div>
+      <div class="control-btn btn-skip" @click="next">
+        <b-icon icon="skip-end-fill" font-scale="1.8"/>
+      </div>
+      <div class="control-btn btn-repeat position-relative ml-auto mr-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
+        <b-icon icon="arrow-repeat"/>
+        <span v-show="repeat === REPEAT.ONE" class="repeat-one">1</span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
+import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { convertTime } from '@/utils';
@@ -50,6 +85,9 @@ const PROGRESS_MAX = 300;
 @Component
 export default class AudioPlayer extends Vue {
   @Ref() private audio!: HTMLAudioElement;
+
+  @Prop({ type: Boolean, default: false })
+  private reduced!: boolean;
 
   private REPEAT = REPEAT;
 
@@ -110,6 +148,10 @@ export default class AudioPlayer extends Vue {
       [PROGRESS_MAX * 0.01]: convertTime(this.currentTime),
       [PROGRESS_MAX * 0.99]: convertTime(this.duration),
     };
+  }
+
+  get song() {
+    return musicModule.current;
   }
 
   @Watch('mute')
@@ -208,6 +250,11 @@ export default class AudioPlayer extends Vue {
   min-height: 4rem;
   height: 4rem;
   box-shadow: 0 -0.25rem .5rem rgba(0, 0, 0, 0.15);
+
+  &.player-mobile {
+    min-height: 6rem;
+    height: 6rem;
+  }
 }
 .player-controls {
   height: 100%;
@@ -238,6 +285,7 @@ export default class AudioPlayer extends Vue {
   flex-grow: 1;
 }
 .player-progress-mobile {
+  position: absolute;
   width: 100%;
   top: -8.5px;
 }

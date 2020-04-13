@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column" :style="{ height }">
+  <div v-if="$pc" class="d-flex flex-column" :style="{ height }">
     <div class="d-flex flex-grow-1 overflow-hidden">
       <div class="sidemenu-left py-2">
         <div class="px-2 pb-2">
@@ -13,43 +13,78 @@
           <hr v-else class="mt-2 mb-1">
         </template>
       </div>
-      <div class="flex-grow-1 overflow-auto">
+      <div class="center-block flex-grow-1 overflow-auto">
         <router-view/>
       </div>
       <div class="sidemenu-right">
-        <player-info/>
+        <player-info class="h-100"/>
       </div>
     </div>
     <audio-player class="mt-auto"/>
   </div>
+  <div v-else-if="mOpened" class="d-flex flex-column" :style="{ height }">
+    <player-info class="overflow-auto" @close="mOpened = false"/>
+    <audio-player class="mt-auto"/>
+  </div>
+  <div v-else class="d-flex flex-column" :style="{ height }">
+    <v-nav :items="mTabs" tabs justified do-routing/>
+    <router-view class="overflow-auto"/>
+    <audio-player class="mt-auto" reduced @click.native="mOpened = true"/>
+  </div>
 </template>
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
+import { Component, Prop, Watch } from 'vue-property-decorator';
 import { mixins } from 'vue-class-component';
 import { musicModule } from '@/store';
 import { HeightMixin } from '@/utils';
+import { VNav } from '@/components';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 
 @Component({
   components: {
     AudioPlayer,
     PlayerInfo,
+    VNav,
   },
 })
 export default class Music extends mixins(HeightMixin) {
+  private baseTitle = '';
   private tabs = [
     { key: 'all', name: 'All' },
     { key: 'artist', name: 'Artist' },
     { key: 'playlist', name: 'Playlist' },
     { key: 'div1' },
-    { key: 'fabulous', name: 'Fabulous' },
-    { key: 'excellent', name: 'Excellent' },
-    { key: 'great', name: 'Great' },
-    { key: 'good', name: 'Good' },
-    { key: 'unrated', name: 'Unrated' },
+    { key: 'playlist/fabulous', name: 'Fabulous' },
+    { key: 'playlist/excellent', name: 'Excellent' },
+    { key: 'playlist/great', name: 'Great' },
+    { key: 'playlist/good', name: 'Good' },
+    { key: 'playlist/unrated', name: 'Unrated' },
     { key: 'space' },
     { key: 'settings', name: 'Settings' },
   ];
+
+  private mOpened = false;
+  private mTabs = [
+    { key: 'artist', to: '/music/artist', title: 'Artist' },
+    { key: 'playlist', to: '/music/playlist', title: 'Playlist' },
+  ];
+
+  get currentSong() {
+    return musicModule.current;
+  }
+
+  @Watch('currentSong')
+  private onSongChanged() {
+    if (this.currentSong) {
+      document.title = `♪${this.currentSong.title} - ${this.baseTitle}`;
+    } else {
+      document.title = this.baseTitle;
+    }
+  }
+
+  protected created() {
+    this.baseTitle = document.title;
+  }
 
   protected mounted() {
     if (musicModule.current) musicModule.FetchAudio(musicModule.current);
@@ -86,7 +121,9 @@ export default class Music extends mixins(HeightMixin) {
 }
 .sidemenu-right {
   width: 16rem;
-  border-left: 2px solid #dee2e6;
   overflow-x: auto;
+}
+.center-block {
+  border-right: 2px solid #dee2e6;
 }
 </style>

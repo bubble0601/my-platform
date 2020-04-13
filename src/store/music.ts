@@ -508,6 +508,7 @@ export default class MusicModule extends VuexModule {
   }
 }
 
+// 永続化する値
 const keys = [
   'current',
   'queue',

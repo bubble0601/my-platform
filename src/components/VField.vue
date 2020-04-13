@@ -17,19 +17,19 @@ import { waitUntil } from '@/utils';
 
 @Component
 export default class VField extends Vue {
-  @Prop({ default: '' })
+  @Prop({ type: String, default: '' })
   private label!: string;
 
-  @Prop({ default: '' })
+  @Prop({ type: String, default: '' })
   private help!: string;
 
   @Prop({ default: null })
   private feedback!: string | { valid: string, invalid: string } | null;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   private horizontal!: boolean;
 
-  @Prop({ default: 'md' })
+  @Prop({ type: String, default: 'md' })
   private size!: string;
 
   private labelFor = '';

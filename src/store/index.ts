@@ -5,6 +5,7 @@ import createPersistedState from 'vuex-persistedstate';
 import { concat } from 'lodash';
 import auth from './auth';
 import music, { paths as musicPaths } from './music';
+import screen from './screen';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ const store = new Vuex.Store({
   modules: {
     auth,
     music,
+    screen,
   },
   plugins: [
     createPersistedState({
@@ -26,3 +28,4 @@ const store = new Vuex.Store({
 export default store;
 export const authModule = getModule(auth, store);
 export const musicModule = getModule(music, store);
+export const screenModule = getModule(screen, store);

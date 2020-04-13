@@ -1,6 +1,7 @@
 <template>
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center">
+      <icon-button v-if="$mobile" icon="chevron-left" @click="$router.push(`/music/${context === 'tab' ? 'playlist' : context}`)"/>
       <icon-button icon="check-box" tooltip="check all / clear check" @click="toggleSelection"/>
       <icon-button icon="shuffle" tooltip="shuffle and play" class="mr-auto" @click="shuffleAndPlay"/>
       <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeSong">Remove song</b-button>
@@ -18,12 +19,13 @@
       v-model="displayedSongs"
       ref="table"
       responsive
-      small
+      :small="$pc"
       striped
       hover
       selectable
       select-mode="range"
-      class="music-list border-bottom"
+      class="music-list border-bottom mb-0"
+      :class="{ 'music-list-pc': $pc }"
       :items="songs"
       :fields="fields"
       :current-page="currentPage"
@@ -31,6 +33,9 @@
       @row-selected="onSelectedRows"
       @row-dblclicked="play"
     >
+      <template #cell(checkbox)="{ rowSelected, selectRow, unselectRow }">
+        <b-form-checkbox :checked="rowSelected" @change="$event ? selectRow() : unselectRow()"/>
+      </template>
       <template #cell(rate)="{ item, value }">
         <rate :value="value" @input="updateRate(item.id, $event)"/>
       </template>
@@ -39,12 +44,15 @@
         <span class="mx-2">{{ value }}</span>
         <icon-button icon="plus" class="p-0" @click="updateWeight(item.id, value + 1)"/>
       </template>
+      <template #cell(play)="{ item }">
+        <icon-button icon="caret-right-fill" @click="play(item)"/>
+      </template>
     </b-table>
   </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
-import { BTable } from 'bootstrap-vue';
+import { BTable, BvTableFieldArray } from 'bootstrap-vue';
 import { sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
@@ -58,10 +66,10 @@ import { convertTime } from '@/utils';
   },
 })
 export default class SongList extends Vue {
-  @Prop({ default: '' })
+  @Prop({ type: String, default: '' })
   private tab!: string;
 
-  @Prop({ default: 'tab' })
+  @Prop({ type: String, default: 'tab' })
   private context!: string;
 
   private selected: Song[] = [];
@@ -71,16 +79,21 @@ export default class SongList extends Vue {
   @Ref() private table!: BTable;
 
   get fields() {
-    const fields = [
+    const fields: BvTableFieldArray = [
       { key: 'title', sortable: true },
       { key: 'artist', sortable: true },
       { key: 'album', sortable: true },
       { key: 'rate', sortable: true },
-      { key: 'time', sortable: true, formatter: convertTime },
-      { key: 'year', sortable: true },
     ];
+    if (this.$pc) {
+      fields.push({ key: 'time', sortable: true, formatter: convertTime });
+      fields.push({ key: 'year', sortable: true });
+    } else {
+      fields.unshift({ key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' });
+      fields.push({ key: 'play', label: '', sortable: false, tdClass: 'px-0' });
+    }
     if (this.context === 'playlist') {
-      fields.push({ key: 'weight', sortable: true });
+      fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });
     }
     return fields;
   }
@@ -168,8 +181,10 @@ export default class SongList extends Vue {
 }
 </style>
 <style lang="scss">
-.music-list td {
+.music-list.music-list-pc td {
   padding: .1rem .3rem;
+}
+.music-list td {
   vertical-align: middle;
 }
 </style>

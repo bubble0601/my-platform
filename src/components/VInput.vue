@@ -11,7 +11,7 @@ export default class VInput extends Vue {
   public blur!: () => void;
   public select!: () => void;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   private autofocus!: boolean;
 
   @Ref() private input!: BFormInput;

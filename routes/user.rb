@@ -30,7 +30,7 @@ class MainApp < Sinatra::Base
       { user: @user.slice(:name) }
     end
 
-    post '/logout' do
+    get '/logout' do
       session.delete :uid
       regenerate_session
       status 204

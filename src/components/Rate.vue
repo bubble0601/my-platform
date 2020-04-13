@@ -11,10 +11,10 @@ import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 
 @Component
 export default class Rate extends Vue {
-  @Prop({ default: 0 })
+  @Prop({ type: Number, default: 0 })
   private value!: number;
 
-  @Prop({ default: 1 })
+  @Prop({ type: Number, default: 1 })
   private size!: number;
 
   private hover: number = -1;

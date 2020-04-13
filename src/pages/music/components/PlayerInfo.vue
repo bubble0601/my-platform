@@ -1,6 +1,10 @@
 <template>
-  <div class="d-flex flex-column h-100">
-    <v-nav v-model="tab" :items="tabs" tabs class="px-2"/>
+  <div class="d-flex flex-column">
+    <v-nav v-model="tab" :items="tabs" tabs class="px-2">
+      <template #nav-end v-if="$mobile">
+        <b-icon icon="x" font-scale="1.5" class="text-secondary" @click="$emit('close')"/>
+      </template>
+    </v-nav>
     <div class="flex-grow-1 bg-white overflow-auto px-2">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">

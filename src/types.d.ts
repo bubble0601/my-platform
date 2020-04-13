@@ -1,4 +1,13 @@
-import Vue from 'vue';
+import { Size } from '@/store/screen';
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    $mobile: boolean;
+    $pc: boolean;
+    $from: (size: Size) => boolean;
+    $until: (size: Size) => boolean;
+  }
+}
 
 export interface Dict<T = any> {
   [key: string]: T;

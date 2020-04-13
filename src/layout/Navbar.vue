@@ -15,7 +15,7 @@
             <template #button-content>
               <b-icon icon="person-fill" size="1.5" :class="{ 'text-muted': !isAuthenticated }"/>
             </template>
-            <b-dropdown-form v-if="!isAuthenticated" class="px-2">
+            <b-dropdown-form v-if="!isAuthenticated" form-class="px-2">
               <b-form-group>
                 <v-input ref="usernameInput" v-model="username" size="sm" required placeholder="Username" @keydown.native.enter="$refs.passwordInput.focus()"/>
               </b-form-group>

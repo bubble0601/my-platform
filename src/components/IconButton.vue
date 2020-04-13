@@ -9,7 +9,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
 export default class IconButton extends Vue {
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   private icon!: string;
 
   @Prop({ default: null })

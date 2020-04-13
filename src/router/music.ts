@@ -1,3 +1,5 @@
+import { Route } from 'vue-router';
+
 export default [
   {
     path: '/music',
@@ -16,14 +18,19 @@ export default [
       {
         path: 'artist/:id',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/ArtistList.vue'),
-        props: true,
+        props: (route: Route) => ({ id: Number(route.params.id) }),
       },
       {
         path: 'playlist',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
       },
       {
-        path: 'playlist/:id',
+        path: 'playlist/:id(\\d+)',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
+        props: (route: Route) => ({ id: Number(route.params.id) }),
+      },
+      {
+        path: 'playlist/:tab',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
         props: true,
       },

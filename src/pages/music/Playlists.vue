@@ -1,19 +1,39 @@
 <template>
-  <div class="d-flex h-100">
+  <div v-if="$pc" class="d-flex h-100">
     <div class="playlists dropdown-menu overflow-hidden mt-0 py-0">
-      <router-link v-for="playlist in playlists" :key="playlist.id" :to="`/music/playlist/${playlist.id}`"
+      <router-link v-for="p in playlists" :key="p.id" :to="`/music/playlist/${p.id}`"
                    class="dropdown-item px-3 py-1" active-class="active"
                    @dblclick.native="shuffleAndPlay">
-        <small>{{ playlist.name }}</small>
+        <small>{{ p.name }}</small>
       </router-link>
     </div>
     <song-list ref="songList" context="playlist" class="w-100"/>
+  </div>
+  <div v-else-if="tab">
+    <song-list ref="songList" :tab="tab" class="w-100"/>
+  </div>
+  <div v-else-if="id > 0">
+    <song-list ref="songList" context="playlist" class="w-100"/>
+  </div>
+  <div v-else>
+    <div class="playlists dropdown-menu overflow-hidden mt-0 py-0 w-100">
+      <router-link v-for="p in mPlaylists" :key="p.key" :to="`/music/playlist/${p.key}`"
+                  class="dropdown-item px-3 py-1" active-class="active"
+                  @dblclick.native="shuffleAndPlay">
+        <small>{{ p.name }}</small>
+      </router-link>
+      <router-link v-for="p in playlists" :key="p.id" :to="`/music/playlist/${p.id}`"
+                   class="dropdown-item px-3 py-1" active-class="active"
+                   @dblclick.native="shuffleAndPlay">
+        <small>{{ p.name }}</small>
+      </router-link>
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { NavigationGuard } from 'vue-router';
-import { musicModule } from '@/store';
+import { musicModule, screenModule } from '@/store';
 import SongList from './SongList.vue';
 
 @Component({
@@ -21,14 +41,29 @@ import SongList from './SongList.vue';
     SongList,
   },
   beforeRouteEnter(to, from, next) {
+    if (screenModule.isMobile && from.path.startsWith('/music/playlist')) {
+      next();
+      return;
+    }
     const id = musicModule.playlistId;
     if (!to.params.id && id) next(`/music/playlist/${id}`);
     else next();
   },
 })
 export default class ArtistList extends Vue {
-  @Prop({ default: 0 })
+  private mPlaylists = [
+    { key: 'fabulous', name: 'Fabulous' },
+    { key: 'excellent', name: 'Excellent' },
+    { key: 'great', name: 'Great' },
+    { key: 'good', name: 'Good' },
+    { key: 'unrated', name: 'Unrated' },
+  ];
+
+  @Prop({ type: Number, default: 0 })
   private id!: number;
+
+  @Prop({ default: null })
+  private tab!: string | null;
 
   @Ref() private songList!: SongList;
 

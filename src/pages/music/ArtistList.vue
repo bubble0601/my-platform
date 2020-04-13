@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex h-100">
+  <div v-if="$pc" class="d-flex h-100">
     <div class="artist-list dropdown-menu mt-0 py-0">
       <router-link v-for="artist in artists" :key="artist.id" :to="`/music/artist/${artist.id}`"
                    class="dropdown-item px-3 py-1" active-class="active"
@@ -9,11 +9,23 @@
     </div>
     <song-list ref="songList" context="artist" class="w-100"/>
   </div>
+  <div v-else-if="id > 0">
+    <song-list ref="songList" context="artist" class="w-100"/>
+  </div>
+  <div v-else>
+    <div class="artist-list dropdown-menu mt-0 py-0 w-100">
+      <router-link v-for="artist in artists" :key="artist.id" :to="`/music/artist/${artist.id}`"
+                   class="dropdown-item px-3 py-1" active-class="active"
+                   @dblclick.native="shuffleAndPlay">
+        <small>{{ artist.name }}</small>
+      </router-link>
+    </div>
+  </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { NavigationGuard } from 'vue-router';
-import { musicModule } from '@/store';
+import { musicModule, screenModule } from '@/store';
 import SongList from './SongList.vue';
 
 @Component({
@@ -21,13 +33,17 @@ import SongList from './SongList.vue';
     SongList,
   },
   beforeRouteEnter(to, from, next) {
+    if (screenModule.isMobile && from.path.startsWith('/music/artist')) {
+      next();
+      return;
+    }
     const id = musicModule.artistId;
     if (!to.params.id && id) next(`/music/artist/${id}`);
     else next();
   },
 })
 export default class ArtistList extends Vue {
-  @Prop({ default: 0 })
+  @Prop({ type: Number, default: 0 })
   private id!: number;
 
   @Ref() private songList!: SongList;
