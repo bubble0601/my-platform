@@ -88,6 +88,7 @@ export default class SongList extends Vue {
     if (this.$pc) {
       fields.push({ key: 'time', sortable: true, formatter: convertTime });
       fields.push({ key: 'year', sortable: true });
+      fields.push({ key: 'created_at', sortable: true });
     } else {
       fields.unshift({ key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' });
       fields.push({ key: 'play', label: '', sortable: false, tdClass: 'px-0' });

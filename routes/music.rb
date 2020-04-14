@@ -16,6 +16,7 @@ class MainApp < Sinatra::Base
             filename: File.basename(song[:filename]),
             year: song.album&.year,
             rate: song[:rate],
+            created_at: song[:created_at].strftime("%Y/%m/%d %H:%M"),
           }
         elsif song[:weight]
           {
@@ -30,6 +31,7 @@ class MainApp < Sinatra::Base
             year: song[:year],
             rate: song[:rate],
             weight: song[:weight],
+            created_at: song[:created_at].strftime("%Y/%m/%d %H:%M"),
           }
         else
           {
@@ -43,6 +45,7 @@ class MainApp < Sinatra::Base
             filename: File.basename(song[:filename]),
             year: song[:year],
             rate: song[:rate],
+            created_at: song[:created_at].strftime("%Y/%m/%d %H:%M"),
           }
         end
       end

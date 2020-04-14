@@ -29,6 +29,9 @@
       <v-field>
         <v-input v-model="uAlbum" placeholder="Album"/>
       </v-field>
+      <v-field>
+        <v-input v-model="uYear" placeholder="Year"/>
+      </v-field>
       <div class="d-flex align-items-center">
         <b-button variant="outline-danger" @click="uReset">Reset</b-button>
         <span v-if="uploading" class="ml-auto">
@@ -56,6 +59,9 @@
         </v-field>
         <v-field>
           <v-input v-model="dAlbum" placeholder="Album"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dYear" placeholder="Year"/>
         </v-field>
       </v-form>
       <div class="d-flex align-items-center">
@@ -100,6 +106,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private uAlbumArtist = '';
   private uAlbum = '';
   private uTitle = '';
+  private uYear = '';
 
   private downloading = false;
   private url = '';
@@ -107,6 +114,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private dAlbumArtist = '';
   private dAlbum = '';
   private dTitle = '';
+  private dYear = '';
 
   @Ref() private modal!: BModal;
   @Ref() private downloadForm!: VForm;
@@ -145,6 +153,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       album_artist: this.uAlbumArtist,
       album: this.uAlbum,
       title: this.uTitle,
+      year: this.uYear,
     }, isEmpty);
     if (!isEmpty(metadata)) data.append('data', JSON.stringify(metadata));
 
@@ -171,6 +180,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       album_artist: this.dAlbumArtist,
       album: this.dAlbum,
       title: this.dTitle,
+      year: this.dYear,
     }, isEmpty);
     const data = {
       url: this.url,
