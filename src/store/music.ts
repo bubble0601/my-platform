@@ -378,10 +378,10 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public Play(song: Song | undefined) {
+  public async Play(song: Song | undefined) {
     if (!song) return;
     this.SET_CURRENT(song);
-    this.FetchAudio(song);
+    await this.FetchAudio(song);
     this.SET_PLAYING(true);
     this.setQueue({ song, songs: this.displayedSongs });
   }
@@ -404,6 +404,7 @@ export default class MusicModule extends VuexModule {
       this.FetchAudio(next);
       this.OP_QUEUE('shift');
       this.updateQueue();
+      this.SET_PLAYING(true);
     } else {
       this.SET_CURRENT(null);
       this.SET_AUDIO(null);
