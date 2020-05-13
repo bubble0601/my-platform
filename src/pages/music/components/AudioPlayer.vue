@@ -76,6 +76,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
+import { throttle } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { convertTime } from '@/utils';
@@ -154,6 +155,10 @@ export default class AudioPlayer extends Vue {
     return musicModule.current;
   }
 
+  get prefetch() {
+    return throttle(musicModule.Prefetch, 10);
+  }
+
   @Watch('mute')
   private onMuteChanged = this.setVolume;
 
@@ -212,8 +217,12 @@ export default class AudioPlayer extends Vue {
   }
 
   private onUpdate() {
+    if (this.duration <= 0) return;
     this.currentTime = Math.floor(this.audio.currentTime);
     this.progress = Math.floor(this.currentTime / this.duration * PROGRESS_MAX);
+    if (this.duration - this.currentTime < 30) {
+      this.prefetch();
+    }
   }
 
   private onEnd() {

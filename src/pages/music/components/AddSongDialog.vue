@@ -32,6 +32,12 @@
       <v-field>
         <v-input v-model="uYear" placeholder="Year"/>
       </v-field>
+      <v-field>
+        <v-input v-model="uTrack" placeholder="Track Number"/>
+      </v-field>
+      <v-field>
+        <v-input v-model="uDisc" placeholder="Disc Number"/>
+      </v-field>
       <div class="d-flex align-items-center">
         <b-button variant="outline-danger" @click="uReset">Reset</b-button>
         <span v-if="uploading" class="ml-auto">
@@ -62,6 +68,12 @@
         </v-field>
         <v-field>
           <v-input v-model="dYear" placeholder="Year"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dTrack" placeholder="Track Number"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dDisc" placeholder="Disc Number"/>
         </v-field>
       </v-form>
       <div class="d-flex align-items-center">
@@ -107,6 +119,8 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private uAlbum = '';
   private uTitle = '';
   private uYear = '';
+  private uTrack = '';
+  private uDisc = '';
 
   private downloading = false;
   private url = '';
@@ -115,6 +129,8 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private dAlbum = '';
   private dTitle = '';
   private dYear = '';
+  private dTrack = '';
+  private dDisc = '';
 
   @Ref() private modal!: BModal;
   @Ref() private downloadForm!: VForm;
@@ -126,10 +142,24 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }
   }
 
+  @Watch('uAlbum')
+  private onUAlbumChanged(val: string) {
+    if (this.uDisc === '') {
+      this.uDisc = '1/1';
+    }
+  }
+
   @Watch('dArtist')
   private onDArtistChanged(val: string, oldVal: string) {
     if (this.dAlbumArtist === oldVal) {
       this.dAlbumArtist = this.dArtist;
+    }
+  }
+
+  @Watch('dAlbum')
+  private onDAlbumChanged(val: string) {
+    if (this.dDisc === '') {
+      this.dDisc = '1/1';
     }
   }
 
@@ -154,6 +184,8 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       album: this.uAlbum,
       title: this.uTitle,
       year: this.uYear,
+      track: this.uTrack,
+      disc: this.uDisc,
     }, isEmpty);
     if (!isEmpty(metadata)) data.append('data', JSON.stringify(metadata));
 
@@ -181,6 +213,8 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       album: this.dAlbum,
       title: this.dTitle,
       year: this.dYear,
+      track: this.dTrack,
+      disc: this.dDisc,
     }, isEmpty);
     const data = {
       url: this.url,

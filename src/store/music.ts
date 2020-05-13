@@ -85,6 +85,8 @@ export default class MusicModule extends VuexModule {
   public current: Song | null = null;
   public audioData: Blob | null = null;
   public audioSrc: string | null = null;
+  public nextSong: Song | null = null;
+  public nextAudio: Blob | null = null;
   public queue: Song[] = [];
   public queueSet: Song[] = [];
   public history: Song[] = [];
@@ -158,8 +160,14 @@ export default class MusicModule extends VuexModule {
     } else {
       if (this.audioSrc) URL.revokeObjectURL(this.audioSrc);
       this.audioData = null;
-      this.audioSrc = null;
+      this.audioSrc = '';
     }
+  }
+
+  @Mutation
+  private SET_NEXT(data: { song: Song, audio: Blob | null}) {
+    this.nextSong = data.song;
+    this.nextAudio = data.audio;
   }
 
   @Mutation
@@ -331,10 +339,27 @@ export default class MusicModule extends VuexModule {
   @Action({ rawError: true })
   public async FetchAudio(song: Song) {
     if (!song) return;
+    if (song === this.nextSong && this.nextAudio) {
+      this.SET_AUDIO(this.nextAudio);
+      return;
+    }
     this.SET_AUDIO(null);
-    const res = await api.fetchAudio(song).catch(this.PlayNext);
+    const res = await api.fetchAudio(song).catch(this.playing ? this.PlayNext : null);
     if (res) {
       this.SET_AUDIO(res.data);
+    }
+  }
+
+  @Action
+  public async Prefetch() {
+    if (this.repeat === REPEAT.ONE || this.queue.length === 0) return;
+    const next = this.queue[0];
+    if (next === this.nextSong) return;
+    const res = await api.fetchAudio(next).catch(() => {
+      this.SET_NEXT({ song: next, audio: null });
+    });
+    if (res) {
+      this.SET_NEXT({ song: next, audio: res.data });
     }
   }
 
@@ -383,7 +408,7 @@ export default class MusicModule extends VuexModule {
     this.SET_CURRENT(song);
     await this.FetchAudio(song);
     this.SET_PLAYING(true);
-    this.setQueue({ song, songs: this.displayedSongs });
+    this.setQueue({ song, songs: this.songs });
   }
 
   @Action
@@ -522,4 +547,4 @@ const keys = [
   'artistId',
   'playlistId',
 ];
-export const paths = keys.map((str) => `music.${str}`);
+export const paths = keys.map((k) => `music.${k}`);

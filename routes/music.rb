@@ -50,6 +50,7 @@ class MainApp < Sinatra::Base
         end
       end
     end
+
     namespace '/songs' do
       get '' do
         if params[:tab]

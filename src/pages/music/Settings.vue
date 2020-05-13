@@ -1,12 +1,12 @@
 <template>
   <div class="p-2">
-    <div>
+    <div v-if="isLocal">
       <b-button variant="info" :disabled="loadingSync" @click="sync">
         <b-spinner v-if="loadingSync" small type="grow" class="mr-1"/>
         <span>Sync with remote</span>
       </b-button>
     </div>
-    <div class="mt-2">
+    <div v-if="isLocal" class="mt-2">
       <b-button variant="info" :disabled="scanning" @click="scan">
         <b-spinner v-if="scanning" small type="grow" class="mr-1"/>
         <span>Scan music directory</span>
@@ -22,13 +22,21 @@
 </template>
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import { musicModule } from '@/store';
+import { musicModule, settingModule } from '@/store';
 
 @Component
 export default class Settings extends Vue {
   private loadingSync = false;
   private scanning = false;
   // private organizing = false;
+
+  get isLocal() {
+    return settingModule.isLocal;
+  }
+
+  protected created() {
+    settingModule.init();
+  }
 
   private async sync() {
     let data;
