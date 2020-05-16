@@ -146,6 +146,10 @@ export default class SongList extends Vue {
     musicModule.RemovePlaylistSong({ songs: this.selected });
   }
 
+  private play(item: Song) {
+    musicModule.Play(item);
+  }
+
   public shuffleAndPlay() {
     if (this.songs.length === 0) return;
     musicModule.SetControl({ shuffle: true });
@@ -176,7 +180,7 @@ export default class SongList extends Vue {
     e.preventDefault();
     new ContextMenu().show({
       items: [
-        { text: '再生', action: () => { musicModule.Play(item); } },
+        { text: '再生', action: () => { this.play(item); } },
         { text: '次に再生', action: () => { this.insertIntoNext(item); } },
         { text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
       ],
