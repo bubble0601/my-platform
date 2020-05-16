@@ -32,6 +32,7 @@
       :per-page="perPage"
       @row-selected="onSelectedRows"
       @row-dblclicked="play"
+      @row-contextmenu="showContextMenu"
     >
       <template #cell(checkbox)="{ rowSelected, selectRow, unselectRow }">
         <b-form-checkbox :checked="rowSelected" @change="$event ? selectRow() : unselectRow()"/>
@@ -44,9 +45,6 @@
         <span class="mx-2">{{ value }}</span>
         <icon-button icon="plus" class="p-0" @click="updateWeight(item.id, value + 1)"/>
       </template>
-      <template #cell(play)="{ item }">
-        <icon-button icon="caret-right-fill" @click="play(item)"/>
-      </template>
     </b-table>
   </div>
 </template>
@@ -56,7 +54,7 @@ import { BTable, BvTableFieldArray } from 'bootstrap-vue';
 import { sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
-import { IconButton, Rate } from '@/components';
+import { ContextMenu, IconButton, Rate } from '@/components';
 import { convertTime } from '@/utils';
 
 @Component({
@@ -81,8 +79,8 @@ export default class SongList extends Vue {
   get fields() {
     const fields: BvTableFieldArray = [
       { key: 'title', sortable: true },
-      { key: 'artist', sortable: true },
-      { key: 'album', sortable: true },
+      { key: 'artist', formatter: (value) => value.name , sortable: true, sortByFormatted: true },
+      { key: 'album', formatter: (value) => value.title, sortable: true, sortByFormatted: true },
       { key: 'rate', sortable: true },
     ];
     if (this.$pc) {
@@ -91,7 +89,6 @@ export default class SongList extends Vue {
       fields.push({ key: 'created_at', sortable: true });
     } else {
       fields.unshift({ key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' });
-      fields.push({ key: 'play', label: '', sortable: false, tdClass: 'px-0' });
     }
     if (this.context === 'playlist') {
       fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });
@@ -156,8 +153,8 @@ export default class SongList extends Vue {
     musicModule.Play(sample(this.songs));
   }
 
-  private play(item: Song) {
-    musicModule.Play(item);
+  private insertIntoNext(item: Song) {
+    musicModule.InsertIntoNext(item);
   }
 
   private async updateRate(id: number, val: number) {
@@ -173,6 +170,18 @@ export default class SongList extends Vue {
     if (val < 0) return;
     await musicModule.UpdatePlaylistSong({ id, data: { weight: val } });
     await musicModule.ReloadPlaylistSong(id);
+  }
+
+  public showContextMenu(item: Song, i: number, e: MouseEvent) {
+    e.preventDefault();
+    new ContextMenu().show({
+      items: [
+        { text: '再生', action: () => { musicModule.Play(item); } },
+        { text: '次に再生', action: () => { this.insertIntoNext(item); } },
+        { text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
+      ],
+      event: e,
+    });
   }
 }
 </script>

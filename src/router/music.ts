@@ -5,11 +5,15 @@ export default [
     path: '/music',
     component: () => import(/* webpackChunkName: "music" */ '../pages/music/Music.vue'),
     meta: { title: 'Music' },
-    props: { tab: 'all' },
     children: [
       {
         path: '',
         redirect: '/music/artist',
+      },
+      {
+        path: 'all',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/SongList.vue'),
+        props: { tab: 'all' },
       },
       {
         path: 'artist',

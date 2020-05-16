@@ -7,15 +7,20 @@ import { message } from '@/utils/Dialogs';
 export interface Song {
   id: number;
   title: string;
-  artist: string;
-  album: string;
+  artist: Artist;
+  album: Album;
   digest: string;
   filename: string;
   time: number;
   year: number | null;
   rate: number;
-  album_artist: string;
   weight?: number;
+}
+
+export interface Album {
+  id: number;
+  title: string;
+  artist: string;
 }
 
 export interface Artist {
@@ -186,16 +191,14 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private OP_QUEUE(op: string) {
-    switch (op) {
-      case 'unshift':
-        if (this.current) {
-          this.queue.unshift(this.current);
-        }
-        break;
-      case 'shift':
-        this.queue.shift();
-        break;
+  private SHIFT_QUEUE() {
+    this.queue.shift();
+  }
+
+  @Mutation
+  private UNSHIFT_QUEUE(song = this.current) {
+    if (song) {
+      this.queue.unshift(song);
     }
   }
 
@@ -373,6 +376,17 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
+  public async ReloadSongs() {
+    const params: FetchSongParams = {};
+    params.artist = this.artistId || undefined;
+    params.playlist = this.playlistId || undefined;
+    params.tab = this.tab || undefined;
+
+    const { data } = await api.fetchSongs(params);
+    this.SET_SONGS(data);
+  }
+
+  @Action
   public async ReloadPlaylistSong(sid: number) {
     if (this.playlistId) {
       const { data } = await api.fetchPlaylistSong(this.playlistId, sid);
@@ -427,7 +441,7 @@ export default class MusicModule extends VuexModule {
     if (next) {
       this.SET_CURRENT(next);
       this.FetchAudio(next);
-      this.OP_QUEUE('shift');
+      this.SHIFT_QUEUE();
       this.updateQueue();
       this.SET_PLAYING(true);
     } else {
@@ -440,11 +454,16 @@ export default class MusicModule extends VuexModule {
   public PlayPrev() {
     const prev = last(this.history);
     if (prev) {
-      this.OP_QUEUE('unshift');
+      this.UNSHIFT_QUEUE();
       this.SET_CURRENT(prev);
       this.FetchAudio(prev);
       this.OP_HISTORY('pop');
     }
+  }
+
+  @Action
+  public InsertIntoNext(song: Song) {
+    this.UNSHIFT_QUEUE(song);
   }
 
   @Action

@@ -8,8 +8,15 @@ class MainApp < Sinatra::Base
           {
             id: song[:id],
             title: song[:title],
-            artist: song[:artist_name] || song.artist&.name || 'Unknown Artist',
-            album: song.album&.title || 'Unknown Album',
+            artist: {
+              id: song[:artist_id],
+              name: song[:artist_name] || song.artist&.name || 'Unknown Artist',
+            },
+            album: {
+              id: song[:album_id],
+              title: song.album&.title || 'Unknown Album',
+              artist: song.artist&.name,
+            },
             album_artist: song.artist&.name,
             time: song[:length],
             digest: song[:digest],
@@ -22,9 +29,15 @@ class MainApp < Sinatra::Base
           {
             id: song[:id],
             title: song[:title],
-            artist: song[:artist_name] || song[:name] || 'Unknown Artist',
-            album: song[:album_title] || 'Unknown Album',
-            album_artist: song[:name],
+            artist: {
+              id: song[:artist_id],
+              name: song[:artist_name] || song[:name] || 'Unknown Artist',
+            },
+            album: {
+              id: song[:album_id],
+              title: song[:album_title] || 'Unknown Album',
+              artist: song[:name],
+            },
             time: song[:length],
             digest: song[:digest],
             filename: File.basename(song[:filename]),
@@ -37,9 +50,15 @@ class MainApp < Sinatra::Base
           {
             id: song[:id],
             title: song[:title],
-            artist: song[:artist_name] || song[:name] || 'Unknown Artist',
-            album: song[:album_title] || 'Unknown Album',
-            album_artist: song[:name],
+            artist: {
+              id: song[:artist_id],
+              name: song[:artist_name] || song[:name] || 'Unknown Artist',
+            },
+            album: {
+              id: song[:album_id],
+              title: song[:album_title] || 'Unknown Album',
+              artist: song[:name],
+            },
             time: song[:length],
             digest: song[:digest],
             filename: File.basename(song[:filename]),
@@ -71,6 +90,8 @@ class MainApp < Sinatra::Base
             query = query.where{rate >= 2}
           when 'unrated'
             query = query.where(rate: 0)
+          when 'new'
+            query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
           end
           query.map(&method(:to_song_data))
         elsif params[:artist]
@@ -87,16 +108,15 @@ class MainApp < Sinatra::Base
           w_items = {}
           items.each{|e| w_items[e.song_id] = e.weight}
 
-          Song
-            .eager_graph(:album, :artist)
-            .where(Sequel[:songs][:id] => w_items.keys)
-            .order{artist[:ruby]}
-            .order_append{artist[:name]}
-            .order_append{album[:year]}
-            .order_append{album[:title]}
-            .order_append(:track_num, :title)
-            .map{|s| s[:weight] = w_items[s[:id]]; s}
-            .map(&method(:to_song_data))
+          Song.eager_graph(:album, :artist)
+              .where(Sequel[:songs][:id] => w_items.keys)
+              .order{artist[:ruby]}
+              .order_append{artist[:name]}
+              .order_append{album[:year]}
+              .order_append{album[:title]}
+              .order_append(:track_num, :title)
+              .map{|s| s[:weight] = w_items[s[:id]]; s}
+              .map(&method(:to_song_data))
         end
       end
 
@@ -172,7 +192,10 @@ class MainApp < Sinatra::Base
 
     namespace '/artists' do
       get '' do
-        artists = Artist.order(:name).all.map{|artist| artist.slice(:id, :name)}
+        artists = Song.eager_graph(:artist)
+                      .group_and_count(:artist_id, :name)
+                      .having{count.function.* > 0}
+                      .map{|s| p s; { id: s[:artist_id], name: s[:name] }}
         artists.push({ id: 0, name: 'Unknown Artist' }) if Song.first(artist_id: nil)
         artists
       end

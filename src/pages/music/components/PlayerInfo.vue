@@ -19,7 +19,7 @@
         </div>
         <div v-if="song" class="text-center overflow-auto pb-3">
           <small>
-            <span>{{ song.artist }} / {{ song.album }}</span><span v-if="song.year">({{ song.year }})</span>
+            <span>{{ song.artist.name }} / {{ song.album.title }}</span><span v-if="song.year">({{ song.year }})</span>
           </small>
           <small v-if="lyrics" class="lyrics d-block pre mt-2">
             {{ lyrics }}

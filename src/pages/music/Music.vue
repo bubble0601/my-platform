@@ -54,6 +54,7 @@ export default class Music extends mixins(HeightMixin) {
     { key: 'artist', name: 'Artist' },
     { key: 'playlist', name: 'Playlist' },
     { key: 'div1' },
+    { key: 'playlist/new', name: 'New' },
     { key: 'playlist/fabulous', name: 'Fabulous' },
     { key: 'playlist/excellent', name: 'Excellent' },
     { key: 'playlist/great', name: 'Great' },

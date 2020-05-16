@@ -197,7 +197,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       },
     }).then(() => {
       this.uReset();
-      musicModule.FetchSongs();
+      musicModule.ReloadSongs();
       musicModule.FetchArtists();
     }).catch(() => {
       this.$message.error('Failed to upload');
@@ -223,7 +223,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     this.downloading = true;
     musicModule.Download(data).then(() => {
       this.dReset();
-      musicModule.FetchSongs();
+      musicModule.ReloadSongs();
       musicModule.FetchArtists();
       this.$bvToast.toast('Completed', {
         variant: 'success',
@@ -244,6 +244,9 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       this.uAlbumArtist = '';
       this.uAlbum = '';
       this.uTitle = '';
+      this.uYear = '';
+      this.uTrack = '';
+      this.uDisc = '';
     }
   }
 
@@ -255,6 +258,9 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       this.dAlbumArtist = '';
       this.dAlbum = '';
       this.dTitle = '';
+      this.dYear = '';
+      this.dTrack = '';
+      this.dDisc = '';
     }
   }
 }
