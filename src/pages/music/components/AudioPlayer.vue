@@ -36,7 +36,7 @@
       <div v-if="song" class="text-light ml-2">
         <h5 class="mb-1">{{ song.title }}</h5>
         <small>
-          <span>{{ song.artist }} / {{ song.album }}</span>
+          <span>{{ song.artist.name }} / {{ song.album.title }}</span>
         </small>
       </div>
       <div class="control-btn btn-skip ml-auto" @click.stop="prev">

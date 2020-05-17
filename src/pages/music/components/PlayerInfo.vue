@@ -36,7 +36,7 @@
           <div class="song-info" @mousedown.prevent @click="play(i)">
             <span>{{ song.title }}</span>
             <br>
-            <small class="text-muted">{{ song.artist }} - {{ song.album }}</small>
+            <small class="text-muted">{{ song.artist.name }} - {{ song.album.title }}</small>
           </div>
           <b-button-close class="ml-auto" @mousedown.prevent @click="remove(i)"/>
         </b-list-group-item>

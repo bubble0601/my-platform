@@ -200,5 +200,6 @@ export default class SongList extends Vue {
 }
 .music-list td {
   vertical-align: middle;
+  user-select: none;
 }
 </style>

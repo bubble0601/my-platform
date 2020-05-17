@@ -28,7 +28,7 @@ class MainApp < Sinatra::Base
   # the base64 encoded authenticity token is acquired by Rack::Protection::AuthenticityToken.token(session)
   use Rack::Protection::RemoteToken
 
-  use Rack::Protection::SessionHijacking
+  use Rack::Protection::SessionHijacking if production?
 
   # # using `set :show_exceptions, :after_handler` can only catch classes under Exception, not under Error
   # # so we do the following hack

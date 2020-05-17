@@ -53,6 +53,7 @@ import SongList from './SongList.vue';
 })
 export default class ArtistList extends Vue {
   private mPlaylists = [
+    { key: 'new', name: 'New' },
     { key: 'fabulous', name: 'Fabulous' },
     { key: 'excellent', name: 'Excellent' },
     { key: 'great', name: 'Great' },
