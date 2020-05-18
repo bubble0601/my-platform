@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <Navbar/>
-    <main>
+    <section>
       <router-view/>
-    </main>
+    </section>
   </div>
 </template>
 <script lang="ts">
@@ -22,10 +22,10 @@ export default class App extends Vue {}
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
-#app > main {
+#app > section {
   flex-grow: 1;
   background-color: #fafafa;
 }

@@ -78,6 +78,7 @@ export default class SongList extends Vue {
 
   get fields() {
     const fields: BvTableFieldArray = [
+      { key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' },
       { key: 'title', sortable: true },
       { key: 'artist', formatter: (value) => value.name , sortable: true, sortByFormatted: true },
       { key: 'album', formatter: (value) => value.title, sortable: true, sortByFormatted: true },
@@ -87,8 +88,6 @@ export default class SongList extends Vue {
       fields.push({ key: 'time', sortable: true, formatter: convertTime });
       fields.push({ key: 'year', sortable: true });
       fields.push({ key: 'created_at', sortable: true });
-    } else {
-      fields.unshift({ key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' });
     }
     if (this.context === 'playlist') {
       fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });

@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :class="{ 'player-mobile': !reduced && $mobile }">
+  <div class="player" :class="{ 'player-mobile': $mobile, expanded: $mobile && !reduced }">
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
            @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="playing = false"/>
     <div v-if="$pc" class="player-controls d-flex align-items-center">
@@ -261,6 +261,11 @@ export default class AudioPlayer extends Vue {
   box-shadow: 0 -0.25rem .5rem rgba(0, 0, 0, 0.15);
 
   &.player-mobile {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  &.expanded {
     min-height: 6rem;
     height: 6rem;
   }
