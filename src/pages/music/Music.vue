@@ -22,14 +22,22 @@
     </div>
     <audio-player ref="player"/>
   </main>
-  <main v-else-if="mOpened" class="d-flex flex-column" :style="mainStyle">
-    <player-info class="overflow-auto" @close="mOpened = false"/>
-    <audio-player ref="player"/>
-  </main>
   <main v-else class="d-flex flex-column" :style="mainStyle">
-    <v-nav :items="mTabs" tabs justified do-routing/>
-    <router-view class="overflow-auto"/>
-    <audio-player ref="player" reduced @click.native="mOpened = true"/>
+    <player-info v-show="mOpened"
+                 class="overflow-auto"
+                 @close="mOpened = false"
+                 @touchstart.native="mOnTouchStart"
+                 @touchmove.native="mOnTouchMove"
+                 @touchend.native="mOnTouchEnd"/>
+
+    <v-nav v-show="!mOpened" :items="mTabs" tabs justified do-routing/>
+    <router-view v-show="!mOpened" class="overflow-auto"/>
+
+    <audio-player ref="player" :reduced="!mOpened"
+                  @click.native="mOpened = true"
+                  @touchstart.native="mOnTouchStart"
+                  @touchmove.native="mOnTouchMove"
+                  @touchend.native="mOnTouchEnd"/>
   </main>
 </template>
 <script lang="ts">
@@ -74,6 +82,8 @@ export default class Music extends mixins(SizeMixin) {
     { key: 'artist', to: '/music/artist', title: 'Artist' },
     { key: 'playlist', to: '/music/playlist', title: 'Playlist' },
   ];
+  private mScrollPos: number = 0;
+  private mTouchPath: Touch[] = [];
 
   get currentSong() {
     return musicModule.current;
@@ -112,6 +122,36 @@ export default class Music extends mixins(SizeMixin) {
   private addSong() {
     // @ts-ignore
     new AddSongDialog().open();
+  }
+
+  private mOnTouchStart(e: TouchEvent) {
+    this.mScrollPos = window.scrollY;
+    this.mTouchPath.push(e.changedTouches[0]);
+  }
+
+  private mOnTouchMove(e: TouchEvent) {
+    this.mTouchPath.push(e.changedTouches[0]);
+    // const touchY = e.changedTouches[0].clientY;
+    // const movedDistance = touchY - this.mTouchPos;
+    // if (movedDistance < 0) {
+    //   this.mScrollPos = -1;
+    //   this.mTop = 0;
+    // } else {
+    //   this.mTop = movedDistance;
+    // }
+  }
+
+  private mOnTouchEnd(e: TouchEvent) {
+    if (this.mScrollPos > 0) return;
+    const last = this.mTouchPath.pop();
+    const beforeLast = this.mTouchPath.pop();
+    if (last && beforeLast) {
+      if (last.clientY - beforeLast.clientY > 0) {
+        this.mOpened = false;
+      } else {
+        this.mOpened = true;
+      }
+    }
   }
 }
 </script>

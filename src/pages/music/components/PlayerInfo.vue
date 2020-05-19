@@ -1,8 +1,8 @@
 <template>
-  <div class="d-flex flex-column">
-    <v-nav v-model="tab" :items="tabs" tabs class="px-2">
-      <template #nav-end v-if="$mobile">
-        <b-icon icon="x" font-scale="1.5" class="text-secondary" @click="$emit('close')"/>
+  <div class="player-info">
+    <v-nav v-model="tab" :items="tabs" tabs class="bg-light px-2">
+      <template #nav-start v-if="$mobile">
+        <b-icon icon="chevron-down" font-scale="1.5" class="text-secondary ml-2 mr-3" @click="$emit('close')"/>
       </template>
     </v-nav>
     <div class="flex-grow-1 bg-white overflow-auto px-2">
@@ -248,6 +248,10 @@ export default class PlayerInfo extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+.player-info {
+  display: flex;
+  flex-direction: column;
+}
 .lyrics {
   font-size: 11px;
 }

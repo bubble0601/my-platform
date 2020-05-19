@@ -1,5 +1,8 @@
 <template>
   <b-nav :tabs="tabs" :pills="pills" :fill="fill" :justified="justified">
+    <b-nav-text class="d-flex align-items-center">
+      <slot name="nav-start"/>
+    </b-nav-text>
     <template v-for="item in items">
       <b-nav-item v-if="doRouting" :key="item.key" :to="item.to" active-class="active">
         {{ item.title }}
