@@ -22,7 +22,7 @@
     </div>
     <audio-player ref="player"/>
   </main>
-  <main v-else class="d-flex flex-column" :style="mainStyle">
+  <main v-else class="d-flex flex-column" :style="mMainStyle">
     <player-info v-show="mOpened"
                  class="overflow-auto"
                  @close="mOpened = false"
@@ -57,8 +57,10 @@ import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 })
 export default class Music extends mixins(SizeMixin) {
   private mainStyle = {
-    'height': 'auto',
-    'padding-bottom': '0',
+    height: 'auto',
+  };
+  private mMainStyle = {
+    'padding-bottom': '6rem',
   };
 
   private baseTitle = '';
@@ -100,19 +102,19 @@ export default class Music extends mixins(SizeMixin) {
     }
   }
 
+  @Watch('mOpened')
+  private onMOpenedChanged(val: boolean) {
+    if (val) this.mMainStyle['padding-bottom'] = '6rem';
+    else this.mMainStyle['padding-bottom'] = '4rem';
+  }
+
   protected created() {
     this.baseTitle = document.title;
-    if (this.$pc) {
-      this.addSizingCallback(() => {
-        if (this.$el instanceof HTMLElement) {
-          this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop}px`;
-        }
-      });
-    } else {
-      this.addSizingCallback(() => {
-        this.mainStyle['padding-bottom'] = `${this.player.$el.clientHeight}px`;
-      });
-    }
+    this.addSizingCallback(() => {
+      if (this.$el instanceof HTMLElement) {
+        this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop}px`;
+      }
+    });
   }
 
   protected mounted() {

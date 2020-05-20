@@ -1,12 +1,16 @@
 <template>
   <div v-if="$pc" class="d-flex h-100">
-    <div class="playlists dropdown-menu overflow-hidden mt-0 py-0">
-      <router-link v-for="p in playlists" :key="p.id" :to="`/music/playlist/${p.id}`"
-                   class="dropdown-item px-3 py-1" active-class="active"
-                   @dblclick.native="shuffleAndPlay">
+    <b-list-group flush class="playlists">
+      <b-list-group-item v-if="playlists.length === 0" variant="secondary" class="text-muted border-0 px-3 py-1 cursor-default">
+        <small>empty</small>
+      </b-list-group-item>
+      <b-list-group-item v-for="p in playlists" :key="p.id"
+                        :to="`/music/playlist/${p.id}`" variant="secondary"
+                        class="border-0 px-3 py-1" active-class="active"
+                        @dblclick.native="shuffleAndPlay">
         <small>{{ p.name }}</small>
-      </router-link>
-    </div>
+      </b-list-group-item>
+    </b-list-group>
     <song-list v-if="tab" ref="songList" :tab="tab" class="w-100"/>
     <song-list v-else ref="songList" context="playlist" class="w-100"/>
   </div>
@@ -17,18 +21,14 @@
     <song-list ref="songList" context="playlist" class="w-100"/>
   </div>
   <div v-else>
-    <div class="playlists dropdown-menu overflow-hidden mt-0 py-0 w-100">
-      <router-link v-for="p in mPlaylists" :key="p.key" :to="`/music/playlist/${p.key}`"
-                  class="dropdown-item px-3 py-1" active-class="active"
-                  @dblclick.native="shuffleAndPlay">
+    <b-list-group flush class="playlists">
+      <b-list-group-item v-for="p in playlists" :key="p.id"
+                         :to="`/music/playlist/${p.id}`" variant="light"
+                         class="px-3 py-2" active-class="active"
+                         @dblclick.native="shuffleAndPlay">
         <small>{{ p.name }}</small>
-      </router-link>
-      <router-link v-for="p in playlists" :key="p.id" :to="`/music/playlist/${p.id}`"
-                   class="dropdown-item px-3 py-1" active-class="active"
-                   @dblclick.native="shuffleAndPlay">
-        <small>{{ p.name }}</small>
-      </router-link>
-    </div>
+      </b-list-group-item>
+    </b-list-group>
   </div>
 </template>
 <script lang="ts">
@@ -42,23 +42,22 @@ import SongList from './SongList.vue';
     SongList,
   },
   beforeRouteEnter(to, from, next) {
-    if (screenModule.isMobile && from.path.startsWith('/music/playlist')) {
+    const id = Number(to.params.id);
+    if (screenModule.isMobile && id > 0) {
+      musicModule.FetchSongs({ playlist: id }).then(next);
+    } else {
       next();
-      return;
     }
-    const id = musicModule.playlistId;
-    if (!to.params.id && !to.params.tab && id) next(`/music/playlist/${id}`);
-    else next();
   },
 })
-export default class ArtistList extends Vue {
+export default class Plylists extends Vue {
   private mPlaylists = [
-    { key: 'new', name: 'New' },
-    { key: 'fabulous', name: 'Fabulous' },
-    { key: 'excellent', name: 'Excellent' },
-    { key: 'great', name: 'Great' },
-    { key: 'good', name: 'Good' },
-    { key: 'unrated', name: 'Unrated' },
+    { id: 'new', name: 'New' },
+    { id: 'fabulous', name: 'Fabulous' },
+    { id: 'excellent', name: 'Excellent' },
+    { id: 'great', name: 'Great' },
+    { id: 'good', name: 'Good' },
+    { id: 'unrated', name: 'Unrated' },
   ];
 
   @Prop({ type: Number, default: 0 })
@@ -70,7 +69,11 @@ export default class ArtistList extends Vue {
   @Ref() private songList!: SongList;
 
   get playlists() {
-    return musicModule.playlists;
+    const playlists: Array<{ id: number | string, name: string}> = musicModule.playlists;
+    if (this.$mobile) {
+      playlists.unshift(...this.mPlaylists);
+    }
+    return playlists;
   }
 
   @Watch('id', { immediate: true })
@@ -89,21 +92,9 @@ export default class ArtistList extends Vue {
 </script>
 <style lang="scss" scoped>
 .playlists {
-  display: block;
-  position: static;
-  min-width: 0;
-  font-size: .9rem;
-  border: none;
-  border-radius: 0;
   background-color: #9994;
-  .dropdown-item {
-    border-top: 1px solid #0001;
-    &:last-child {
-      border-bottom: 1px solid #0001;
-    }
-    &:hover:not(.active) {
-      background-color: #9996;
-    }
-  }
+  overflow-y: auto;
+  overflow-x: hidden;
+  word-break: keep-all;
 }
 </style>

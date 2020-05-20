@@ -193,9 +193,10 @@ class MainApp < Sinatra::Base
     namespace '/artists' do
       get '' do
         artists = Song.eager_graph(:artist)
+                      .exclude(artist_id: nil)
                       .group_and_count(:artist_id, :name)
                       .having{count.function.* > 0}
-                      .map{|s| p s; { id: s[:artist_id], name: s[:name] }}
+                      .map{|s| { id: s[:artist_id], name: s[:name] }}
         artists.push({ id: 0, name: 'Unknown Artist' }) if Song.first(artist_id: nil)
         artists
       end

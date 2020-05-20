@@ -17,11 +17,11 @@ export default [
       },
       {
         path: 'artist',
-        component: () => import(/* webpackChunkName: "music" */ '../pages/music/ArtistList.vue'),
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/Artists.vue'),
       },
       {
         path: 'artist/:id',
-        component: () => import(/* webpackChunkName: "music" */ '../pages/music/ArtistList.vue'),
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/Artists.vue'),
         props: (route: Route) => ({ id: Number(route.params.id) }),
       },
       {
