@@ -1,4 +1,6 @@
+export { default as CircleButton } from './CircleButton.vue';
 export { default as ContextMenu } from './ContextMenu.vue';
+export { default as FloatingButton } from './FloatingButton.vue';
 export { default as IconButton } from './IconButton.vue';
 export { default as Message } from './Message.vue';
 export { default as MessageBox } from './MessageBox.vue';

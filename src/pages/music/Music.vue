@@ -30,6 +30,7 @@
                  @touchmove.native="mOnTouchMove"
                  @touchend.native="mOnTouchEnd"/>
 
+    <floating-button v-show="!mOpened" icon="plus" :offset="4" @click="addSong"/>
     <v-nav v-show="!mOpened" :items="mTabs" tabs justified do-routing/>
     <router-view v-show="!mOpened" class="overflow-auto"/>
 
@@ -45,12 +46,13 @@ import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import { mixins } from 'vue-class-component';
 import { musicModule } from '@/store';
 import { SizeMixin } from '@/utils';
-import { VNav } from '@/components';
+import { FloatingButton, VNav } from '@/components';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 
 @Component({
   components: {
     AudioPlayer,
+    FloatingButton,
     PlayerInfo,
     VNav,
   },

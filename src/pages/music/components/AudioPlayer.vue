@@ -264,7 +264,7 @@ export default class AudioPlayer extends Vue {
     position: fixed;
     bottom: 0;
     width: 100%;
-    z-index: 10;
+    z-index: 110;
   }
   &.expanded {
     min-height: 6rem;
