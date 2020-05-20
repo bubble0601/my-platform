@@ -29,14 +29,9 @@ export default [
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
       },
       {
-        path: 'playlist/:id(\\d+)',
+        path: 'playlist/:id',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
-        props: (route: Route) => ({ id: Number(route.params.id) }),
-      },
-      {
-        path: 'playlist/:tab',
-        component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
-        props: true,
+        props: (route: Route) => ({ id: Number(route.params.id) || route.params.id }),
       },
       {
         path: 'settings',

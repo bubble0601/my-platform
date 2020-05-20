@@ -11,13 +11,9 @@
         <small>{{ p.name }}</small>
       </b-list-group-item>
     </b-list-group>
-    <song-list v-if="tab" ref="songList" :tab="tab" class="w-100"/>
-    <song-list v-else ref="songList" context="playlist" class="w-100"/>
+    <song-list ref="songList" context="playlist" class="w-100"/>
   </div>
-  <div v-else-if="tab">
-    <song-list ref="songList" :tab="tab" class="w-100"/>
-  </div>
-  <div v-else-if="id > 0">
+  <div v-else-if="id !== 0">
     <song-list ref="songList" context="playlist" class="w-100"/>
   </div>
   <div v-else>
@@ -34,6 +30,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { NavigationGuard } from 'vue-router';
+import { isString } from 'lodash';
 import { musicModule, screenModule } from '@/store';
 import SongList from './SongList.vue';
 
@@ -51,29 +48,20 @@ import SongList from './SongList.vue';
   },
 })
 export default class Plylists extends Vue {
-  private mPlaylists = [
-    { id: 'new', name: 'New' },
-    { id: 'fabulous', name: 'Fabulous' },
-    { id: 'excellent', name: 'Excellent' },
-    { id: 'great', name: 'Great' },
-    { id: 'good', name: 'Good' },
-    { id: 'unrated', name: 'Unrated' },
-  ];
-
-  @Prop({ type: Number, default: 0 })
-  private id!: number;
-
-  @Prop({ default: null })
-  private tab!: string | null;
+  @Prop({ type: [Number, String], default: 0 })
+  private id!: number | string;
 
   @Ref() private songList!: SongList;
 
   get playlists() {
-    const playlists: Array<{ id: number | string, name: string}> = musicModule.playlists;
-    if (this.$mobile) {
-      playlists.unshift(...this.mPlaylists);
+    if (this.$pc) {
+      return musicModule.playlists;
     }
-    return playlists;
+    return this.livePlaylists.concat(musicModule.playlists);
+  }
+
+  get livePlaylists() {
+    return musicModule.livePlaylists;
   }
 
   @Watch('id', { immediate: true })

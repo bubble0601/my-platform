@@ -72,14 +72,37 @@ class MainApp < Sinatra::Base
 
     namespace '/songs' do
       get '' do
-        if params[:tab]
+        if params[:artist]
+          aid = params[:artist]
+          aid = nil if params[:artist] == '0'
+          Song.eager_graph(:album, :artist)
+              .where(Sequel[:songs][:artist_id] =~ aid)
+              .order{album[:year]}
+              .order_append{album[:title]}
+              .order_append(:track_num, :title)
+              .map(&method(:to_song_data))
+        elsif (Integer params[:playlist] rescue false)
+          items = PlaylistSong.select(:song_id, :weight).where(playlist_id: params[:playlist].to_i).all
+          w_items = {}
+          items.each{|e| w_items[e.song_id] = e.weight}
+
+          Song.eager_graph(:album, :artist)
+              .where(Sequel[:songs][:id] => w_items.keys)
+              .order{artist[:ruby]}
+              .order_append{artist[:name]}
+              .order_append{album[:year]}
+              .order_append{album[:title]}
+              .order_append(:track_num, :title)
+              .map{|s| s[:weight] = w_items[s[:id]]; s}
+              .map(&method(:to_song_data))
+        elsif params[:playlist]
           query = Song.eager_graph(:album, :artist)
                       .order{artist[:ruby]}
                       .order_append{artist[:name]}
                       .order_append{album[:year]}
                       .order_append{album[:title]}
                       .order_append(:track_num, :title)
-          case params[:tab]
+          case params[:playlist]
           when 'fabulous'
             query = query.where(rate: 5)
           when 'excellent'
@@ -94,29 +117,6 @@ class MainApp < Sinatra::Base
             query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
           end
           query.map(&method(:to_song_data))
-        elsif params[:artist]
-          aid = params[:artist]
-          aid = nil if params[:artist] == '0'
-          Song.eager_graph(:album, :artist)
-              .where(Sequel[:songs][:artist_id] =~ params[:artist])
-              .order{album[:year]}
-              .order_append{album[:title]}
-              .order_append(:track_num, :title)
-              .map(&method(:to_song_data))
-        elsif params[:playlist]
-          items = PlaylistSong.select(:song_id, :weight).where(playlist_id: params[:playlist].to_i).all
-          w_items = {}
-          items.each{|e| w_items[e.song_id] = e.weight}
-
-          Song.eager_graph(:album, :artist)
-              .where(Sequel[:songs][:id] => w_items.keys)
-              .order{artist[:ruby]}
-              .order_append{artist[:name]}
-              .order_append{album[:year]}
-              .order_append{album[:title]}
-              .order_append(:track_num, :title)
-              .map{|s| s[:weight] = w_items[s[:id]]; s}
-              .map(&method(:to_song_data))
         end
       end
 

@@ -64,20 +64,6 @@ export default class Music extends mixins(SizeMixin) {
   };
 
   private baseTitle = '';
-  private tabs = [
-    { key: 'all', name: 'All' },
-    { key: 'artist', name: 'Artist' },
-    { key: 'playlist', name: 'Playlist' },
-    { key: 'div1' },
-    { key: 'playlist/new', name: 'New' },
-    { key: 'playlist/fabulous', name: 'Fabulous' },
-    { key: 'playlist/excellent', name: 'Excellent' },
-    { key: 'playlist/great', name: 'Great' },
-    { key: 'playlist/good', name: 'Good' },
-    { key: 'playlist/unrated', name: 'Unrated' },
-    { key: 'space' },
-    { key: 'settings', name: 'Settings' },
-  ];
 
   private mOpened = true;
   private mTabs = [
@@ -86,6 +72,22 @@ export default class Music extends mixins(SizeMixin) {
   ];
   private mScrollPos: number = 0;
   private mTouchPath: Touch[] = [];
+
+  get tabs() {
+    const lp = musicModule.livePlaylists.map((p) => ({
+      key: `playlist/${p.id}`,
+      name: p.name,
+    }));
+    return [
+      { key: 'all', name: 'All' },
+      { key: 'artist', name: 'Artist' },
+      { key: 'playlist', name: 'Playlist' },
+      { key: 'div1' },
+      ...lp,
+      { key: 'space' },
+      { key: 'settings', name: 'Settings' },
+    ];
+  }
 
   get currentSong() {
     return musicModule.current;

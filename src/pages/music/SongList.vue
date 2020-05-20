@@ -51,7 +51,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BTable, BvTableFieldArray } from 'bootstrap-vue';
-import { sample } from 'lodash';
+import { isNumber, sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
@@ -81,15 +81,17 @@ export default class SongList extends Vue {
       { key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' },
       { key: 'title', sortable: true },
       { key: 'artist', formatter: (value) => value.name , sortable: true, sortByFormatted: true },
-      { key: 'album', formatter: (value) => value.title, sortable: true, sortByFormatted: true },
-      { key: 'rate', sortable: true },
     ];
+    if (this.$pc) {
+      fields.push({ key: 'album', formatter: (value) => value.title, sortable: true, sortByFormatted: true });
+    }
+    fields.push({ key: 'rate', sortable: true });
     if (this.$pc) {
       fields.push({ key: 'time', sortable: true, formatter: convertTime });
       fields.push({ key: 'year', sortable: true });
-      fields.push({ key: 'created_at', sortable: true });
+      // fields.push({ key: 'created_at', sortable: true });
     }
-    if (this.context === 'playlist') {
+    if (this.context === 'playlist' && isNumber(musicModule.playlistId)) {
       fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });
     }
     return fields;
@@ -108,11 +110,6 @@ export default class SongList extends Vue {
   }
   set displayedSongs(val: Song[]) {
     musicModule.SET_DISPLAYED_SONGS(val);
-  }
-
-  @Watch('tab', { immediate: true })
-  private onTabChanged() {
-    if (this.tab) musicModule.FetchSongs({ tab: this.tab });
   }
 
   private created() {
