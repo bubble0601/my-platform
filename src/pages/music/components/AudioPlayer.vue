@@ -1,7 +1,7 @@
 <template>
   <div class="player" :class="{ 'player-mobile': $mobile, expanded: $mobile && !reduced }">
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
-           @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="playing = false"/>
+           @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="onPause"/>
     <div v-if="$pc" class="player-controls d-flex align-items-center">
       <div class="control-btn btn-skip ml-4" @click="prev">
         <b-icon icon="skip-start-fill"/>
@@ -92,6 +92,7 @@ export default class AudioPlayer extends Vue {
 
   private REPEAT = REPEAT;
 
+  private loading: boolean = false;
   private max = PROGRESS_MAX;
   private progress = 0; // 0 to PROGRESS_MAX
   private currentTime = 0;  // 0 to duration(second)
@@ -225,6 +226,10 @@ export default class AudioPlayer extends Vue {
     }
   }
 
+  private onPause() {
+    if (!this.loading) this.playing = false;
+  }
+
   private onEnd() {
     this.next();
   }
@@ -240,11 +245,21 @@ export default class AudioPlayer extends Vue {
   }
 
   private next() {
-    musicModule.PlayNext();
+    this.loading = true;
+    this.audio.pause();
+    musicModule.PlayNext()?.then(() => {
+      this.audio.play();
+      this.loading = false;
+    });
   }
 
   private prev() {
-    musicModule.PlayPrev();
+    this.loading = true;
+    if (this.playing) this.audio.pause();
+    musicModule.PlayPrev()?.then(() => {
+      if (this.playing) this.audio.play();
+      this.loading = false;
+    });
   }
 
   private convertPosToTime(pos: number) {

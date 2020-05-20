@@ -58,7 +58,7 @@
           <b-button variant="success" @click="save">Save</b-button>
         </div>
         <div class="mt-1 mb-2">
-          <b-button variant="warning" class="mr-2" @click="fix">Fix</b-button>
+          <b-button v-b-tooltip.hover title="Fix playtime or bitrate" variant="warning" class="mr-2" @click="fix">Fix</b-button>
           <b-button variant="danger" class="mr-2" @click="deleteSong">Delete</b-button>
         </div>
       </div>

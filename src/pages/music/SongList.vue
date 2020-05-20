@@ -159,7 +159,7 @@ export default class SongList extends Vue {
 
   private async updateRate(id: number, val: number) {
     await musicModule.UpdateSong({ id, data: { rate: val } });
-    if (this.context === 'playlist') {
+    if (this.context === 'playlist' && isNumber(musicModule.playlistId)) {
       musicModule.ReloadPlaylistSong(id);
     } else {
       musicModule.ReloadSong(id);

@@ -439,11 +439,12 @@ export default class MusicModule extends VuexModule {
     this.OP_HISTORY('push');
     const next = this.queue[0];
     if (next) {
+      const promise = this.FetchAudio(next);
       this.SET_CURRENT(next);
-      this.FetchAudio(next);
       this.SHIFT_QUEUE();
       this.updateQueue();
-      this.SET_PLAYING(true);
+      promise.then(() => this.SET_PLAYING(true));
+      return promise;
     } else {
       this.SET_CURRENT(null);
       this.SET_AUDIO(null);
@@ -454,10 +455,11 @@ export default class MusicModule extends VuexModule {
   public PlayPrev() {
     const prev = last(this.history);
     if (prev) {
+      const promise = this.FetchAudio(prev);
       this.UNSHIFT_QUEUE();
       this.SET_CURRENT(prev);
-      this.FetchAudio(prev);
       this.OP_HISTORY('pop');
+      return promise;
     }
   }
 
