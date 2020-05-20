@@ -5,7 +5,7 @@
         <b-input-group-prepend is-text>
           <b-icon icon="search"/>
         </b-input-group-prepend>
-        <b-form-input v-model="query" class="search_input"/>
+        <b-form-input v-model="query" autofocus class="search_input"/>
       </b-input-group>
       <b-list-group flush>
         <b-list-group-item v-for="artist in artists" :key="artist.id"
