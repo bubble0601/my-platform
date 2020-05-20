@@ -1,7 +1,42 @@
 <template>
   <b-modal ref="modal" title="Add new song" ok-only @hidden="$nextTick($destroy)">
     <v-nav v-model="nav" :items="navItems" pills/>
-    <div v-if="nav === 'upload'" class="pt-3">
+    <div v-if="nav === 'download'" class="pt-3">
+      <v-form ref="downloadForm">
+        <v-field>
+          <v-input v-model="url" type="url" placeholder="url(ex. https://www.youtube.com/watch?v=0YF8vecQWYs)" required/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dTitle" placeholder="Title"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dArtist" placeholder="Artist"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dAlbumArtist" placeholder="Album Artist"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dAlbum" placeholder="Album"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dYear" placeholder="Year"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dTrack" placeholder="Track Number"/>
+        </v-field>
+        <v-field>
+          <v-input v-model="dDisc" placeholder="Disc Number"/>
+        </v-field>
+      </v-form>
+      <div class="d-flex align-items-center">
+        <b-button variant="outline-danger" @click="dReset">Reset</b-button>
+        <b-button class="ml-auto" variant="success" :disabled="downloading" @click="download">
+          <b-spinner v-if="downloading" small class="mr-2"/>
+          <span>{{ downloading ? 'Downloading...' : 'Download' }}</span>
+        </b-button>
+      </div>
+    </div>
+    <div v-else class="pt-3">
       <b-input-group class="mb-2">
         <template #prepend>
           <b-dropdown variant="outline-success" :text="isFile ? 'File' : 'Folder'">
@@ -49,41 +84,6 @@
         </b-button>
       </div>
     </div>
-    <div v-else class="pt-3">
-      <v-form ref="downloadForm">
-        <v-field>
-          <v-input v-model="url" type="url" placeholder="url(ex. https://www.youtube.com/watch?v=0YF8vecQWYs)" required/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dTitle" placeholder="Title"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dArtist" placeholder="Artist"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dAlbumArtist" placeholder="Album Artist"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dAlbum" placeholder="Album"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dYear" placeholder="Year"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dTrack" placeholder="Track Number"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dDisc" placeholder="Disc Number"/>
-        </v-field>
-      </v-form>
-      <div class="d-flex align-items-center">
-        <b-button variant="outline-danger" @click="dReset">Reset</b-button>
-        <b-button class="ml-auto" variant="success" :disabled="downloading" @click="download">
-          <b-spinner v-if="downloading" small class="mr-2"/>
-          <span>{{ downloading ? 'Downloading...' : 'Download' }}</span>
-        </b-button>
-      </div>
-    </div>
   </b-modal>
 </template>
 <script lang="ts">
@@ -102,11 +102,21 @@ import { VNav, VForm } from '@/components';
   },
 })
 export default class AddSongDialog extends mixins(DialogMixin) {
-  private nav = 'upload';
+  private nav = 'download';
   private navItems = [
-    { key: 'upload', title: 'Upload' },
     { key: 'download', title: 'Download' },
+    { key: 'upload', title: 'Upload' },
   ];
+
+  private downloading = false;
+  private url = '';
+  private dArtist = '';
+  private dAlbumArtist = '';
+  private dAlbum = '';
+  private dTitle = '';
+  private dYear = '';
+  private dTrack = '';
+  private dDisc = '';
 
   private files: File[] | null = null;
   private isFile = true;
@@ -122,32 +132,8 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private uTrack = '';
   private uDisc = '';
 
-  private downloading = false;
-  private url = '';
-  private dArtist = '';
-  private dAlbumArtist = '';
-  private dAlbum = '';
-  private dTitle = '';
-  private dYear = '';
-  private dTrack = '';
-  private dDisc = '';
-
   @Ref() private modal!: BModal;
   @Ref() private downloadForm!: VForm;
-
-  @Watch('uArtist')
-  private onUArtistChanged(val: string, oldVal: string) {
-    if (this.uAlbumArtist === oldVal) {
-      this.uAlbumArtist = this.uArtist;
-    }
-  }
-
-  @Watch('uAlbum')
-  private onUAlbumChanged(val: string) {
-    if (this.uDisc === '') {
-      this.uDisc = '1/1';
-    }
-  }
 
   @Watch('dArtist')
   private onDArtistChanged(val: string, oldVal: string) {
@@ -163,9 +149,53 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }
   }
 
+  @Watch('uArtist')
+  private onUArtistChanged(val: string, oldVal: string) {
+    if (this.uAlbumArtist === oldVal) {
+      this.uAlbumArtist = this.uArtist;
+    }
+  }
+
+  @Watch('uAlbum')
+  private onUAlbumChanged(val: string) {
+    if (this.uDisc === '') {
+      this.uDisc = '1/1';
+    }
+  }
+
   private async open() {
     await waitUntil(() => !!this.modal);
     this.modal.show();
+  }
+
+  private download() {
+    if (!this.downloadForm.validate()) return;
+    const metadata = omitBy({
+      artist: this.dArtist,
+      album_artist: this.dAlbumArtist,
+      album: this.dAlbum,
+      title: this.dTitle,
+      year: this.dYear,
+      track: this.dTrack,
+      disc: this.dDisc,
+    }, isEmpty);
+    const data = {
+      url: this.url,
+      metadata,
+    };
+    this.downloading = true;
+    musicModule.Download(data).then(() => {
+      this.dReset();
+      musicModule.ReloadSongs();
+      musicModule.FetchArtists();
+      this.$bvToast.toast('Completed', {
+        variant: 'success',
+        autoHideDelay: 15000,
+      });
+    }).catch(() => {
+      this.$message.error('Failed to download');
+      this.dReset(false);
+    });
   }
 
   private upload() {
@@ -205,34 +235,18 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     });
   }
 
-  private download() {
-    if (!this.downloadForm.validate()) return;
-    const metadata = omitBy({
-      artist: this.dArtist,
-      album_artist: this.dAlbumArtist,
-      album: this.dAlbum,
-      title: this.dTitle,
-      year: this.dYear,
-      track: this.dTrack,
-      disc: this.dDisc,
-    }, isEmpty);
-    const data = {
-      url: this.url,
-      metadata,
-    };
-    this.downloading = true;
-    musicModule.Download(data).then(() => {
-      this.dReset();
-      musicModule.ReloadSongs();
-      musicModule.FetchArtists();
-      this.$bvToast.toast('Completed', {
-        variant: 'success',
-        autoHideDelay: 15000,
-      });
-    }).catch(() => {
-      this.$message.error('Failed to download');
-      this.dReset(false);
-    });
+  private dReset(success: boolean = true) {
+    this.downloading = false;
+    if (success) {
+      this.url = '';
+      this.dArtist = '';
+      this.dAlbumArtist = '';
+      this.dAlbum = '';
+      this.dTitle = '';
+      this.dYear = '';
+      this.dTrack = '';
+      this.dDisc = '';
+    }
   }
 
   private uReset(success: boolean = true) {
@@ -247,20 +261,6 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       this.uYear = '';
       this.uTrack = '';
       this.uDisc = '';
-    }
-  }
-
-  private dReset(success: boolean = true) {
-    this.downloading = false;
-    if (success) {
-      this.url = '';
-      this.dArtist = '';
-      this.dAlbumArtist = '';
-      this.dAlbum = '';
-      this.dTitle = '';
-      this.dYear = '';
-      this.dTrack = '';
-      this.dDisc = '';
     }
   }
 }
