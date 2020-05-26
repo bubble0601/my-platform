@@ -42,6 +42,13 @@ export function escapeHtml(str: string) {
     .replace(/`/g, '&#x60;');
 }
 
+export function download(url: string, filename: string = '') {
+  const a = document.createElement('a');
+  a.download = filename || url.split('/').pop() || '';
+  a.href = url;
+  a.click();
+}
+
 function parseDate(str: string) {
   const r = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (r === null) return null;

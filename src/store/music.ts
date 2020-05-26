@@ -56,7 +56,7 @@ export enum REPEAT {
   ONE,
 }
 
-const getFilename = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
+export const getFilename = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
 
 const api = {
   fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),

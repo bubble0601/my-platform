@@ -53,9 +53,9 @@ import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BTable, BvTableFieldArray } from 'bootstrap-vue';
 import { isNumber, sample } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, REPEAT } from '@/store/music';
+import { Song, REPEAT, getFilename } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
-import { convertTime } from '@/utils';
+import { convertTime, download } from '@/utils';
 
 @Component({
   components: {
@@ -179,6 +179,7 @@ export default class SongList extends Vue {
         { text: '再生', action: () => { this.play(item); } },
         { text: '次に再生', action: () => { this.insertIntoNext(item); } },
         { text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
+        { text: 'ダウンロード', action: () => { download(getFilename(item)); } },
       ],
       event: e,
     });
