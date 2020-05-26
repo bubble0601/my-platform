@@ -1,5 +1,5 @@
 <template>
-  <b-form-input ref="input" v-bind="$attrs" v-on="$listeners"/>
+  <b-form-input ref="input" v-bind="$attrs" :autocomplete="autocomplete" v-on="$listeners"/>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
@@ -13,6 +13,9 @@ export default class VInput extends Vue {
 
   @Prop({ type: Boolean, default: false })
   private autofocus!: boolean;
+
+  @Prop({ type: String, default: 'off' })
+  private autocomplete!: string;
 
   @Ref() private input!: BFormInput;
 

@@ -1,7 +1,10 @@
 require 'date'
+require 'net/http'
+require 'nokogiri'
 
 class MainApp < Sinatra::Base
   namespace '/api/music' do
+    helpers UtilityHelpers
     helpers do
       def to_song_data(song)
         if song.is_a?(Song)
@@ -131,6 +134,7 @@ class MainApp < Sinatra::Base
             Song.set_tags(path, @json[:metadata])
             res = Song.create_from_file(path)
             logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
+            return 200, to_song_data(res) if res
           else
             logger.error('youtube-dl'){out}
             halt 400, 'Failed to download from the url'
@@ -262,6 +266,39 @@ class MainApp < Sinatra::Base
         halt 404 if song.nil? or pl.nil?
         pl.remove_song(song)
         status 204
+      end
+    end
+
+    namespace '/tools' do
+      get '/candidates' do
+        url = params[:url]
+        if url.start_with?('https://www.youtube.com')
+          doc = get_doc(params[:url])
+          title = doc.title.gsub(/ - YouTube$/, '')
+          title.gsub!(/[(（]?(Official Music Video|Official Video|Music Video)[)）]?/i, '')
+          title.gsub!(/[(（]?(MV|PV)[)）]?/, '')
+          title.strip!
+          matched = /(.*)[「『](.*)[」』]/.match(title)
+          if matched
+            return {
+              title: [$2.strip],
+              artist: [$1.strip],
+            }
+          end
+          matched = /(.*)([-ー−\/／](.*))/.match(title)
+          if matched
+            c1 = $1.strip
+            c2 = $2.strip
+            return {
+              title: [c2, c1],
+              artist: [c1, c2],
+            }
+          end
+          {
+            title: [title],
+            artist: [],
+          }
+        end
       end
     end
 

@@ -45,6 +45,11 @@ interface FetchSongParams {
   playlist?: number | string;
 }
 
+interface CandidateResponse {
+  title: string[];
+  artist: string[];
+}
+
 export enum REPEAT {
   NONE,
   ALL,
@@ -57,8 +62,11 @@ const api = {
   fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilename(song), { responseType: 'blob' }),
+
   uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post('/api/music/songs', data, config),
-  downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post('/api/music/songs', data),
+  downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post<Song | null>('/api/music/songs', data),
+  getCandidates: (url: string) => axios.get<CandidateResponse>('/api/music/tools/candidates', { params: { url } }),
+
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
@@ -496,7 +504,12 @@ export default class MusicModule extends VuexModule {
 
   @Action({ rawError: true })
   public async Download(data: { url: string, metadata: Dict<string> }) {
-    await api.downloadSong(data);
+    return await api.downloadSong(data);
+  }
+
+  @Action
+  public async GetCandidatesFromURL(url: string) {
+    return await api.getCandidates(url);
   }
 
   @Action

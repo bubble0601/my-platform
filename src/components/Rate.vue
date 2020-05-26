@@ -35,7 +35,7 @@ export default class Rate extends Vue {
   .hovered:not(.enabled) {
     color: #efc20faa;
   }
-  .icon {
+  .b-icon {
     cursor: pointer;
   }
 }

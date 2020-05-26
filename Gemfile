@@ -19,5 +19,6 @@ gem 'minitest'
 gem 'rack-test'
 
 # Tools
+gem 'pycall'
 gem 'bcrypt'
-gem 'ruby-mp3info'
+gem 'nokogiri'
