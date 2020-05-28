@@ -143,14 +143,14 @@ export default class SongList extends Vue {
   }
 
   private play(item: Song) {
-    musicModule.Play(item);
+    musicModule.PlayAndSet(item);
   }
 
   public shuffleAndPlay() {
     if (this.songs.length === 0) return;
     musicModule.SetControl({ shuffle: true });
     if (musicModule.repeat === REPEAT.ONE) musicModule.SetControl({ repeat: REPEAT.NONE });
-    musicModule.Play(sample(this.songs));
+    musicModule.PlayAndSet(sample(this.songs));
   }
 
   private insertIntoNext(item: Song) {

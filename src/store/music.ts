@@ -63,7 +63,7 @@ const api = {
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilename(song), { responseType: 'blob' }),
 
-  uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post('/api/music/songs', data, config),
+  uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post<Song[] | null>('/api/music/songs', data, config),
   downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post<Song | null>('/api/music/songs', data),
   getCandidates: (url: string) => axios.get<CandidateResponse>('/api/music/tools/candidates', { params: { url } }),
 
@@ -430,6 +430,12 @@ export default class MusicModule extends VuexModule {
     this.SET_CURRENT(song);
     await this.FetchAudio(song);
     this.SET_PLAYING(true);
+  }
+
+  @Action
+  public async PlayAndSet(song: Song | undefined) {
+    if (!song) return;
+    this.Play(song);
     this.setQueue({ song, songs: this.songs });
   }
 
@@ -477,6 +483,13 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
+  public Insert(songs: Song[]) {
+    songs.reverse().forEach((s) => {
+      this.UNSHIFT_QUEUE(s);
+    });
+  }
+
+  @Action
   public async UpdateSong(payload: { id: number, data: Partial<Song> }) {
     const { id, data } = payload;
     await api.updateSong(id, data);
@@ -498,8 +511,8 @@ export default class MusicModule extends VuexModule {
   public async Upload(payload: { data: FormData, onUploadProgress: (e: ProgressEvent) => void }) {
     const { data, onUploadProgress } = payload;
     const config: AxiosRequestConfig = {};
-    if (onUploadProgress) config.onUploadProgress = onUploadProgress;
-    await api.uploadSong(data, config);
+    config.onUploadProgress = onUploadProgress;
+    return await api.uploadSong(data, config);
   }
 
   @Action({ rawError: true })

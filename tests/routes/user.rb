@@ -9,7 +9,7 @@ class UserTest < TestBase
   end
 
   def test_register_and_login
-    post_json '/api/users/new', { username: 'name', password: 'v#s9vAR4b%%X' }
+    post_json '/api/users/new', { username: 'name', password: 'password' }
     assert last_response.status == 204
     user = User.first(name: 'name')
     assert user && user.created_at
@@ -18,7 +18,7 @@ class UserTest < TestBase
 
     post_json '/api/auth/login', { username: 'name', password: 'password' }
     assert last_response.ok?
-    assert parse(last_response)[:name] == 'name'
+    assert parse(last_response)[:user][:name] == 'name'
     assert prev_cookie[CONF.session.name] != rack_mock_session.cookie_jar.to_hash[CONF.session.name]
   end
 end

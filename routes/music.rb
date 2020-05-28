@@ -143,17 +143,21 @@ class MainApp < Sinatra::Base
           metadata = if params[:data] then JSON.parse(params[:data], symbolize_names: true) else nil end
           case params[:file]
           when Array
+            results = []
             params[:file].each do |f|
               return unless f[:filename].end_with?('.mp3')
               Song.set_tags(f[:tempfile].path, metadata)
               res = Song.create_from_file(f[:tempfile].path, f[:filename])
               logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
+              results.push(to_song_data(res))
             end
+            return 200, results if results.length > 0
           else
             f = params[:file]
             Song.set_tags(f[:tempfile].path, metadata)
             res = Song.create_from_file(f[:tempfile].path, f[:filename])
             logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
+            return 200, [to_song_data(res)] if res
           end
         end
         status 204

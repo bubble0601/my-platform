@@ -77,7 +77,7 @@ class ID3
     @id3 = PyMP3::ID3.new(filename)
   end
 
-  def get_all(convert: false)
+  def get_all(convert = false)
     return @id3.items.to_h unless convert
     @id3.items.to_h.transform_keys{|k| k[0...4]}.map{|k, v| TAGS[k] ? [k, TAGS[k][:get].call(@id3)] : [k, v]}.to_h
   end

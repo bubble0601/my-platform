@@ -46,7 +46,7 @@
             <span v-else>{{ d.url }}</span>
           </div>
           <div class="ml-auto">
-            <span v-if="d.status === Status.Processing" class="text-primary">...Downloading</span>
+            <span v-if="d.status === Status.Processing" class="text-primary">Downloading...</span>
             <div v-else-if="d.status === Status.Success">
               <b-button size="sm" variant="primary">
                 <b-icon icon="play"/>
@@ -78,8 +78,8 @@
         <b-form-file v-model="files" accept="audio/*" multiple :directory="!isFile"
                      :placeholder="`No ${isFile ? 'File'  : 'Folder'} chosen`"
                      class="overflow-hidden text-nowrap">
-          <template #file-name="{ files }">
-            {{ files.length === 1 ? files[0].name : `${files.length} files selected` }}
+          <template #file-name>
+            {{ filename }}
           </template>
         </b-form-file>
       </b-input-group>
@@ -105,15 +105,43 @@
         <v-input v-model="uDisc" placeholder="Disc Number"/>
       </v-field>
       <div class="d-flex align-items-center">
-        <b-button variant="outline-danger" @click="uReset">Reset</b-button>
-        <span v-if="uploading" class="ml-auto">
-          {{ uploadProgress }}%
-        </span>
-        <b-button class="ml-auto" variant="success" :disabled="uploading" @click="upload">
-          <b-spinner v-if="uploading" small class="mr-2"/>
-          <span>{{ uploading ? 'Uploading...' : 'Upload' }}</span>
+        <b-button class="ml-auto" variant="success" @click="upload">
+          <span>Upload</span>
         </b-button>
       </div>
+      <b-list-group class="mt-3">
+        <b-list-group-item v-for="(u, i) in uploadQueue" :key="i" class="d-flex align-items-center">
+          <b-spinner v-if="u.status === Status.Processing" type="grow" variant="primary" small/>
+          <b-icon v-else-if="u.status === Status.Success" icon="check" scale="1.5" variant="success"/>
+          <b-icon v-else-if="u.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+          <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
+          <div class="text-truncate text-nowrap ml-2">
+            <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
+            <span v-else>{{ u.filename }}</span>
+          </div>
+          <div class="ml-auto">
+            <span v-if="u.status === Status.Processing" class="text-primary">
+              Uploading...({{ u.progress }} / 100 )
+            </span>
+            <div v-else-if="u.status === Status.Success">
+              <b-button size="sm" variant="primary" @click="play(u.songs)">
+                <b-icon icon="play"/>
+                <span v-if="$pc">Play</span>
+              </b-button>
+              <b-button size="sm" variant="success" class="ml-2">
+                <b-icon icon="pencil"/>
+                <span v-if="$pc">Edit</span>
+              </b-button>
+            </div>
+            <div v-else-if="u.status === Status.Warning" class="text-warning">
+              <span>Already exists</span>
+            </div>
+            <div v-else>
+              <b-button size="sm" variant="outline-danger" @click="retry(u)">Retry</b-button>
+            </div>
+          </div>
+        </b-list-group-item>
+      </b-list-group>
     </div>
   </b-modal>
 </template>
@@ -122,7 +150,7 @@ import { mixins } from 'vue-class-component';
 import { Component, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
-import { isEmpty, omitBy, Dictionary } from 'lodash';
+import { isArray, isEmpty, omitBy, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { DialogMixin, waitUntil } from '@/utils';
@@ -136,10 +164,19 @@ enum Status {
 }
 
 interface DownloadStatus {
-  url: string;
   status: Status;
+  url: string;
   metadata: Dictionary<string>;
   song?: Song;
+}
+
+interface UploadStatus {
+  status: Status;
+  data: FormData;
+  metadata: Dictionary<string>;
+  filename: string;
+  progress: number;
+  songs?: Song[];
 }
 
 @Component({
@@ -172,9 +209,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   private files: File[] | null = null;
   private isFile = true;
 
-  private uploading = false;
-  private uploadProgress = 0;
-  private uploadButtonText = 'Upload';
+  private uploadQueue: UploadStatus[] = [];
   private uTitle = '';
   private uArtist = '';
   private uAlbumArtist = '';
@@ -186,6 +221,13 @@ export default class AddSongDialog extends mixins(DialogMixin) {
   @Ref() private modal!: BModal;
   @Ref() private downloadForm!: VForm;
   @Ref() private urlInput!: VInput;
+
+  get filename() {
+    if (this.files) {
+      return this.files.length === 1 ? this.files[0].name : `${this.files.length} files`;
+    }
+    return '';
+  }
 
   @Watch('dArtist')
   private onDArtistChanged(val: string, oldVal: string) {
@@ -261,17 +303,22 @@ export default class AddSongDialog extends mixins(DialogMixin) {
       track: this.dTrack,
       disc: this.dDisc,
     }, isEmpty);
-    const data = {
+    const status: DownloadStatus = {
       url: this.url,
       metadata,
-    };
-    const status: DownloadStatus = {
-      ...data,
       status: Status.Processing,
     };
     this.downloadQueue.push(status);
     this.dReset();
-    musicModule.Download(data).then((res) => {
+    this.execDownload(status);
+  }
+
+  private execDownload(status: DownloadStatus) {
+    status.status = Status.Processing;
+    musicModule.Download({
+      url: status.url,
+      metadata: status.metadata,
+    }).then((res) => {
       musicModule.ReloadSongs();
       musicModule.FetchArtists();
       if (res.data) {
@@ -283,21 +330,6 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }).catch(() => {
       this.$message.error('Failed to download');
       status.status = Status.Error;
-    });
-  }
-
-  private retry(data: DownloadStatus) {
-    data.status = Status.Processing;
-    musicModule.Download({
-      url: data.url,
-      metadata: data.metadata,
-    }).then(() => {
-      musicModule.ReloadSongs();
-      musicModule.FetchArtists();
-      data.status = Status.Success;
-    }).catch(() => {
-      this.$message.error('Failed to download');
-      data.status = Status.Error;
     });
   }
 
@@ -322,25 +354,57 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }, isEmpty);
     if (!isEmpty(metadata)) data.append('data', JSON.stringify(metadata));
 
-    this.uploading = true;
-    musicModule.Upload({
+    const status: UploadStatus = {
       data,
+      metadata,
+      filename: this.filename,
+      progress: 0,
+      status: Status.Processing,
+    };
+    this.uploadQueue.push(status);
+    this.uReset();
+    this.execUpload(status);
+  }
+
+  private execUpload(status: UploadStatus) {
+    status.status = Status.Processing;
+    musicModule.Upload({
+      data: status.data,
       onUploadProgress: (e: ProgressEvent) => {
-        this.uploadProgress = Math.round((e.loaded * 100) / e.total);
+        status.progress = Math.round((e.loaded * 100) / e.total);
       },
-    }).then(() => {
-      this.uReset();
+    }).then((res) => {
       musicModule.ReloadSongs();
       musicModule.FetchArtists();
+      if (res.data && res.data.length) {
+        status.status = Status.Success;
+        status.songs = res.data;
+      } else {
+        status.status = Status.Warning;
+      }
     }).catch(() => {
       this.$message.error('Failed to upload');
-      this.uReset(false);
+      status.status = Status.Error;
     });
   }
 
-  private play(s: Song | null) {
+  private retry(status: DownloadStatus | UploadStatus) {
+    if ('url' in status) {
+      this.execDownload(status);
+    } else {
+      this.execUpload(status);
+    }
+  }
+
+  private play(s: Song[] | Song | null) {
     if (s) {
-      musicModule.Play(s);
+      if (isArray(s)) {
+        if (s.length === 0) return;
+        musicModule.Insert(s.slice(1));
+        musicModule.Play(s[0]);
+      } else {
+        musicModule.Play(s);
+      }
     }
   }
 
@@ -357,19 +421,15 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     this.artistCandidates = [];
   }
 
-  private uReset(success: boolean = true) {
-    this.uploading = false;
-    this.uploadProgress = 0;
-    if (success) {
-      this.files = null;
-      this.uArtist = '';
-      this.uAlbumArtist = '';
-      this.uAlbum = '';
-      this.uTitle = '';
-      this.uYear = '';
-      this.uTrack = '';
-      this.uDisc = '';
-    }
+  private uReset() {
+    this.files = null;
+    this.uArtist = '';
+    this.uAlbumArtist = '';
+    this.uAlbum = '';
+    this.uTitle = '';
+    this.uYear = '';
+    this.uTrack = '';
+    this.uDisc = '';
   }
 }
 </script>
