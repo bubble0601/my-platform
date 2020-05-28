@@ -14,7 +14,7 @@
         <b-icon icon="skip-end-fill"/>
       </div>
       <div class="player-progress ml-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="formatTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn btn-repeat position-relative ml-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
         <b-icon icon="arrow-repeat"/>
@@ -52,7 +52,7 @@
     </div>
     <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
       <div class="player-progress-mobile px-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="formatTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn ml-3 mr-auto" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
         <b-icon icon="shuffle"/>
@@ -79,7 +79,7 @@ import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
 import { throttle } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
-import { convertTime } from '@/utils';
+import { formatTime } from '@/utils';
 
 const PROGRESS_MAX = 300;
 
@@ -98,7 +98,7 @@ export default class AudioPlayer extends Vue {
   private currentTime = 0;  // 0 to duration(second)
   private duration = 0; // (second)
 
-  private convertTime = convertTime;
+  private formatTime = formatTime;
 
   private labelStyle = {
     'color': 'white',
@@ -147,8 +147,8 @@ export default class AudioPlayer extends Vue {
 
   get timeLabel() {
     return {
-      [PROGRESS_MAX * 0.01]: convertTime(this.currentTime),
-      [PROGRESS_MAX * 0.99]: convertTime(this.duration),
+      [PROGRESS_MAX * 0.01]: formatTime(this.currentTime),
+      [PROGRESS_MAX * 0.99]: formatTime(this.duration),
     };
   }
 
@@ -264,7 +264,7 @@ export default class AudioPlayer extends Vue {
 
   private convertPosToTime(pos: number) {
     const time = this.duration * pos / PROGRESS_MAX;
-    return convertTime(time);
+    return formatTime(time);
   }
 }
 </script>

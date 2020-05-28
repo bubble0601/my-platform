@@ -66,7 +66,7 @@ export function getWeekDay(arg: string | Date) {
   return '日月火水木金土'[date.getDay()];
 }
 
-export function convertTime(time: number) {
+export function formatTime(time: number) {
   const h = Math.floor(time / 3600);
   const m = Math.floor((time - 3600 * h) / 60);
   const s = time % 60;
@@ -91,6 +91,18 @@ export function timeRange(_start: string, _end: string, emphStart = false, emphE
     return `&sim;${end}`;
   }
   return '';
+}
+
+export function formatBytes(bytes: number, decimals = 2) {
+  if (bytes === 0) return '0 bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 export const env = {

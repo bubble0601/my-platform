@@ -55,7 +55,7 @@ import { isNumber, sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT, getFilename } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
-import { convertTime, download } from '@/utils';
+import { formatTime, download } from '@/utils';
 
 @Component({
   components: {
@@ -87,7 +87,7 @@ export default class SongList extends Vue {
     }
     fields.push({ key: 'rate', sortable: true });
     if (this.$pc) {
-      fields.push({ key: 'time', sortable: true, formatter: convertTime });
+      fields.push({ key: 'time', sortable: true, formatter: formatTime });
       fields.push({ key: 'year', sortable: true });
       // fields.push({ key: 'created_at', sortable: true });
     }

@@ -41,7 +41,7 @@
           <b-button-close class="ml-auto" @mousedown.prevent @click="remove(i)"/>
         </b-list-group-item>
       </b-list-group>
-      <div v-else-if="tab === 'edit'" class="p-2">
+      <div v-else-if="tab === 'info'" class="p-2">
         <v-field v-for="(label, k) in basicTags" :key="k" :label="cap(label)" size="sm">
           <div class="d-flex align-items-center">
             <v-input v-model="edit[k]" size="sm"/>
@@ -57,8 +57,23 @@
           <b-button variant="outline-danger" class="mr-auto" @click="setEdit">Cancel</b-button>
           <b-button variant="success" @click="save">Save</b-button>
         </div>
+        <div v-if="tag" class="my-2">
+          <b-button variant="info" @click="formatInfoVisible = !formatInfoVisible">
+            {{ formatInfoVisible ? 'Hide' : 'Show' }} format info
+          </b-button>
+          <b-collapse v-model="formatInfoVisible" class="mt-2">
+            <b-card no-body class="p-2">
+              <b-card-text>
+                <span>{{ tag.format.codec }} / {{ tag.format.codecProfile }}</span><br>
+                <span>{{ (tag.format.bitrate / 1000).toFixed(1) }}kbps / {{ tag.format.sampleRate / 1000 }}kHz</span><br>
+                <span>{{ duration }} / {{ filesize }}</span><br>
+                <span>Tags: {{ tag.format.tagTypes.join(', ') }}</span>
+              </b-card-text>
+            </b-card>
+          </b-collapse>
+        </div>
         <div class="mt-1 mb-2">
-          <b-button v-b-tooltip.hover title="Fix playtime or bitrate" variant="warning" class="mr-2" @click="fix">Fix</b-button>
+          <!-- <b-button v-b-tooltip.hover title="Fix playtime or bitrate" variant="warning" class="mr-2" @click="fix">Fix</b-button> -->
           <b-button variant="danger" class="mr-2" @click="deleteSong">Delete</b-button>
         </div>
       </div>
@@ -68,11 +83,12 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
-import { capitalize, clone, find, isEmpty, omitBy, pick } from 'lodash';
+import { capitalize, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { VNav, VForm, Rate } from '@/components';
 import { Dict } from '@/types';
+import { formatTime, formatBytes } from '@/utils';
 
 @Component({
   components: {
@@ -83,29 +99,21 @@ import { Dict } from '@/types';
 })
 export default class PlayerInfo extends Vue {
   private tab = 'song';
-  private tag: mm.IAudioMetadata | null = null;
-  private artwork: string | null = null;
-  private queue: Song[] = [];
-  private dragging: { index: number, song: Song } | null = null;
-  private edit: Dict<string> = {};
-  private readonly basicTags = {
-    TIT2: 'title',
-    TPE1: 'artist',
-    TPE2: 'album_artist',
-    TALB: 'album',
-    TYER: 'year',
-    TRCK: 'track',
-    TPOS: 'disc',
-  };
-  private readonly cap = capitalize;
-
-  get tabs() {
-    return [
+  private readonly tabs = [
       { key: 'song', title: 'Song' },
       { key: 'queue', title: 'Queue' },
-      { key: 'edit', title: 'Edit' },
-    ];
-  }
+      { key: 'info', title: 'Info' },
+  ];
+  private tag: mm.IAudioMetadata | null = null;
+
+  private artwork: string | null = null;
+
+  private queue: Song[] = [];
+  private dragging: { index: number, song: Song } | null = null;
+
+  private formatInfoVisible = false;
+  private edit: Dict<string | null> = {};
+  private readonly cap = capitalize;
 
   get song() {
     return musicModule.current;
@@ -115,9 +123,17 @@ export default class PlayerInfo extends Vue {
     return musicModule.audioData;
   }
 
-  get lyrics() {
+  get id3Version() {
     if (this.tag) {
-      const uslt = find(this.tag.native['ID3v2.3'], { id: 'USLT' });
+      if (this.tag.native['ID3v2.4']) return 'ID3v2.4';
+      else if (this.tag.native['ID3v2.3']) return 'ID3v2.3';
+    }
+    return null;
+  }
+
+  get lyrics() {
+    if (this.tag && this.id3Version) {
+      const uslt = find(this.tag.native[this.id3Version], { id: 'USLT' });
       if (uslt) {
         return uslt.value.text;
       }
@@ -128,10 +144,45 @@ export default class PlayerInfo extends Vue {
     return musicModule.queue;
   }
 
+  get basicTags() {
+    if (this.id3Version === 'ID3v2.3') {
+      return {
+        TIT2: 'title',
+        TPE1: 'artist',
+        TPE2: 'album artist',
+        TALB: 'album',
+        TYER: 'year',
+        TRCK: 'track',
+        TPOS: 'disc',
+      };
+    }
+    return {
+      TIT2: 'title',
+      TPE1: 'artist',
+      TPE2: 'album artist',
+      TALB: 'album',
+      TDRC: 'year',
+      TRCK: 'track',
+      TPOS: 'disc',
+    };
+  }
+
   get filteredEdit() {
-    // TSSE(Software/Hardware and settings used for encoding) is automatically added by ffmpeg
-    const excludedTags = Object.keys(this.basicTags).concat(['TSSE']);
-    return omitBy(this.edit, (v, k) => excludedTags.includes(k));
+    const excludedTags = Object.keys(this.basicTags);
+    return omitBy(this.edit, (v, k) => excludedTags.includes(k) || v === null);
+  }
+
+  get duration() {
+    if (this.tag?.format.duration) {
+      const d = Math.floor(this.tag.format.duration);
+      return formatTime(d);
+    }
+  }
+
+  get filesize() {
+    if (this.audioData) {
+      return formatBytes(this.audioData.size);
+    }
   }
 
   @Watch('audioData')
@@ -155,8 +206,8 @@ export default class PlayerInfo extends Vue {
 
   @Watch('tag')
   private onTagUpdated(tag: mm.IAudioMetadata | null) {
-    if (this.tag) {
-      const art = find(this.tag.native['ID3v2.3'], { id: 'APIC' });
+    if (this.tag && this.id3Version) {
+      const art = find(this.tag.native[this.id3Version], { id: 'APIC' });
       if (art) {
         const type = art.value.format.includes('image/jpeg') ? 'image/jpeg' : 'image/png';
         const blob = new Blob([art.value.data], { type });
@@ -205,11 +256,11 @@ export default class PlayerInfo extends Vue {
     musicModule.SET_QUEUE(this.queue);
   }
 
-  // Edit
+  // Info
   private setEdit() {
     this.edit = {};
-    if (this.tag) {
-      const tags = this.tag.native['ID3v2.3'] || this.tag.native['ID3v2.4'];
+    if (this.tag && this.id3Version) {
+      const tags = this.tag.native[this.id3Version];
       if (!tags) return;
       tags.forEach((t) => {
         if ('string' !== typeof t.value) return true;
@@ -219,7 +270,7 @@ export default class PlayerInfo extends Vue {
   }
 
   private deleteTag(k: string) {
-    this.$delete(this.edit, k);
+    this.edit[k] = null;
   }
 
   private async save() {
