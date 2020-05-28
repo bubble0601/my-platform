@@ -1,25 +1,14 @@
-require 'mp3info'
 require 'digest/md5'
 require 'fileutils'
+require_relative 'utils/mp3'
 
 class Song < Sequel::Model(:songs)
   many_to_one :album, order: [:year, :title]
   many_to_one :artist, order: [:name]
   many_to_many :playlists
 
-  def self.to_id3v2(mp3)
-    # to ID3v2.3
-    if mp3.hastag1?
-      mp3.tag1.each do |key, val|
-        frame = Mp3Info::TAG_MAPPING_2_3[key]
-        next if mp3.tag2.has_key?(frame)
-        mp3.tag2[frame] = val
-      end
-      mp3.removetag1
-    end
-  end
-
   def self.fix_mp3(filename)
+    # deprecated
     # MP3Infoのtagの保存に一部不具合あり
     # ffmpegやchromeで見たときにbitrateがおかしくなり、再生時間が正しく取得できない
     # なのでffmpegで書き直して修正
@@ -32,25 +21,26 @@ class Song < Sequel::Model(:songs)
     File.rename(tmp, filename)
   end
 
-  def self.set_tags(filename, data)
+  def self.set_tags(filename, data, delete: false)
     return if data.nil?
-    Mp3Info.open(filename) do |mp3|
-      to_id3v2(mp3)
-
-      mp3.tag2.TIT2 = data[:title] if data[:title]
-      mp3.tag2.TPE1 = data[:artist] if data[:artist]
-      mp3.tag2.TPE2 = data[:album_artist] if data[:album_artist]
-      mp3.tag2.TALB = data[:album] if data[:album]
-      mp3.tag2.TYER = data[:year] if data[:year]
-      mp3.tag2.TRCK = data[:track] if data[:track]
-      mp3.tag2.TPOS = data[:disc] if data[:disc]
-      mp3.tag2.USLT = data[:lyrics] if data[:lyrics]
-      if data[:artwork]
-        mp3.tag2.remove_pictures
-        mp3.tag2.add_picture(data[:artwork])
-      end
+    tags = MP3.new(filename).tags
+    tags.update_to_v24
+    tags.delete_tag('TSSE')
+    tags.title = data[:title] if data[:title]
+    tags.artist = data[:artist] if data[:artist]
+    tags.album_artist = data[:album_artist] if data[:album_artist]
+    tags.album = data[:album] if data[:album]
+    tags.year = data[:year] if data[:year]
+    tags.track = data[:track] if data[:track]
+    tags.disc = data[:disc] if data[:disc]
+    tags.lyrics = data[:lyrics] if data[:lyrics]
+    if data[:artwork]
+      tags.picture = {
+        mime: data[:artwork][:mime],
+        data: data[:artwork][:data],
+      }
     end
-    fix_mp3(filename)
+    tags.save
   end
 
   def self.load_from_tags(tags)
@@ -67,7 +57,7 @@ class Song < Sequel::Model(:songs)
         artist.name = val
       when 'TALB' # Album
         album.title = val
-      when 'TYER' # Year
+      when 'TDRC' # Year
         album.year = val.to_i if val.to_i > 0
       when 'TRCK' # Track number
         values = val.split('/')
@@ -101,38 +91,39 @@ class Song < Sequel::Model(:songs)
   def self.create_from_file(path, filename=nil)
     filename ||= File.basename(path)
     # load id3 tag
-    song = Mp3Info.open(path) do |mp3|
-      to_id3v2(mp3)
+    mp3 = MP3.new(path)
+    tags = mp3.tags
+    tags.update_to_v24
 
-      # load tags
-      song, album, artist = load_from_tags(mp3.tag2)
+    # load tags
+    song, album, artist = load_from_tags(tags)
 
-      unless song.title
-        ext = File.extname(filename)
-        song.title = File.basename(filename)[%r((.*)#{ext}), 1]
-      end
-
-      if artist.name
-        song.artist = Artist.first(artist.to_hash) || artist.save
-        song.artist_name = artist.name unless song.artist_name
-        album.artist_id = song.artist.id
-      end
-
-      if album.artist_id and album.title
-        song.album = Album.first(album.to_hash.slice(:artist_id, :title))
-        if song.album
-          [:year, :num_tracks, :num_discs].each{|k|
-            song.album[k] = album[k] if song.album[k].nil? and album[k]
-          }
-        else
-          song.album = album.save
-        end
-      end
-
-      song.length = mp3.length
-      song.filename = song.to_filename(filename)
-      song
+    unless song.title
+      ext = File.extname(filename)
+      song.title = File.basename(filename)[%r((.*)#{ext}), 1]
     end
+
+    if artist.name
+      song.artist = Artist.first(artist.to_hash) || artist.save
+      song.artist_name = artist.name unless song.artist_name
+      album.artist_id = song.artist.id
+    end
+
+    if album.artist_id and album.title
+      song.album = Album.first(album.to_hash.slice(:artist_id, :title))
+      if song.album
+        [:year, :num_tracks, :num_discs].each{|k|
+          song.album[k] = album[k] if song.album[k].nil? and album[k]
+        }
+      else
+        song.album = album.save
+      end
+    end
+
+    song.length = mp3.length
+    song.filename = song.to_filename(filename)
+    song
+
     song.digest = Digest::MD5.file(path).hexdigest[0,8]
 
     new_filename = "#{CONF.storage.music}/#{song.filename}"
@@ -154,19 +145,22 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
-  def update_tag(tags)
+  def update_tag(new_tags)
     path = self.to_fullpath
-    Mp3Info.open(path) do |mp3|
-      tags.each do |k, v|
-        mp3.tag2[k] = v
-      end
-      mp3.tag2.each do |k, v|
-        mp3.tag2[k] = nil unless tags[k]
+    tags = MP3.new(path).tags
+    new_tags.each do |k, v|
+      case k
+      when 'TYER'
+        tags['TDRC'] = v
+      else
+        tags[k] = v
       end
     end
-    self.class.fix_mp3(path)
+    tags.save
 
-    song, album, artist = self.class.load_from_tags(tags)
+    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+
+    song, album, artist = self.class.load_from_tags(new_tags)
 
     if artist.name == nil
       self.artist = nil

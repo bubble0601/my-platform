@@ -175,7 +175,7 @@ class MainApp < Sinatra::Base
       put '/:id/tag' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
-        song.update_tag(@json.transform_keys(&:to_s).filter{|k, v| v && v.length > 0})
+        song.update_tag(@json.transform_keys(&:to_s))
         status 204
       end
 

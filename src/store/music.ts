@@ -483,7 +483,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async UpdateSongTag(payload: { id: number, data: Dict<string> }) {
+  public async UpdateSongTag(payload: { id: number, data: Dict<string | null> }) {
     const { id, data } = payload;
     await api.updateSongTag(id, data);
   }
