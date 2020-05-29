@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="modal" title="Add new song" ok-only @shown="urlInput.focus()" @hidden="$nextTick($destroy)">
+  <b-modal ref="modal" title="Add new song" hide-footer @shown="urlInput.focus()" @hidden="$nextTick($destroy)">
     <v-nav v-model="nav" :items="navItems" pills/>
     <div v-if="nav === 'download'" class="pt-3">
       <v-form ref="downloadForm">
@@ -146,8 +146,7 @@
   </b-modal>
 </template>
 <script lang="ts">
-import { mixins } from 'vue-class-component';
-import { Component, Watch, Ref } from 'vue-property-decorator';
+import { Component, Mixins, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
 import { isArray, isEmpty, omitBy, Dictionary } from 'lodash';
@@ -185,7 +184,7 @@ interface UploadStatus {
     VForm,
   },
 })
-export default class AddSongDialog extends mixins(DialogMixin) {
+export default class AddSongDialog extends Mixins(DialogMixin) {
   private nav = 'download';
   private navItems = [
     { key: 'download', title: 'Download' },
@@ -257,7 +256,7 @@ export default class AddSongDialog extends mixins(DialogMixin) {
     }
   }
 
-  private async open() {
+  public async open() {
     await waitUntil(() => !!this.modal);
     this.modal.show();
   }

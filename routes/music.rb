@@ -289,7 +289,7 @@ class MainApp < Sinatra::Base
               artist: [$1.strip],
             }
           end
-          matched = /(.*)([-ー−\/／](.*))/.match(title)
+          matched = /(.*)[-ー−\/／](.*)/.match(title)
           if matched
             c1 = $1.strip
             c2 = $2.strip

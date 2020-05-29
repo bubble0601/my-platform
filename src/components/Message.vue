@@ -10,14 +10,13 @@
   </div>
 </template>
 <script lang="ts">
-import { mixins } from 'vue-class-component';
-import { Vue, Component, Watch, Ref } from 'vue-property-decorator';
+import { Vue, Component, Mixins, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
 import { Variant, MsgOptions } from '@/types';
 
 @Component
-export default class Message extends mixins(DialogMixin) {
+export default class Message extends Mixins(DialogMixin) {
   private opened = false;
   private container = null;
   private title = '';

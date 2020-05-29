@@ -1,7 +1,5 @@
 <template>
-  <div class="container">
-    Comming soon
-  </div>
+  <div v-t="'home.message'" class="container"/>
 </template>
 
 <script lang="ts">

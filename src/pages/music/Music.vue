@@ -42,8 +42,7 @@
   </main>
 </template>
 <script lang="ts">
-import { Component, Prop, Ref, Watch } from 'vue-property-decorator';
-import { mixins } from 'vue-class-component';
+import { Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
 import { musicModule } from '@/store';
 import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav } from '@/components';
@@ -57,7 +56,7 @@ import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
     VNav,
   },
 })
-export default class Music extends mixins(SizeMixin) {
+export default class Music extends Mixins(SizeMixin) {
   private mainStyle = {
     height: 'auto',
   };
@@ -126,8 +125,9 @@ export default class Music extends mixins(SizeMixin) {
   }
 
   private addSong() {
-    // @ts-ignore
-    new AddSongDialog().open();
+    new AddSongDialog({
+      parent: this,
+    }).open();
   }
 
   private mOnTouchStart(e: TouchEvent) {

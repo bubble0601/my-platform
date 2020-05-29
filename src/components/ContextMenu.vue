@@ -6,8 +6,7 @@
   </b-list-group>
 </template>
 <script lang="ts">
-import { mixins } from 'vue-class-component';
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component, Mixins, Prop } from 'vue-property-decorator';
 import { DialogMixin } from '@/utils';
 import { Dict } from '@/types';
 
@@ -17,7 +16,7 @@ export interface MenuItem {
 }
 
 @Component
-export default class ContextMenu extends mixins(DialogMixin) {
+export default class ContextMenu extends Mixins(DialogMixin) {
   private shown = false;
   private items: MenuItem[] = [];
   private style: Dict<string> = {
@@ -33,7 +32,7 @@ export default class ContextMenu extends mixins(DialogMixin) {
     window.removeEventListener('mousedown', this.destroy);
   }
 
-  private destroy(e: MouseEvent) {
+  private destroy() {
     this.$destroy();
   }
 

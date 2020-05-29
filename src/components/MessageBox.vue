@@ -23,14 +23,13 @@
   </b-modal>
 </template>
 <script lang="ts">
-import { mixins } from 'vue-class-component';
-import { Vue, Component, Watch, Ref } from 'vue-property-decorator';
+import { Vue, Component, Mixins, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
 import { Variant, MsgBoxOptions } from '@/types';
 
 @Component
-export default class MessageBox extends mixins(DialogMixin) {
+export default class MessageBox extends Mixins(DialogMixin) {
   private show = false;
   private result = false;
   private resolve: ((value?: any) => void) | null = null;
