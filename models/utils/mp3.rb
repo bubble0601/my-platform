@@ -95,12 +95,19 @@ class ID3
 
   def to_utf8
     get_all.each do |key, value|
-      return if value.encoding == PyMP3::Encoding.UTF8
-      tag = key[0...4]
-      if TAGS[tag]
-        TAGS[tag][:set].call(@id3, value)
-      else
-        @id3.delall(tag)
+      begin
+        next if (not value.respond_to?('encoding')) || value.encoding == PyMP3::Encoding.UTF8
+        tag = key[0...4]
+        if TAGS[tag]
+          TAGS[tag][:set].call(@id3, value)
+        else
+          values = @id3.getall(tag)
+          values =  values.map{ |v| v.encoding = PyMP3::Encoding.UTF8; v }
+          @id3.setall(tag, values)
+        end
+      rescue => e
+        p key, value
+        raise e
       end
     end
     @id3
