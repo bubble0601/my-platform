@@ -11,7 +11,6 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Mixins, Watch, Ref } from 'vue-property-decorator';
-import { BModal } from 'bootstrap-vue';
 import { DialogMixin } from '@/utils';
 import { Variant, MsgOptions } from '@/types';
 

@@ -11,6 +11,7 @@ export interface Song {
   album: Album;
   digest: string;
   filename: string;
+  created_at: string;
   time: number;
   year: number | null;
   rate: number;
@@ -56,12 +57,12 @@ export enum REPEAT {
   ONE,
 }
 
-export const getFilename = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
+export const getFilepath = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
 
 const api = {
   fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
-  fetchAudio: (song: Song) => axios.get<Blob>(getFilename(song), { responseType: 'blob' }),
+  fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
 
   uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post<Song[] | null>('/api/music/songs', data, config),
   downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post<Song | null>('/api/music/songs', data),
@@ -348,8 +349,13 @@ export default class MusicModule extends VuexModule {
     this.SET_PLAYLISTS(data);
   }
 
+  @Action
+  public FetchAudio(song: Song) {
+    return api.fetchAudio(song);
+  }
+
   @Action({ rawError: true })
-  public async FetchAudio(song: Song) {
+  public async FetchAudioForPlay(song: Song) {
     if (!song) return;
     if (song === this.nextSong && this.nextAudio) {
       this.SET_AUDIO(this.nextAudio);
@@ -428,7 +434,7 @@ export default class MusicModule extends VuexModule {
   public async Play(song: Song | undefined) {
     if (!song) return;
     this.SET_CURRENT(song);
-    await this.FetchAudio(song);
+    await this.FetchAudioForPlay(song);
     this.SET_PLAYING(true);
   }
 
@@ -443,7 +449,7 @@ export default class MusicModule extends VuexModule {
   public PlayFromQueue(i: number) {
     const song = this.queue[i];
     this.SET_CURRENT(song);
-    this.FetchAudio(song);
+    this.FetchAudioForPlay(song);
     this.SET_QUEUE(this.queue.slice(i + 1));
     this.updateQueue();
   }
@@ -453,7 +459,7 @@ export default class MusicModule extends VuexModule {
     this.OP_HISTORY('push');
     const next = this.queue[0];
     if (next) {
-      const promise = this.FetchAudio(next);
+      const promise = this.FetchAudioForPlay(next);
       this.SET_CURRENT(next);
       this.SHIFT_QUEUE();
       this.updateQueue();
@@ -469,7 +475,7 @@ export default class MusicModule extends VuexModule {
   public PlayPrev() {
     const prev = last(this.history);
     if (prev) {
-      const promise = this.FetchAudio(prev);
+      const promise = this.FetchAudioForPlay(prev);
       this.UNSHIFT_QUEUE();
       this.SET_CURRENT(prev);
       this.OP_HISTORY('pop');

@@ -53,7 +53,7 @@ import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BTable, BvTableFieldArray } from 'bootstrap-vue';
 import { isNumber, sample } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, REPEAT, getFilename } from '@/store/music';
+import { Song, REPEAT, getFilepath } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
 import { EditSongDialog } from './components';
 import { formatTime, download } from '@/utils';
@@ -173,7 +173,7 @@ export default class SongList extends Vue {
     await musicModule.ReloadPlaylistSong(id);
   }
 
-  public showContextMenu(item: Song, i: number, e: MouseEvent) {
+  private showContextMenu(item: Song, n: number, e: MouseEvent) {
     e.preventDefault();
     new ContextMenu().show({
       items: [
@@ -183,10 +183,23 @@ export default class SongList extends Vue {
         {
           text: '編集',
           action: () => {
-            new EditSongDialog({ parent: this }).open(item);
+            const dialog = new EditSongDialog({
+              parent: this,
+              propsData: {
+                getNeighborSong: (current?: Song) => {
+                  if (!current) return {};
+                  const i = this.displayedSongs.indexOf(current);
+                  return {
+                    prevSong: this.displayedSongs[i - 1],
+                    nextSong: this.displayedSongs[i + 1],
+                  };
+                },
+              },
+            });
+            dialog.open(item);
           },
         },
-        { text: 'ダウンロード', action: () => { download(getFilename(item)); } },
+        { text: 'ダウンロード', action: () => { download(getFilepath(item)); } },
       ],
       event: e,
     });

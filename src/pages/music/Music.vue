@@ -99,7 +99,11 @@ export default class Music extends Mixins(SizeMixin) {
   @Watch('currentSong')
   private onSongChanged() {
     if (this.currentSong) {
-      document.title = `♪${this.currentSong.title} - ${this.baseTitle}`;
+      if (this.currentSong.artist.name) {
+        document.title = `♪${this.currentSong.title} - ${this.currentSong.artist.name} | ${this.baseTitle}`;
+      } else {
+        document.title = `♪${this.currentSong.title} | ${this.baseTitle}`;
+      }
     } else {
       document.title = this.baseTitle;
     }
@@ -121,7 +125,7 @@ export default class Music extends Mixins(SizeMixin) {
   }
 
   protected mounted() {
-    if (musicModule.current) musicModule.FetchAudio(musicModule.current);
+    if (musicModule.current) musicModule.FetchAudioForPlay(musicModule.current);
   }
 
   private addSong() {

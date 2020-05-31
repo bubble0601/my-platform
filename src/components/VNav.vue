@@ -1,6 +1,6 @@
 <template>
-  <b-nav :tabs="tabs" :pills="pills" :fill="fill" :justified="justified">
-    <b-nav-text class="d-flex align-items-center">
+  <b-nav :tabs="tabs" :pills="pills" :fill="fill" :justified="justified" :class="{ 'no-wrap': noWrap }">
+    <b-nav-text v-if="$slots['nav-start']" class="d-flex align-items-center">
       <slot name="nav-start"/>
     </b-nav-text>
     <template v-for="item in items">
@@ -40,6 +40,9 @@ export default class VNav extends Vue {
   private justified!: boolean;
 
   @Prop({ type: Boolean, default: false })
+  private noWrap!: boolean;
+
+  @Prop({ type: Boolean, default: false })
   private doRouting!: boolean;
 
   private current: string | null = null;
@@ -52,6 +55,16 @@ export default class VNav extends Vue {
   @Watch('current')
   private onCurrentChanged(val: string | null) {
     this.$emit('input', val);
+    this.$nextTick(() => {
+      this.$el.querySelector('.nav-item .active')?.parentElement?.scrollIntoView({ inline: 'center' });
+    });
   }
 }
 </script>
+<style lang="scss" scoped>
+.no-wrap {
+  flex-wrap: nowrap;
+  word-break: keep-all;
+  overflow-x: auto;
+}
+</style>
