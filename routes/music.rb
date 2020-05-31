@@ -148,10 +148,14 @@ class MainApp < Sinatra::Base
               return unless f[:filename].end_with?('.mp3')
               Song.set_tags(f[:tempfile].path, metadata)
               res = Song.create_from_file(f[:tempfile].path, f[:filename])
-              logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
-              results.push(to_song_data(res))
+              if res
+                results.push(to_song_data(res))
+              else
+                logger.warn "The uploaded song already exists: #{f[:filename]}"
+                results.push(nil)
+              end
             end
-            return 200, results if results.length > 0
+            return 200, results
           else
             f = params[:file]
             Song.set_tags(f[:tempfile].path, metadata)

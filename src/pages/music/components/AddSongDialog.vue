@@ -1,5 +1,5 @@
 <template>
-  <b-modal ref="modal" title="Add new song" hide-footer @shown="urlInput.focus()" @hidden="$nextTick($destroy)">
+  <b-modal v-model="visible" title="Add new song" size="lg" hide-footer @shown="urlInput.focus()" @hidden="onClosed">
     <v-nav v-model="nav" :items="navItems" pills/>
     <div v-if="nav === 'download'" class="pt-3">
       <v-form ref="downloadForm">
@@ -110,37 +110,76 @@
         </b-button>
       </div>
       <b-list-group class="mt-3">
-        <b-list-group-item v-for="(u, i) in uploadQueue" :key="i" class="d-flex align-items-center">
-          <b-spinner v-if="u.status === Status.Processing" type="grow" variant="primary" small/>
-          <b-icon v-else-if="u.status === Status.Success" icon="check" scale="1.5" variant="success"/>
-          <b-icon v-else-if="u.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
-          <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
-          <div class="text-truncate text-nowrap ml-2">
-            <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
-            <span v-else>{{ u.filename }}</span>
-          </div>
-          <div class="ml-auto">
-            <span v-if="u.status === Status.Processing" class="text-primary">
-              Uploading...({{ u.progress }} / 100 )
-            </span>
-            <div v-else-if="u.status === Status.Success">
+        <template v-for="(u, i) in uploadQueue">
+          <!-- multiple files result -->
+          <b-list-group-item v-if="u.status === Status.Success && u.songs.length > 1" :key="i">
+            <div class="text-trucate text-nowrap">
+              <span class="text-secondary mr-3" @click="u.expanded = !u.expanded"><b-icon :icon="u.expanded ? 'caret-down-fill' : 'caret-right-fill'"/></span>
+              <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
+              <span v-else>{{ u.filename }}</span>
               <b-button size="sm" variant="primary" @click="play(u.songs)">
                 <b-icon icon="play"/>
-                <span v-if="$pc">Play</span>
-              </b-button>
-              <b-button size="sm" variant="success" class="ml-2">
-                <b-icon icon="pencil"/>
-                <span v-if="$pc">Edit</span>
+                <span>Play all</span>
               </b-button>
             </div>
-            <div v-else-if="u.status === Status.Warning" class="text-warning">
-              <span>Already exists</span>
+            <b-collapse v-model="u.expanded">
+              <b-list-group flush class="pl-2">
+                <b-list-group-item v-for="(f, i) in u.files" :key="f.name" class="d-flex align-items-center">
+                  <b-icon v-if="u.songs[i]" icon="check" scale="1.5" variant="success"/>
+                  <b-icon v-else icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+                  <div class="text-truncate text-nowrap ml-2">
+                    {{ f.name }}
+                  </div>
+                  <div v-if="u.songs[i]" class="ml-auto">
+                    <b-button size="sm" variant="primary" @click="play(u.songs[i])">
+                      <b-icon icon="play"/>
+                      <span v-if="$pc">Play</span>
+                    </b-button>
+                    <b-button size="sm" variant="success" class="ml-2">
+                      <b-icon icon="pencil"/>
+                      <span v-if="$pc">Edit</span>
+                    </b-button>
+                  </div>
+                  <div v-else-if="u.songs[i]" class="ml-auto text-warning">
+                    <span>Already exists</span>
+                  </div>
+                </b-list-group-item>
+              </b-list-group>
+            </b-collapse>
+          </b-list-group-item>
+          <!-- single file -->
+          <b-list-group-item v-else :key="i" class="d-flex align-items-center">
+            <b-spinner v-if="u.status === Status.Processing" type="grow" variant="primary" small/>
+            <b-icon v-else-if="u.status === Status.Success" icon="check" scale="1.5" variant="success"/>
+            <b-icon v-else-if="u.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+            <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
+            <div class="text-truncate text-nowrap ml-2">
+              <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
+              <span v-else>{{ u.filename }}</span>
             </div>
-            <div v-else>
-              <b-button size="sm" variant="outline-danger" @click="retry(u)">Retry</b-button>
+            <div class="ml-auto">
+              <span v-if="u.status === Status.Processing" class="text-primary">
+                Uploading...({{ u.progress }} / 100 )
+              </span>
+              <div v-else-if="u.status === Status.Success">
+                <b-button size="sm" variant="primary" @click="play(u.songs)">
+                  <b-icon icon="play"/>
+                  <span v-if="$pc">Play</span>
+                </b-button>
+                <b-button size="sm" variant="success" class="ml-2">
+                  <b-icon icon="pencil"/>
+                  <span v-if="$pc">Edit</span>
+                </b-button>
+              </div>
+              <div v-else-if="u.status === Status.Warning" class="text-warning">
+                <span>Already exists</span>
+              </div>
+              <div v-else>
+                <b-button size="sm" variant="outline-danger" @click="retry(u)">Retry</b-button>
+              </div>
             </div>
-          </div>
-        </b-list-group-item>
+          </b-list-group-item>
+        </template>
       </b-list-group>
     </div>
   </b-modal>
@@ -152,7 +191,7 @@ import axios from 'axios';
 import { isArray, isEmpty, omitBy, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { DialogMixin, waitUntil } from '@/utils';
+import { DialogMixin } from '@/utils';
 import { VNav, VForm, VInput } from '@/components';
 
 enum Status {
@@ -176,6 +215,8 @@ interface UploadStatus {
   filename: string;
   progress: number;
   songs?: Song[];
+  expanded: boolean;
+  files: File[];
 }
 
 @Component({
@@ -185,6 +226,7 @@ interface UploadStatus {
   },
 })
 export default class AddSongDialog extends Mixins(DialogMixin) {
+  private visible = false;
   private nav = 'download';
   private navItems = [
     { key: 'download', title: 'Download' },
@@ -217,7 +259,6 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
   private uTrack = '';
   private uDisc = '';
 
-  @Ref() private modal!: BModal;
   @Ref() private downloadForm!: VForm;
   @Ref() private urlInput!: VInput;
 
@@ -256,9 +297,16 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
     }
   }
 
-  public async open() {
-    await waitUntil(() => !!this.modal);
-    this.modal.show();
+  protected mounted() {
+    this.visible = true;
+  }
+
+  public open() {
+    // nop
+  }
+
+  private onClosed() {
+    this.$destroy();
   }
 
   private onURLChanged() {
@@ -359,6 +407,8 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
       filename: this.filename,
       progress: 0,
       status: Status.Processing,
+      expanded: false,
+      files: this.files,
     };
     this.uploadQueue.push(status);
     this.uReset();
