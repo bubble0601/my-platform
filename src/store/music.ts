@@ -46,11 +46,6 @@ interface FetchSongParams {
   playlist?: number | string;
 }
 
-interface CandidateResponse {
-  title: string[];
-  artist: string[];
-}
-
 export enum REPEAT {
   NONE,
   ALL,
@@ -63,10 +58,6 @@ const api = {
   fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
-
-  uploadSong: (data: FormData, config: AxiosRequestConfig) => axios.post<Song[] | null>('/api/music/songs', data, config),
-  downloadSong: (data: { url: string, metadata: Dict<string> }) => axios.post<Song | null>('/api/music/songs', data),
-  getCandidates: (url: string) => axios.get<CandidateResponse>('/api/music/tools/candidates', { params: { url } }),
 
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
@@ -83,10 +74,6 @@ const api = {
   updatePlaylistSong: (id: number, songId: number, weight: number) =>
                         axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
   removePlaylistSong: (id: number, songId: number) => axios.delete(`/api/music/playlists/${id}/songs/${songId}`),
-
-  prepareSync: () => axios.get<{ output: string }>('/api/music/sync/testrun'),
-  sync: () => axios.post<{ output: string }>('/api/music/sync/run'),
-  scan: () => axios.post<{ output: string }>('/api/music/scan'),
 };
 
 @Module({ name: 'music' })
@@ -324,6 +311,11 @@ export default class MusicModule extends VuexModule {
     }
   }
 
+  @Action
+  public async FetchSong(id: number) {
+    return await api.fetchSong(id);
+  }
+
   @Action({ rawError: true })
   public async FetchSongs(params: FetchSongParams = {}) {
     this.SET_SONGS([]);
@@ -513,24 +505,6 @@ export default class MusicModule extends VuexModule {
     this.UPDATE_SONGS({ id, song: null });
   }
 
-  @Action({ rawError: true })
-  public async Upload(payload: { data: FormData, onUploadProgress: (e: ProgressEvent) => void }) {
-    const { data, onUploadProgress } = payload;
-    const config: AxiosRequestConfig = {};
-    config.onUploadProgress = onUploadProgress;
-    return await api.uploadSong(data, config);
-  }
-
-  @Action({ rawError: true })
-  public async Download(data: { url: string, metadata: Dict<string> }) {
-    return await api.downloadSong(data);
-  }
-
-  @Action
-  public async GetCandidatesFromURL(url: string) {
-    return await api.getCandidates(url);
-  }
-
   @Action
   public async CreatePlaylist(data: { name: string, songs: Song[]}) {
     const res = await api.createPlaylist(data.name);
@@ -562,29 +536,6 @@ export default class MusicModule extends VuexModule {
     data.songs.forEach((song) => {
       api.removePlaylistSong(id, song.id);
     });
-  }
-
-  @Action
-  public Fix(id: number) {
-    api.fixSong(id);
-  }
-
-  @Action
-  public async PrepareSync() {
-    const { data } = await api.prepareSync();
-    return data;
-  }
-
-  @Action
-  public async Sync() {
-    const { data } = await api.sync();
-    return data;
-  }
-
-  @Action
-  public async Scan() {
-    const { data } = await api.scan();
-    return data;
   }
 }
 

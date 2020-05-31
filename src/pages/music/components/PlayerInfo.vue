@@ -42,12 +42,12 @@
         </b-list-group-item>
       </b-list-group>
       <div v-else-if="tab === 'info'" class="p-2">
-        <v-field v-for="(label, k) in basicTags" :key="k" :label="cap(label)" size="sm">
+        <v-field v-for="(label, k) in basicTags" :key="k" :label="label" size="sm">
           <div class="d-flex align-items-center">
             <v-input v-model="edit[k]" size="sm"/>
           </div>
         </v-field>
-        <v-field v-for="(v, k) in filteredEdit" :key="k" :label="k" size="sm">
+        <v-field v-for="(v, k) in otherTags" :key="k" :label="k" size="sm">
           <div class="d-flex align-items-center">
             <v-input v-model="edit[k]" size="sm"/>
             <b-button-close class="ml-1" @click="deleteTag(k)"/>
@@ -83,17 +83,16 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
-import { capitalize, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
+import { clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { VNav, VForm, Rate } from '@/components';
+import { VNav, Rate } from '@/components';
 import { Dict } from '@/types';
 import { formatTime, formatBytes } from '@/utils';
 
 @Component({
   components: {
     VNav,
-    VForm,
     Rate,
   },
 })
@@ -113,7 +112,6 @@ export default class PlayerInfo extends Vue {
 
   private formatInfoVisible = false;
   private edit: Dict<string | null> = {};
-  private readonly cap = capitalize;
 
   get song() {
     return musicModule.current;
@@ -147,27 +145,27 @@ export default class PlayerInfo extends Vue {
   get basicTags() {
     if (this.id3Version === 'ID3v2.3') {
       return {
-        TIT2: 'title',
-        TPE1: 'artist',
-        TPE2: 'album artist',
-        TALB: 'album',
-        TYER: 'year',
-        TRCK: 'track',
-        TPOS: 'disc',
+        TIT2: 'Title',
+        TPE1: 'Artist',
+        TPE2: 'Album artist',
+        TALB: 'Album',
+        TYER: 'Year',
+        TRCK: 'Track',
+        TPOS: 'Disc',
       };
     }
     return {
-      TIT2: 'title',
-      TPE1: 'artist',
-      TPE2: 'album artist',
-      TALB: 'album',
-      TDRC: 'year',
-      TRCK: 'track',
-      TPOS: 'disc',
+      TIT2: 'Title',
+      TPE1: 'Artist',
+      TPE2: 'Album artist',
+      TALB: 'Album',
+      TDRC: 'Year',
+      TRCK: 'Track',
+      TPOS: 'Disc',
     };
   }
 
-  get filteredEdit() {
+  get otherTags() {
     const excludedTags = Object.keys(this.basicTags);
     return omitBy(this.edit, (v, k) => excludedTags.includes(k) || v === null);
   }
@@ -188,7 +186,7 @@ export default class PlayerInfo extends Vue {
   @Watch('audioData')
   private onDataChanged() {
     if (this.audioData) {
-      mm.parseBlob(this.audioData).then((metadata: mm.IAudioMetadata) => {
+      mm.parseBlob(this.audioData).then((metadata) => {
         this.tag = metadata;
         this.setEdit();
       }).catch(() => {
@@ -284,10 +282,10 @@ export default class PlayerInfo extends Vue {
     }
   }
 
-  private fix() {
-    if (!this.song) return;
-    musicModule.Fix(this.song.id);
-  }
+  // private fix() {
+  //   if (!this.song) return;
+  //   musicModule.Fix(this.song.id);
+  // }
 
   private deleteSong() {
     this.$confirm('Do you really delete this song?').then(() => {

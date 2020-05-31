@@ -324,7 +324,7 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
         this.url = this.url.replace(matched[0], '');
       }
     }
-    musicModule.GetCandidatesFromURL(this.url).then((res) => {
+    axios.get<{ title: string[], artist: string[] }>('/api/music/tools/candidates', { params: { url: this.url } }).then((res) => {
       const el = document.activeElement;
       if (el instanceof HTMLInputElement) {
         el.blur();
@@ -362,7 +362,7 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
 
   private execDownload(status: DownloadStatus) {
     status.status = Status.Processing;
-    musicModule.Download({
+    axios.post<Song | null>('/api/music/songs', {
       url: status.url,
       metadata: status.metadata,
     }).then((res) => {
@@ -417,8 +417,7 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
 
   private execUpload(status: UploadStatus) {
     status.status = Status.Processing;
-    musicModule.Upload({
-      data: status.data,
+    axios.post<Song[] | null>('/api/music/songs', status.data, {
       onUploadProgress: (e: ProgressEvent) => {
         status.progress = Math.round((e.loaded * 100) / e.total);
       },

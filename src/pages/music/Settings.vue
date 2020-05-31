@@ -21,8 +21,9 @@
   </div>
 </template>
 <script lang="ts">
+import axios from 'axios';
 import { Vue, Component } from 'vue-property-decorator';
-import { musicModule, settingModule } from '@/store';
+import { settingModule } from '@/store';
 
 @Component
 export default class Settings extends Vue {
@@ -39,20 +40,20 @@ export default class Settings extends Vue {
   }
 
   private async sync() {
-    let data;
+    let res;
     this.loadingSync = true;
     try {
-      data = await musicModule.PrepareSync();
+      res = await axios.get<{ output: string }>('/api/music/sync/testrun');
     } finally {
       this.loadingSync = false;
     }
-    if (!data.output) return;
+    if (!res.data.output) return;
 
-    this.$confirm('Sync Info', data.output, { pre: true, variant: 'success' }).then(async () => {
+    this.$confirm('Sync Info', res.data.output, { pre: true, variant: 'success' }).then(async () => {
       this.$bvToast.toast('Syncing...', { title: 'Info', variant: 'info' });
-      const result = await musicModule.Sync();
+      res = await axios.post<{ output: string }>('/api/music/sync/run');
       const h = this.$createElement;
-      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [result.output])], {
+      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res.data.output])], {
         title: 'Completed',
         variant: 'success',
         solid: true,
@@ -62,10 +63,10 @@ export default class Settings extends Vue {
 
   private async scan() {
     this.scanning = true;
-    const result = await musicModule.Scan();
+    const res = await axios.post<{ output: string }>('/api/music/scan');
     this.scanning = false;
     const h = this.$createElement;
-    this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [result.output])], {
+    this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res.data.output])], {
       title: 'Completed',
       variant: 'success',
       solid: true,
