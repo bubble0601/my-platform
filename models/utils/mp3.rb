@@ -122,7 +122,6 @@ class ID3
   end
 
   def []=(key, value)
-    p key, value
     if TAGS[key]
       if value
         TAGS[key][:set].call(@id3, value)
@@ -130,9 +129,7 @@ class ID3
         TAGS[key][:del].call(@id3)
       end
     elsif key.length === 4 && value == nil
-      p @id3
       @id3.delall(key)
-      p @id3
     else
       method_missing(:[]=, key, value)
     end

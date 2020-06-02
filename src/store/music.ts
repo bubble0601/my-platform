@@ -431,6 +431,11 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
+  public Pause() {
+    this.SET_PLAYING(false);
+  }
+
+  @Action
   public async PlayAndSet(song: Song | undefined) {
     if (!song) return;
     this.Play(song);

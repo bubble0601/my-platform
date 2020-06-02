@@ -1,4 +1,5 @@
 require 'date'
+require 'json'
 require 'net/http'
 require 'nokogiri'
 
@@ -70,6 +71,33 @@ class MainApp < Sinatra::Base
             created_at: song[:created_at].strftime("%Y/%m/%d %H:%M"),
           }
         end
+      end
+
+      def get_json(url, limit = 10)
+        raise ArgumentError, 'HTTP redirect too deep' if limit == 0
+        uri = URI.parse(url)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = uri.scheme == 'https'
+        begin
+          response = http.request_get(uri, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
+          case response
+          when Net::HTTPSuccess
+            return JSON.parse(response.body)
+          when Net::HTTPRedirection
+            location = response['location']
+            warn "redirected to #{location}"
+            return get_json(location, limit - 1)
+          else
+            puts [uri.to_s, response.value].join("\n")
+          end
+        rescue => e
+          puts [uri.to_s, e.class, e].join("\n")
+        end
+      end
+
+      def search_info(title, artist)
+        url = URI.escape("https://musicbrainz.org/ws/2/recording?query=title:#{title} AND artist:#{artist}&fmt=json")
+        get_json(url)
       end
     end
 
@@ -307,6 +335,60 @@ class MainApp < Sinatra::Base
             artist: [],
           }
         end
+      end
+
+      get '/searchinfo' do
+        results = []
+        search_result = search_info(params[:title], params[:artist])
+        open("./storage/temp/info.json", 'w') {|f| f.write(JSON.pretty_generate(search_result))}
+        search_result['recordings'].each do |rec|
+          # 候補2つ以上のときスコア70未満は無視
+          break if rec['score'] < 70 and results.length > 1
+          artist = rec['artist-credit'][0]['name']
+          if rec['artist-credit'].length > 1
+            artist = rec['artist-credit'].reduce('') do |result, item|
+              result += item['name']
+              result += item['joinphrase'] if item['joinphrase']
+              result
+            end
+          end
+          next unless rec['releases']
+          rec['releases'].each do |album|
+            results.push({
+              title: rec['title'],
+              artist: artist,
+              album: (album['title'] rescue nil),
+              album_artist: (album['artist-credit'][0]['name'] rescue nil),
+              year: (Date.parse(album['date']).year rescue nil),
+              track_num: (album['media'][0]['track'][0]['number'] rescue nil),
+              track_count: (album['media'][0]['track-count'] rescue nil),
+              disc_num: (album['media'][0]['position'] rescue nil),
+              disc_count: (album['count'] rescue nil),
+            })
+          end
+        end
+        return results.sort_by{|x|
+          [
+            x[:album_artist] == "Various Artists" ? 1 : 0,
+            x[:title].downcase.eql?(params[:title].downcase) ? 0 : 1,
+            x[:track_count] > 5 ? 0 : 1,
+            x[:year] || 10000,
+          ]
+        }.map{|x|
+          if x[:track_num] and x[:track_count]
+            x[:track] = [x[:track_num], x[:track_count]].join('/')
+          else
+            x[:track] = nil
+          end
+          if x[:disc_num] and x[:disc_count]
+            x[:disc] = [x[:disc_num], x[:disc_count]].join('/')
+          else
+            x[:disc] = nil
+          end
+          [:track_num, :track_count, :disc_num, :disc_count].each{|k| x.delete(k)}
+          x[:year] = x[:year].to_s
+          x
+        }
       end
     end
 

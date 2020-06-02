@@ -47,7 +47,7 @@ import SongList from './SongList.vue';
     }
   },
 })
-export default class Plylists extends Vue {
+export default class Playlists extends Vue {
   @Prop({ type: [Number, String], default: 0 })
   private id!: number | string;
 

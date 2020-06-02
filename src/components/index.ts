@@ -7,6 +7,7 @@ export { default as MessageBox } from './MessageBox.vue';
 export { default as Rate } from './Rate.vue';
 export { default as VField } from './VField.vue';
 export { default as VForm } from './VForm.vue';
+export { default as VFormGroup } from './VFormGroup.vue';
 export { default as VHelp } from './VHelp.vue';
 export { default as VInfo } from './VInfo.vue';
 export { default as VInput } from './VInput.vue';

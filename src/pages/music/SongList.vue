@@ -55,7 +55,7 @@ import { isNumber, sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT, getFilepath } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
-import { EditSongDialog } from './components';
+import { SongInfoDialog } from './components';
 import { formatTime, download } from '@/utils';
 
 @Component({
@@ -181,9 +181,9 @@ export default class SongList extends Vue {
         { text: '次に再生', action: () => { this.insertIntoNext(item); } },
         { text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
         {
-          text: '編集',
+          text: '詳細を表示',
           action: () => {
-            const dialog = new EditSongDialog({
+            const dialog = new SongInfoDialog({
               parent: this,
               propsData: {
                 getNeighborSong: (current?: Song) => {

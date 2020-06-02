@@ -1,6 +1,6 @@
 # Application settings
 app:
-  name: 'ibubble'
+  name: 'my platform'
   debug: true
 
 # Server settings

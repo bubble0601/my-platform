@@ -19,6 +19,6 @@ gem 'minitest'
 gem 'rack-test'
 
 # Tools
-gem 'pycall'
 gem 'bcrypt'
+gem 'pycall'
 gem 'nokogiri'
