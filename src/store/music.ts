@@ -213,7 +213,7 @@ export default class MusicModule extends VuexModule {
   private UPDATE_QUEUE_ITEM(song: Song) {
     const find  = (queue: Song[]) => {
       return findIndex(queue, (s) => s.id === song.id && s.digest !== song.digest);
-    }
+    };
     let n = find(this.queue);
     while (n >= 0) {
       this.queue[n] = song;

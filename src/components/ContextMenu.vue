@@ -46,7 +46,11 @@ export default class ContextMenu extends Mixins(DialogMixin) {
       } else {
         this.style.left = `${e.clientX}px`;
       }
-      this.style.top = `${e.clientY}px`;
+      if (this.$el.clientHeight + e.clientY > window.innerHeight) {
+        this.style.top = `${e.clientY - this.$el.clientHeight}px`;
+      } else {
+        this.style.top = `${e.clientY}px`;
+      }
     });
   }
 }

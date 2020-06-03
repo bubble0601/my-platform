@@ -41,8 +41,8 @@
           <b-button-close class="ml-auto" @mousedown.prevent @click="remove(i)"/>
         </b-list-group-item>
       </b-list-group>
-      <div v-else-if="tab === 'info'" class="container p-2">
-        <dl v-if="song" class="row">
+      <div v-else-if="tab === 'info'" class="p-2">
+        <dl v-if="song">
           <dt>Title</dt>
           <dd>{{ song.title }}</dd>
           <dt>Artist</dt>
@@ -68,8 +68,14 @@
           <dt>Tag types</dt>
           <dd>{{ format.tagTypes ? format.tagTypes.join(', ') : '&nbsp;' }}</dd>
         </dl>
-        <div class="mt-1 mb-2">
-          <b-button variant="success" class="mr-2" @click="editSong">Edit</b-button>
+        <div class="mt-1">
+          <b-dropdown split variant="success" text="Edit" @click="editSong">
+            <b-dropdown-item @click="editSong('tag')">Tag</b-dropdown-item>
+            <b-dropdown-item @click="editSong('lyrics')">Lyrics</b-dropdown-item>
+            <b-dropdown-item @click="editSong('artwork')">Artwork</b-dropdown-item>
+          </b-dropdown>
+        </div>
+        <div class="my-2">
           <b-button variant="danger" @click="deleteSong">Delete</b-button>
         </div>
       </div>
@@ -85,6 +91,7 @@ import { Song } from '@/store/music';
 import { VNav, Rate } from '@/components';
 import { Dict } from '@/types';
 import { formatTime, formatBytes } from '@/utils';
+import SongInfoDialog from './SongInfoDialog.vue';
 
 @Component({
   components: {
@@ -227,8 +234,22 @@ export default class PlayerInfo extends Vue {
   }
 
   // Info
-  private editSong() {
-
+  private editSong(nav = 'info') {
+    if (!this.song) return;
+    const dialog = new SongInfoDialog({
+      parent: this.$parent,
+      propsData: {
+        getNeighborSong: (current?: Song) => {
+          if (!current) return {};
+          const i = this.queue.indexOf(current);
+          return {
+            prevSong: this.queue[i - 1],
+            nextSong: this.queue[i + 1],
+          };
+        },
+      },
+    });
+    dialog.open(this.song, nav);
   }
 
   private deleteSong() {

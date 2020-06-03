@@ -184,7 +184,7 @@ export default class SongList extends Vue {
           text: '詳細を表示',
           action: () => {
             const dialog = new SongInfoDialog({
-              parent: this,
+              parent: this.$parent,
               propsData: {
                 getNeighborSong: (current?: Song) => {
                   if (!current) return {};
