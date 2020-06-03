@@ -1,5 +1,5 @@
 import Vue, { VueConstructor } from 'vue';
-import { now, isDate } from 'lodash';
+import { now, isDate, round } from 'lodash';
 import store from '@/store';
 
 export { calcTextareaHeight } from './calcHeight';
@@ -69,7 +69,7 @@ export function getWeekDay(arg: string | Date) {
 export function formatTime(time: number) {
   const h = Math.floor(time / 3600);
   const m = Math.floor((time - 3600 * h) / 60);
-  const s = time % 60;
+  const s = round(time % 60, 2);
   const H = h > 0 ? `${h}:` : '';
   const M = m < 10 ? `0${m}` : String(m);
   const S = s < 10 ? `0${s}` : String(s);

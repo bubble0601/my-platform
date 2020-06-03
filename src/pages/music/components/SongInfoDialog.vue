@@ -64,7 +64,7 @@
           </div>
         </div>
         <!-- edit -->
-        <audio-editor v-else-if="nav === 'edit'" :song="song" :audio-data="audioData" class="pt-3" @updated="reload"/>
+        <audio-editor v-else-if="nav === 'edit'" :song="song" :data="audioData" class="pt-3" @updated="reload"/>
       </keep-alive>
       <template #modal-footer="{ close }">
         <b-button-group class="mr-auto">
@@ -264,9 +264,11 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
 
   private async reload() {
     if (!this.song) return;
-    const { data } = await musicModule.FetchSong(this.song.id);
-    this.song = data;
-    await musicModule.ReloadSongs();
+    const res1 = await musicModule.FetchSong(this.song.id);
+    this.song = res1.data;
+    const res2 = await musicModule.FetchAudio(this.song);
+    this.audioData = res2.data;
+    musicModule.ReloadSong(this.song.id);
   }
 
   // info
@@ -348,15 +350,6 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     if (!this.song) return;
     await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
     this.reload();
-  }
-
-  // edit
-  private onUpdate() {
-
-  }
-
-  private seek() {
-
   }
 }
 </script>

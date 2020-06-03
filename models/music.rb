@@ -7,20 +7,6 @@ class Song < Sequel::Model(:songs)
   many_to_one :artist, order: [:name]
   many_to_many :playlists
 
-  def self.fix_mp3(filename)
-    # deprecated
-    # MP3Infoのtagの保存に一部不具合あり
-    # ffmpegやchromeで見たときにbitrateがおかしくなり、再生時間が正しく取得できない
-    # なのでffmpegで書き直して修正
-    tmp = "#{filename}.tmp.mp3"
-    out = `ffmpeg -i #{filename.escape_shell} -c copy #{tmp.escape_shell}`
-    unless $?.success?
-      File.delete(tmp)
-      raise "failed: #{out}"
-    end
-    File.rename(tmp, filename)
-  end
-
   def self.set_tags(filename, data, delete: false)
     return if data.nil?
     tags = MP3.new(filename).tags
@@ -145,6 +131,21 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
+  def to_filename(original_name = nil)
+    artist = self.artist&.name&.escape_filename || 'Unknown Artist'
+    album = self.album&.title&.escape_filename || 'Unknown Album'
+    title = "#{self.title&.escape_filename}.mp3" || original_name || 'Unknown Song.mp3'
+    if self.track_num
+      "#{artist}/#{album}/%02d #{title}" % self.track_num
+    else
+      "#{artist}/#{album}/#{title}"
+    end
+  end
+
+  def to_fullpath
+    "#{CONF.storage.music}/#{self.filename}"
+  end
+
   def update_tag(new_tags)
     path = self.to_fullpath
     tags = MP3.new(path).tags
@@ -207,23 +208,34 @@ class Song < Sequel::Model(:songs)
     self.update(song.to_hash)
   end
 
-  def fix
-    self.class.fix_mp3(self.to_fullpath)
-  end
-
-  def to_filename(original_name = nil)
-    artist = self.artist&.name&.escape_filename || 'Unknown Artist'
-    album = self.album&.title&.escape_filename || 'Unknown Album'
-    title = "#{self.title&.escape_filename}.mp3" || original_name || 'Unknown Song.mp3'
-    if self.track_num
-      "#{artist}/#{album}/%02d #{title}" % self.track_num
-    else
-      "#{artist}/#{album}/#{title}"
+  def replace_file(new_path)
+    old_path = self.to_fullpath
+    tags = (ID3.new(old_path) rescue nil)
+    ntags = (ID3.new(new_path) rescue nil)
+    unless ntags
+      n = PyMP3::ID3FileType.new(new_path)
+      n.add_tags
+      n.save
+      ntags = ID3.new(new_path)
     end
-  end
-
-  def to_fullpath
-    "#{CONF.storage.music}/#{self.filename}"
+    p tags, ntags
+    if tags
+      ntags.get_all.each do |k, v|
+        ntags.delall(k)
+      end
+      tags.get_all.each do |k, v|
+        if Array === v
+          ntags.setall(k, v)
+        else
+          ntags.setall(k, [v])
+        end
+      end
+      ntags.save
+    end
+    FileUtils.move(new_path, old_path)
+    self.digest = Digest::MD5.file(self.to_fullpath).hexdigest[0,8]
+    self.length = MP3.new(old_path).length
+    self.save
   end
 end
 

@@ -41,40 +41,36 @@
           <b-button-close class="ml-auto" @mousedown.prevent @click="remove(i)"/>
         </b-list-group-item>
       </b-list-group>
-      <div v-else-if="tab === 'info'" class="p-2">
-        <v-field v-for="(label, k) in basicTags" :key="k" :label="label" size="sm">
-          <div class="d-flex align-items-center">
-            <v-input v-model="edit[k]" size="sm"/>
-          </div>
-        </v-field>
-        <v-field v-for="(v, k) in otherTags" :key="k" :label="k" size="sm">
-          <div class="d-flex align-items-center">
-            <v-input v-model="edit[k]" size="sm"/>
-            <b-button-close class="ml-1" @click="deleteTag(k)"/>
-          </div>
-        </v-field>
-        <div class="d-flex my-2">
-          <b-button variant="outline-danger" class="mr-auto" @click="setEdit">Cancel</b-button>
-          <b-button variant="success" @click="save">Save</b-button>
-        </div>
-        <div v-if="tag" class="my-2">
-          <b-button variant="info" @click="formatInfoVisible = !formatInfoVisible">
-            {{ formatInfoVisible ? 'Hide' : 'Show' }} format info
-          </b-button>
-          <b-collapse v-model="formatInfoVisible" class="mt-2">
-            <b-card no-body class="p-2">
-              <b-card-text>
-                <span>{{ tag.format.codec }} / {{ tag.format.codecProfile }}</span><br>
-                <span>{{ (tag.format.bitrate / 1000).toFixed(1) }}kbps / {{ tag.format.sampleRate / 1000 }}kHz</span><br>
-                <span>{{ duration }} / {{ filesize }}</span><br>
-                <span>Tags: {{ tag.format.tagTypes.join(', ') }}</span>
-              </b-card-text>
-            </b-card>
-          </b-collapse>
-        </div>
+      <div v-else-if="tab === 'info'" class="container p-2">
+        <dl v-if="song" class="row">
+          <dt>Title</dt>
+          <dd>{{ song.title }}</dd>
+          <dt>Artist</dt>
+          <dd :class="{ 'text-muted': song.artist.id === null }">{{ song.artist.name }}</dd>
+          <dt>Album</dt>
+          <dd :class="{ 'text-muted': song.album.id === null }">{{ song.album.title }}</dd>
+          <dt>Album artist</dt>
+          <dd :class="{ 'text-muted': !song.album.artist }">{{ song.album.artist }}</dd>
+          <dt>Year</dt>
+          <dd>{{ song.year || '&nbsp;' }}</dd>
+          <dt>Play time</dt>
+          <dd>{{ formatTime(song.time) }}</dd>
+          <dt>Created date</dt>
+          <dd>{{ song.created_at }}</dd>
+          <dt>File size</dt>
+          <dd>{{ filesize ? filesize : '&nbsp;' }}</dd>
+          <dt>Codec</dt>
+          <dd>{{ format.codec }} / {{ format.codecProfile }}</dd>
+          <dt>Bitrate</dt>
+          <dd>{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
+          <dt>Sampling rate</dt>
+          <dd>{{ format.sampleRate ? `${format.sampleRate / 1000}kHz` : '&nbsp;' }}</dd>
+          <dt>Tag types</dt>
+          <dd>{{ format.tagTypes ? format.tagTypes.join(', ') : '&nbsp;' }}</dd>
+        </dl>
         <div class="mt-1 mb-2">
-          <!-- <b-button v-b-tooltip.hover title="Fix playtime or bitrate" variant="warning" class="mr-2" @click="fix">Fix</b-button> -->
-          <b-button variant="danger" class="mr-2" @click="deleteSong">Delete</b-button>
+          <b-button variant="success" class="mr-2" @click="editSong">Edit</b-button>
+          <b-button variant="danger" @click="deleteSong">Delete</b-button>
         </div>
       </div>
     </div>
@@ -97,6 +93,7 @@ import { formatTime, formatBytes } from '@/utils';
   },
 })
 export default class PlayerInfo extends Vue {
+  private readonly formatTime = formatTime;
   private tab = 'song';
   private readonly tabs = [
       { key: 'song', title: 'Song' },
@@ -109,9 +106,6 @@ export default class PlayerInfo extends Vue {
 
   private queue: Song[] = [];
   private dragging: { index: number, song: Song } | null = null;
-
-  private formatInfoVisible = false;
-  private edit: Dict<string | null> = {};
 
   get song() {
     return musicModule.current;
@@ -142,32 +136,11 @@ export default class PlayerInfo extends Vue {
     return musicModule.queue;
   }
 
-  get basicTags() {
-    if (this.id3Version === 'ID3v2.3') {
-      return {
-        TIT2: 'Title',
-        TPE1: 'Artist',
-        TPE2: 'Album artist',
-        TALB: 'Album',
-        TYER: 'Year',
-        TRCK: 'Track',
-        TPOS: 'Disc',
-      };
+  get format() {
+    if (this.tag) {
+      return this.tag.format;
     }
-    return {
-      TIT2: 'Title',
-      TPE1: 'Artist',
-      TPE2: 'Album artist',
-      TALB: 'Album',
-      TDRC: 'Year',
-      TRCK: 'Track',
-      TPOS: 'Disc',
-    };
-  }
-
-  get otherTags() {
-    const excludedTags = Object.keys(this.basicTags);
-    return omitBy(this.edit, (v, k) => excludedTags.includes(k) || v === null);
+    return {};
   }
 
   get duration() {
@@ -188,7 +161,6 @@ export default class PlayerInfo extends Vue {
     if (this.audioData) {
       mm.parseBlob(this.audioData).then((metadata) => {
         this.tag = metadata;
-        this.setEdit();
       }).catch(() => {
         musicModule.SET_CURRENT(null);
       });
@@ -255,37 +227,9 @@ export default class PlayerInfo extends Vue {
   }
 
   // Info
-  private setEdit() {
-    this.edit = {};
-    if (this.tag && this.id3Version) {
-      const tags = this.tag.native[this.id3Version];
-      if (!tags) return;
-      tags.forEach((t) => {
-        if ('string' !== typeof t.value) return true;
-        this.$set(this.edit, t.id, t.value);
-      });
-    }
-  }
+  private editSong() {
 
-  private deleteTag(k: string) {
-    this.edit[k] = null;
   }
-
-  private async save() {
-    const song = musicModule.current;
-    if (!song) return;
-    await musicModule.UpdateSongTag({ id: song.id, data: this.edit });
-    if (musicModule.playlistId === null) {
-      await musicModule.ReloadSong(song.id);
-    } else {
-      await musicModule.ReloadPlaylistSong(song.id);
-    }
-  }
-
-  // private fix() {
-  //   if (!this.song) return;
-  //   musicModule.Fix(this.song.id);
-  // }
 
   private deleteSong() {
     this.$confirm('Do you really delete this song?').then(() => {

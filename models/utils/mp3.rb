@@ -1,7 +1,7 @@
 require 'pycall/import'
 include PyCall::Import
 module PyMP3
-  pyfrom 'mutagen.id3', import: [:ID3, :Encoding, :Frame, :Frames, :PictureType]
+  pyfrom 'mutagen.id3', import: [:ID3, :Encoding, :Frame, :Frames, :PictureType, :ID3FileType]
   pyfrom 'mutagen.mp3', import: [:MP3]
 end
 

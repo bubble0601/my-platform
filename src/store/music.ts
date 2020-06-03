@@ -62,7 +62,6 @@ const api = {
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
-  fixSong: (id: number) => axios.put(`/api/music/songs/${id}/fix`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
 
@@ -208,6 +207,23 @@ export default class MusicModule extends VuexModule {
   @Mutation
   private PUSH_QUEUE(songs: Song[]) {
     this.queue.push(...songs);
+  }
+
+  @Mutation
+  private UPDATE_QUEUE_ITEM(song: Song) {
+    const find  = (queue: Song[]) => {
+      return findIndex(queue, (s) => s.id === song.id && s.digest !== song.digest);
+    }
+    let n = find(this.queue);
+    while (n >= 0) {
+      this.queue[n] = song;
+      n = find(this.queue);
+    }
+    n = find(this.queueSet);
+    while (n >= 0) {
+      this.queueSet[n] = song;
+      n = find(this.queueSet);
+    }
   }
 
   @Mutation
@@ -377,6 +393,7 @@ export default class MusicModule extends VuexModule {
   public async ReloadSong(id: number) {
     const { data } = await api.fetchSong(id);
     this.UPDATE_SONGS({ id, song: data });
+    this.UPDATE_QUEUE_ITEM(data);
     if (this.current && this.current.id === id) {
       this.SET_CURRENT(data);
     }
