@@ -1,27 +1,21 @@
 <template>
   <div>
     <h5>Lyrics</h5>
-    <b-card class="mt-2 mb-3">
-      <div class="d-md-flex">
-        <b-input v-model.trim="title" placeholder="Title"/>
-        <b-input v-model.trim="artist" placeholder="Artist" class="mt-2 mt-md-0 ml-md-2"/>
-      </div>
-      <b-button variant="info" class="d-block my-2" @click="searchLyrics">
-        <b-spinner v-if="searching" type="grow" small class="mr-2"/>
-        <span>Search Lyrics</span>
-      </b-button>
-      <b-form-radio-group v-if="searchResults.length" v-model="selected" buttons button-variant="outline-primary" :options="searchResults"/>
-      <b-form-radio-group v-else buttons button-variant="outline-primary" :options="[{ text: 'No results', value: 'none', disabled: true }]"/>
-    </b-card>
-    <div class="d-flex">
+    <div class="d-md-flex">
+      <b-input v-model.trim="title" placeholder="Title"/>
+      <b-input v-model.trim="artist" placeholder="Artist" class="mt-2 mt-md-0 ml-md-2"/>
+    </div>
+    <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchLyrics">
+      <b-spinner v-if="searching" type="grow" small class="mr-2"/>
+      <span>Search Lyrics</span>
+    </b-button>
+    <b-form-radio-group v-if="searchResults.length" v-model="selected" buttons button-variant="outline-primary" :options="searchResults"/>
+    <b-form-radio-group v-else buttons button-variant="outline-primary" :options="[{ text: 'No results', value: 'none', disabled: true }]"/>
+    <div class="d-flex mt-1">
       <b-form-textarea v-model="lyrics" rows="15" max-rows="15"/>
-      <template v-if="$pc">
-        <icon-button icon="arrow-left" @click="lyrics = lyricsPreview"/>
-        <b-form-textarea v-model="lyricsPreview" readonly rows="15" max-rows="15"/>
-      </template>
     </div>
     <div class="d-flex mt-2">
-      <b-button variant="outline-danger" class="ml-auto" @click="setLyrics">Reset</b-button>
+      <b-button variant="outline-danger" class="ml-auto" @click="reset">Reset</b-button>
       <b-button variant="success" class="ml-2" @click="save">Save</b-button>
     </div>
   </div>
@@ -50,7 +44,6 @@ export default class LyricsEditor extends Vue {
   private title = '';
   private artist = '';
   private selected: string | null = null;
-  private lyricsPreview = '';
   private searching = false;
   private searchResults: Array<{ text: string, value: string }> = [];
 
@@ -75,12 +68,7 @@ export default class LyricsEditor extends Vue {
   @Watch('selected')
   private onSelected() {
     if (this.selected) {
-      this.lyricsPreview = this.selected;
-      if (this.$mobile) {
-        this.$confirm(this.lyricsPreview, { variant: 'primary' }).then(() => {
-          this.lyrics = this.lyricsPreview;
-        });
-      }
+      this.lyrics = this.selected;
     }
   }
 
