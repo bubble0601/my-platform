@@ -22,13 +22,20 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 import { IAudioMetadata } from 'music-metadata-browser';
 import { omitBy, Dictionary } from 'lodash';
+import { musicModule } from '@/store';
 import { Song } from '@/store/music';
+import { VFormGroup } from '@/components';
+import SearchInfoDialog from './SearchInfoDialog.vue';
 
-@Component
+@Component({
+  components: {
+    VFormGroup,
+  },
+})
 export default class TagEditor extends Vue {
   @Prop({ type: Object, required: true })
   private song!: Song;
@@ -42,8 +49,6 @@ export default class TagEditor extends Vue {
   };
   private edit: Dictionary<string | null> = {};
   private searchingInfo: boolean = false;
-  private searchInfoResults: Array<Dictionary<string>> = [];
-  private selectedInfo: Array<Dictionary<string>> = [];
 
   get id3Version() {
     if (this.metadata) {
@@ -86,6 +91,11 @@ export default class TagEditor extends Vue {
     return omitBy(this.edit, (v, k) => excludedTags.includes(k) || v === null);
   }
 
+  @Watch('metadata', { immediate: true })
+  private onMetadataChanged() {
+    this.setEdit();
+  }
+
   private setEdit() {
     this.edit = {};
     if (this.tags) {
@@ -118,9 +128,15 @@ export default class TagEditor extends Vue {
     this.searchingInfo = true;
     axios.get<Array<Dictionary<string>>>('/api/music/tools/searchinfo', { params: { title, artist } }).then((res) => {
       this.searchingInfo = false;
-      this.searchInfoResults = res.data;
       if (res.data.length > 0) {
-        this.searchInfoDialog.show();
+        const dialog = new SearchInfoDialog({
+          parent: this.$root,
+          propsData: {
+            edit: this.edit,
+            searchResults: res.data,
+          },
+        });
+        dialog.$on('apply', this.apply);
       } else {
         this.$message.warn('No results');
       }
@@ -129,9 +145,9 @@ export default class TagEditor extends Vue {
     });
   }
 
-  private applyInfo() {
-    if (this.selectedInfo.length) {
-      const info = this.selectedInfo[0];
+  private apply(selected: Array<Dictionary<string>>) {
+    if (selected.length) {
+      const info = selected[0];
       const year = this.id3Version === 'ID3v2.4' ? 'TDRC' : 'TYER';
       this.edit.TIT2 = info.title;
       this.edit.TPE1 = info.artist;
@@ -143,9 +159,9 @@ export default class TagEditor extends Vue {
     }
   }
 
-  private resetSearchInfo() {
-    this.selectedInfo = [];
-    this.searchInfoResults = [];
+  private async save() {
+    await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
+    this.$emit('updated');
   }
 }
 </script>
