@@ -5,7 +5,7 @@ import axios from 'axios';
 import VueSlider from 'vue-slider-component';
 import { screenModule } from './store';
 import { initDialogs } from './utils';
-import { VField, VHelp, VInput, VTextarea } from './components';
+import { VField, VHelp, VInput } from './components';
 
 Component.registerHooks([
   'beforeRouteEnter',
@@ -19,7 +19,6 @@ Vue.component('VueSlider', VueSlider);
 Vue.component('VField', VField);
 Vue.component('VHelp', VHelp);
 Vue.component('VInput', VInput);
-Vue.component('VTextarea', VTextarea);
 initDialogs();
 
 axios.interceptors.response.use(undefined, (err) => {

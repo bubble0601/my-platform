@@ -42,6 +42,7 @@
           </dl>
         </div>
         <!-- tag -->
+        <!-- <tag-editor v-else-if="nav === 'tag'" class="pt-3" @updated="reload"/> -->
         <div v-else-if="nav === 'tag'" class="pt-3">
           <v-form-group v-for="(label, k) in basicTags" :key="k" :label="label" label-cols="4" label-cols-lg="2">
             <div class="d-flex align-items-center">
@@ -65,6 +66,10 @@
         </div>
         <!-- edit -->
         <audio-editor v-else-if="nav === 'edit'" :song="song" :data="audioData" class="pt-3" @updated="reload"/>
+        <!-- lyrics -->
+        <lyrics-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
+        <!-- artwork -->
+        <artwork-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
       </keep-alive>
       <template #modal-footer="{ close }">
         <b-button-group class="mr-auto">
@@ -100,12 +105,13 @@ import { Component, Mixins, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
 import * as mm from 'music-metadata-browser';
-import { isArray, isEmpty, omitBy, Dictionary } from 'lodash';
+import { find, isArray, isEmpty, omitBy, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, getFilepath } from '@/store/music';
 import { DialogMixin, formatTime, formatBytes, waitUntil } from '@/utils';
 import { VNav, VFormGroup, Rate } from '@/components';
 import AudioEditor from './AudioEditor.vue';
+import LyricsEditor from './LyricsEditor.vue';
 import i18n from '@/i18n/music';
 
 @Component({
@@ -114,6 +120,7 @@ import i18n from '@/i18n/music';
     VFormGroup,
     Rate,
     AudioEditor,
+    LyricsEditor,
   },
   i18n,
 })
@@ -264,11 +271,10 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
 
   private async reload() {
     if (!this.song) return;
-    const res1 = await musicModule.FetchSong(this.song.id);
-    this.song = res1.data;
+    const res1 = await musicModule.ReloadSong(this.song.id);
+    this.song = res1;
     const res2 = await musicModule.FetchAudio(this.song);
     this.audioData = res2.data;
-    musicModule.ReloadSong(this.song.id);
   }
 
   // info

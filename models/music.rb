@@ -1,6 +1,6 @@
 require 'digest/md5'
 require 'fileutils'
-require_relative 'utils/mp3'
+require_relative '../lib/mp3'
 
 class Song < Sequel::Model(:songs)
   many_to_one :album, order: [:year, :title]
@@ -208,6 +208,15 @@ class Song < Sequel::Model(:songs)
     self.update(song.to_hash)
   end
 
+  def update_lyrics(lyrics)
+    path = self.to_fullpath
+    tags = ID3.new(path)
+    tags.lyrics = lyrics
+    p tags.save
+    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.save
+  end
+
   def replace_file(new_path)
     old_path = self.to_fullpath
     tags = (ID3.new(old_path) rescue nil)
@@ -218,7 +227,6 @@ class Song < Sequel::Model(:songs)
       n.save
       ntags = ID3.new(new_path)
     end
-    p tags, ntags
     if tags
       ntags.get_all.each do |k, v|
         ntags.delall(k)

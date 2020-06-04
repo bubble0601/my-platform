@@ -2,6 +2,7 @@ require 'date'
 require 'json'
 require 'net/http'
 require 'nokogiri'
+require_relative '../lib/lyrics'
 
 class MainApp < Sinatra::Base
   namespace '/api/music' do
@@ -70,28 +71,6 @@ class MainApp < Sinatra::Base
             rate: song[:rate],
             created_at: song[:created_at].strftime("%Y/%m/%d %H:%M"),
           }
-        end
-      end
-
-      def get_json(url, limit = 10)
-        raise ArgumentError, 'HTTP redirect too deep' if limit == 0
-        uri = URI.parse(url)
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = uri.scheme == 'https'
-        begin
-          response = http.request_get(uri, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
-          case response
-          when Net::HTTPSuccess
-            return JSON.parse(response.body)
-          when Net::HTTPRedirection
-            location = response['location']
-            warn "redirected to #{location}"
-            return get_json(location, limit - 1)
-          else
-            puts [uri.to_s, response.value].join("\n")
-          end
-        rescue => e
-          puts [uri.to_s, e.class, e].join("\n")
         end
       end
 
@@ -222,11 +201,16 @@ class MainApp < Sinatra::Base
         status 204
       end
 
-      put '/:id/fix' do
+      put '/:id/lyrics' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
-        song.fix
+        song.update_lyrics(@json[:lyrics])
         status 204
+      end
+
+      put '/:id/artwork' do
+        song = Song[params[:id].to_i]
+        halt 404, 'The requested resource not found' if song.nil?
       end
 
       delete '/:id' do
@@ -397,6 +381,10 @@ class MainApp < Sinatra::Base
           x
         }
       end
+
+      get '/searchlyrics' do
+        Lyrics::search(params[:title], params[:artist])
+      end
     end
 
     namespace '/sync' do
@@ -452,8 +440,10 @@ class MainApp < Sinatra::Base
         cmd += " #{append}" if append
         out = `#{cmd}`
         unless $?.success?
+          logger.error "An error ocurred when execute `#{cmd}`"
           logger.error out
-          raise RuntimeError, "An error ocurred when execute `#{cmd}`"
+          # raise RuntimeError, "An error ocurred when execute `#{cmd}`"
+          halt 500, 'An error ocurred when executing command'
         end
         return out
       end

@@ -2,7 +2,6 @@ import Vue, { VueConstructor } from 'vue';
 import { now, isDate, round } from 'lodash';
 import store from '@/store';
 
-export { calcTextareaHeight } from './calcHeight';
 export { default as SizeMixin } from './SizeMixin';
 export { default as DialogMixin } from './DialogMixin';
 export { default as initDialogs } from './Dialogs';

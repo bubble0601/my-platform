@@ -12,4 +12,3 @@ export { default as VHelp } from './VHelp.vue';
 export { default as VInfo } from './VInfo.vue';
 export { default as VInput } from './VInput.vue';
 export { default as VNav } from './VNav.vue';
-export { default as VTextarea } from './VTextarea.vue';

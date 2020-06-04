@@ -397,6 +397,7 @@ export default class MusicModule extends VuexModule {
     if (this.current && this.current.id === id) {
       this.SET_CURRENT(data);
     }
+    return data;
   }
 
   @Action
