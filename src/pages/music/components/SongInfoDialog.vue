@@ -42,7 +42,7 @@
           </dl>
         </div>
         <!-- tag -->
-        <!-- <tag-editor v-else-if="nav === 'tag'" class="pt-3" @updated="reload"/> -->
+        <!-- <tag-editor v-else-if="nav === 'tag'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/> -->
         <div v-else-if="nav === 'tag'" class="pt-3">
           <v-form-group v-for="(label, k) in basicTags" :key="k" :label="label" label-cols="4" label-cols-lg="2">
             <div class="d-flex align-items-center">
@@ -69,7 +69,7 @@
         <!-- lyrics -->
         <lyrics-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
         <!-- artwork -->
-        <artwork-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
+        <artwork-editor v-else-if="nav === 'artwork'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
       </keep-alive>
       <template #modal-footer="{ close }">
         <b-button-group class="mr-auto">
@@ -112,6 +112,7 @@ import { DialogMixin, formatTime, formatBytes, waitUntil } from '@/utils';
 import { VNav, VFormGroup, Rate } from '@/components';
 import AudioEditor from './AudioEditor.vue';
 import LyricsEditor from './LyricsEditor.vue';
+import ArtworkEditor from './ArtworkEditor.vue';
 import i18n from '@/i18n/music';
 
 @Component({
@@ -121,6 +122,7 @@ import i18n from '@/i18n/music';
     Rate,
     AudioEditor,
     LyricsEditor,
+    ArtworkEditor,
   },
   i18n,
 })

@@ -2,7 +2,7 @@ require 'date'
 require 'json'
 require 'net/http'
 require 'nokogiri'
-require_relative '../lib/lyrics'
+require './lib/music/search'
 
 class MainApp < Sinatra::Base
   namespace '/api/music' do
@@ -76,7 +76,7 @@ class MainApp < Sinatra::Base
 
       def search_info(title, artist)
         url = URI.escape("https://musicbrainz.org/ws/2/recording?query=title:#{title} AND artist:#{artist}&fmt=json")
-        get_json(url)
+        get_json(url, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
       end
     end
 
@@ -211,6 +211,9 @@ class MainApp < Sinatra::Base
       put '/:id/artwork' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?
+        response = get_response(@json[:artwork])
+        song.update_artwork(response['Content-Type'], response.body)
+        status 204
       end
 
       delete '/:id' do
@@ -331,7 +334,6 @@ class MainApp < Sinatra::Base
       get '/searchinfo' do
         results = []
         search_result = search_info(params[:title], params[:artist])
-        open("./storage/temp/info.json", 'w') {|f| f.write(JSON.pretty_generate(search_result))}
         search_result['recordings'].each do |rec|
           # 候補2つ以上のときスコア70未満は無視
           break if rec['score'] < 70 and results.length > 1
@@ -384,6 +386,14 @@ class MainApp < Sinatra::Base
 
       get '/searchlyrics' do
         Lyrics::search(params[:title], params[:artist])
+      end
+
+      get '/searchartwork' do
+        if params[:more]
+          Artwork::search_more(params[:title], params[:album], params[:artist])
+        else
+          Artwork::search(params[:title], params[:album], params[:artist])
+        end
       end
     end
 

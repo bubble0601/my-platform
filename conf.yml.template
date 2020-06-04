@@ -2,6 +2,7 @@
 app:
   name: 'my platform'
   debug: true
+  genius_access_token: 'xxxxxxx'
 
 # Server settings
 server:

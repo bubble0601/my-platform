@@ -1,14 +1,15 @@
+require 'json'
 require 'net/http'
 require 'nokogiri'
 
 module UtilityHelpers
-  def get_response(url, limit = 10)
+  def get_response(url, headers = nil, limit = 10)
     raise ArgumentError, 'HTTP redirect too deep' if limit == 0
     uri = URI.parse(url)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == 'https'
     begin
-      response = http.request_get(uri, { 'User-Agent' => "#{CONF.app.name rescue 'xxx'}/1.0.0" })
+      response = http.request_get(uri, headers || {})
       case response
       when Net::HTTPSuccess
         return response
@@ -24,13 +25,22 @@ module UtilityHelpers
     end
   end
 
-  def get_doc(url)
-    html = get_response(url).body
+  def get_doc(url, headers = nil)
+    html = get_response(url, headers).body
     doc = Nokogiri::HTML.parse(html, nil, 'utf-8')
     doc
   end
 
-  def get_json(url)
-    JSON.parse(get_response(url).body)
+  def get_json(url, headers = nil)
+    JSON.parse(get_response(url, headers).body)
+  end
+
+  def async_exec
+    raise ArgumentError unless block_given?
+    begin
+      Thread.new { yield }
+    rescue => e
+      p e
+    end
   end
 end

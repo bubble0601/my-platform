@@ -4,22 +4,13 @@ module Lyrics
   extend UtilityHelpers
 
   module_function
-  def async_search
-    raise ArgumentError unless block_given?
-    begin
-      Thread.new { yield }
-    rescue => e
-      p e
-    end
-  end
-
-  def search(title, artist = nil)
+  def search(title, artist)
     search_methods = [
       :search_az,
       :search_jlyric,
     ]
     results = []
-    threads = search_methods.map{|s| async_search{ method(s).call(results, title, artist) }}
+    threads = search_methods.map{|s| async_exec{ method(s).call(results, title, artist) }}
     threads.each { |t| t.join(10) if t }
     results
   end
@@ -71,5 +62,52 @@ module Lyrics
 
     lyrics = body.children.to_a.filter{|e| e.text?}.map{|e| e.text}.join("\n").strip.gsub("\r", '').gsub("\n\n", "\n")
     results.push({ text: 'j-lyric.net', value: lyrics })
+  end
+end
+
+module Artwork
+  extend UtilityHelpers
+
+  module_function
+  def search(title, album, artist)
+    results = []
+    threads = [
+      async_exec{ search_genius(results, (title or album), artist) },
+    ]
+    threads.each { |t| t.join(5) if t }
+    results
+  end
+
+  def search_more(title, album, artist)
+    results = []
+    threads = [
+      async_exec{ search_yahoo(results, (album or title), artist) },
+    ]
+    threads.each { |t| t.join(10) if t }
+    results
+  end
+
+  def search_genius(results, title, artist)
+    q = [title, artist].filter{|e| e}.join(' ')
+    url = URI.escape("https://api.genius.com/search?q=#{q}")
+    json = get_json(url, { 'Authorization': "Bearer #{CONF.app.genius_access_token}" })
+    images = json['response']['hits'].map{|h| h['result']['header_image_thumbnail_url']}
+    results.push(*images)
+  end
+
+  # def search_google(results, title, artist)
+  #   q = [title, artist].filter{|e| e}.join(' ')
+  #   url = URI.escape("https://www.google.com/search?q=#{q}&tbm=isch")
+
+  #   doc = get_doc(url)
+  # end
+
+  def search_yahoo(results, title, artist)
+    q = [title, artist].filter{|e| e}.join(' ')
+    url = URI.escape("https://search.yahoo.co.jp/image/search?p=#{q}")
+
+    doc = get_doc(url)
+    images = doc.css('div#gridlist img').to_a.map{|e| e['src']}
+    results.push(*images)
   end
 end

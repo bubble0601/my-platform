@@ -1,6 +1,6 @@
 require 'digest/md5'
 require 'fileutils'
-require_relative '../lib/mp3'
+require './lib/music/mp3'
 
 class Song < Sequel::Model(:songs)
   many_to_one :album, order: [:year, :title]
@@ -212,7 +212,19 @@ class Song < Sequel::Model(:songs)
     path = self.to_fullpath
     tags = ID3.new(path)
     tags.lyrics = lyrics
-    p tags.save
+    tags.save
+    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.save
+  end
+
+  def update_artwork(mime, data)
+    path = self.to_fullpath
+    tags = ID3.new(path)
+    tags.picture = {
+      mime: mime,
+      data: data,
+    }
+    tags.save
     self.digest = Digest::MD5.file(path).hexdigest[0,8]
     self.save
   end
