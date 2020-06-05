@@ -48,11 +48,11 @@
           <div class="ml-auto">
             <span v-if="d.status === Status.Processing" class="text-primary">Downloading...</span>
             <div v-else-if="d.status === Status.Success">
-              <b-button size="sm" variant="primary">
+              <b-button size="sm" variant="primary" @click="play(d.song)">
                 <b-icon icon="play"/>
-                <span v-if="$pc" @click="play(d.song)">Play</span>
+                <span v-if="$pc">Play</span>
               </b-button>
-              <b-button size="sm" variant="success" class="ml-2">
+              <b-button size="sm" variant="success" class="ml-2" @click="edit(d.song)">
                 <b-icon icon="pencil"/>
                 <span v-if="$pc">Edit</span>
               </b-button>
@@ -131,11 +131,11 @@
                     {{ f.name }}
                   </div>
                   <div v-if="u.songs[i]" class="ml-auto">
-                    <b-button size="sm" variant="primary" @click="play(u.songs[i])">
+                    <b-button size="sm" variant="primary" @click="play(u.songs[i], u.songs)">
                       <b-icon icon="play"/>
                       <span v-if="$pc">Play</span>
                     </b-button>
-                    <b-button size="sm" variant="success" class="ml-2">
+                    <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[i], u.songs)">
                       <b-icon icon="pencil"/>
                       <span v-if="$pc">Edit</span>
                     </b-button>
@@ -166,7 +166,7 @@
                   <b-icon icon="play"/>
                   <span v-if="$pc">Play</span>
                 </b-button>
-                <b-button size="sm" variant="success" class="ml-2">
+                <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[0])">
                   <b-icon icon="pencil"/>
                   <span v-if="$pc">Edit</span>
                 </b-button>
@@ -193,6 +193,7 @@ import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { DialogMixin } from '@/utils';
 import { VNav, VForm, VInput } from '@/components';
+import SongInfoDialog from './SongInfoDialog.vue';
 
 enum Status {
   Processing,
@@ -454,6 +455,23 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
         musicModule.Play(s);
       }
     }
+  }
+
+  private edit(song: Song, songs?: Song[]) {
+    const dialog = new SongInfoDialog({
+      parent: this.$parent,
+      propsData: {
+        getNeighborSong: (current?: Song) => {
+          if (!current || !songs) return {};
+          const i = songs.indexOf(current);
+          return {
+            prevSong: songs[i - 1],
+            nextSong: songs[i + 1],
+          };
+        },
+      },
+    });
+    dialog.open(song);
   }
 
   private dReset() {
