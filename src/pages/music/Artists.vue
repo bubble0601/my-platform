@@ -51,7 +51,7 @@ import SongList from './SongList.vue';
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
     if (screenModule.isMobile && id >= 0) {
-      musicModule.FetchSongs({ artist: id }).then(next);
+      musicModule.FetchArtistSongs(id).then(next);
     } else {
       next();
     }
@@ -72,7 +72,7 @@ export default class Artists extends Vue {
 
   @Watch('id', { immediate: true })
   private onIdChanged() {
-    musicModule.FetchSongs({ artist: this.id });
+    musicModule.FetchArtistSongs(this.id);
   }
 
   private created() {

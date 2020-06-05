@@ -47,11 +47,6 @@ export interface NormalPlaylist {
   songs?: Song[];
 }
 
-interface FetchSongParams {
-  artist?: number;
-  playlist?: number;
-}
-
 export enum REPEAT {
   NONE,
   ALL,
@@ -61,7 +56,7 @@ export enum REPEAT {
 export const getFilepath = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
 
 const api = {
-  fetchSongs: (params: FetchSongParams) => axios.get<Song[]>('/api/music/songs', { params }),
+  fetchSongs: () => axios.get<Song[]>('/api/music/songs'),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
 
@@ -73,8 +68,7 @@ const api = {
   fetchArtistSongs: (id: number) => axios.get<Song[]>(`/api/music/artists/${id}/songs`),
 
   fetchPlaylists: () => axios.get<Playlist[]>('/api/music/playlists'),
-  // fetchPlaylist: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}`),
-  // fetchPlaylistSongs: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}/songs`),
+  fetchPlaylistSongs: (id: number) => axios.get<Song[]>(`/api/music/playlists/${id}/songs`),
   createPlaylist: (name: string) => axios.post<NormalPlaylist>('/api/music/playlists', { name }),
   fetchPlaylistSong: (id: number, songId: number) => axios.get(`/api/music/playlists/${id}/songs/${songId}`),
   addPlaylistSong: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
@@ -348,23 +342,12 @@ export default class MusicModule extends VuexModule {
     }
   }
 
-  @Action
-  public async FetchSong(id: number) {
-    return await api.fetchSong(id);
-  }
-
+  /* Fetchers */
   @Action({ rawError: true })
-  public async FetchSongs(params: FetchSongParams = {}) {
+  public async FetchAll() {
     this.SET_SONGS([]);
-    if (params.artist) this.SET_ARTIST_ID(params.artist);
-    else this.SET_ARTIST_ID(null);
-
-    if (params.playlist) this.SET_PLAYLIST_ID(params.playlist);
-    else this.SET_PLAYLIST_ID(null);
-
-    this.SET_SMARTLIST_ID(null);
-
-    const { data } = await api.fetchSongs(params);
+    this.RESET_FETCH_SONGS();
+    const { data } = await api.fetchSongs();
     this.SET_SONGS(data);
   }
 
@@ -375,9 +358,83 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
+  public async FetchArtistSongs(id: number) {
+    this.SET_SONGS([]);
+    this.RESET_FETCH_SONGS();
+    this.SET_ARTIST_ID(id);
+    const { data } = await api.fetchArtistSongs(id);
+    this.SET_SONGS(data);
+  }
+
+  @Action
   public async FetchPlaylists() {
     const { data } = await api.fetchPlaylists();
     this.SET_PLAYLISTS(data);
+  }
+
+  @Action
+  public async FetchPlaylistSongs(id: number) {
+    this.SET_SONGS([]);
+    this.RESET_FETCH_SONGS();
+    this.SET_PLAYLIST_ID(id);
+    const { data } = await api.fetchPlaylistSongs(id);
+    this.SET_SONGS(data);
+  }
+
+  @Action
+  public async FetchSmartlists() {
+    const { data } = await api.fetchSmartlists();
+    this.SET_SMARTLISTS(data);
+  }
+
+  @Action
+  public async FetchSmartlistSongs(id: number) {
+    this.SET_SONGS([]);
+    const { data } = await api.fetchSmartlistSongs(id);
+    this.RESET_FETCH_SONGS();
+    this.SET_SMARTLIST_ID(id);
+    this.SET_SONGS(data);
+  }
+
+  @Action
+  public async ReloadSong(id: number) {
+    const { data } = await api.fetchSong(id);
+    this.UPDATE_SONGS({ id, song: data });
+    this.UPDATE_QUEUE_ITEM(data);
+    if (this.current && this.current.id === id) {
+      this.SET_CURRENT(data);
+    }
+    return data;
+  }
+
+  @Action
+  public async ReloadPlaylistSong(sid: number) {
+    if (this.playlistId) {
+      const { data } = await api.fetchPlaylistSong(this.playlistId, sid);
+      this.UPDATE_SONGS({ id: sid, song: data });
+      if (this.current && this.current.id === sid) {
+        this.SET_CURRENT(data);
+      }
+    } else {
+      message.error('An error occurred');
+    }
+  }
+
+  @Action
+  public async ReloadSongs() {
+    if (this.artistId) {
+      const { data } = await api.fetchArtistSongs(this.artistId);
+      this.SET_SONGS(data);
+    } else if (this.playlistId) {
+      const { data } = await api.fetchPlaylistSongs(this.playlistId);
+      this.SET_SONGS(data);
+    } else if (this.smartlistId) {
+      const { data } = await api.fetchSmartlistSongs(this.smartlistId);
+      this.SET_SONGS(data);
+    } else { // all
+      const { data } = await api.fetchSongs();
+      this.SET_SONGS(data);
+    }
   }
 
   @Action
@@ -412,45 +469,7 @@ export default class MusicModule extends VuexModule {
     }
   }
 
-  @Action
-  public async ReloadSong(id: number) {
-    const { data } = await api.fetchSong(id);
-    this.UPDATE_SONGS({ id, song: data });
-    this.UPDATE_QUEUE_ITEM(data);
-    if (this.current && this.current.id === id) {
-      this.SET_CURRENT(data);
-    }
-    return data;
-  }
-
-  @Action
-  public async ReloadSongs() {
-    const params: FetchSongParams = {};
-    params.artist = this.artistId || undefined;
-    params.playlist = this.playlistId || undefined;
-
-    if (this.smartlistId) {
-      const { data } = await api.fetchSmartlistSongs(this.smartlistId);
-      this.SET_SONGS(data);
-    } else {
-      const { data } = await api.fetchSongs(params);
-      this.SET_SONGS(data);
-    }
-  }
-
-  @Action
-  public async ReloadPlaylistSong(sid: number) {
-    if (this.playlistId) {
-      const { data } = await api.fetchPlaylistSong(this.playlistId, sid);
-      this.UPDATE_SONGS({ id: sid, song: data });
-      if (this.current && this.current.id === sid) {
-        this.SET_CURRENT(data);
-      }
-    } else {
-      message.error('An error occurred');
-    }
-  }
-
+  /* Player controls */
   @Action
   public SetControl(data: { shuffle?: boolean, repeat?: REPEAT }) {
     const { shuffle, repeat } = data;
@@ -538,6 +557,7 @@ export default class MusicModule extends VuexModule {
     });
   }
 
+  /* Operations */
   @Action
   public async UpdateSong(payload: { id: number, data: Partial<Song> }) {
     const { id, data } = payload;
@@ -590,20 +610,6 @@ export default class MusicModule extends VuexModule {
       promises.push(p);
     });
     await Promise.all(promises);
-  }
-
-  @Action
-  public async FetchSmartlists() {
-    const { data } = await api.fetchSmartlists();
-    this.SET_SMARTLISTS(data);
-  }
-
-  @Action
-  public async FetchSmartlistSongs(id: number) {
-    const { data } = await api.fetchSmartlistSongs(id);
-    this.RESET_FETCH_SONGS();
-    this.SET_SMARTLIST_ID(id);
-    this.SET_SONGS(data);
   }
 }
 

@@ -42,7 +42,7 @@ import SongList from './SongList.vue';
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
     if (screenModule.isMobile && id > 0) {
-      musicModule.FetchSongs({ playlist: id }).then(next);
+      musicModule.FetchPlaylistSongs(id).then(next);
     } else {
       next();
     }
@@ -73,7 +73,7 @@ export default class Playlists extends Vue {
 
   @Watch('id', { immediate: true })
   private onIdChanged() {
-    musicModule.FetchSongs({ playlist: this.id });
+    musicModule.FetchPlaylistSongs(this.id);
   }
 
   private created() {

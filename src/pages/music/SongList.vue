@@ -113,7 +113,7 @@ export default class SongList extends Vue {
 
   @Watch('context', { immediate: true })
   private onContextChanged() {
-    if (this.context === 'all') musicModule.FetchSongs();
+    if (this.context === 'all') musicModule.FetchAll();
   }
 
   private created() {
