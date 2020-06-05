@@ -226,16 +226,6 @@ class MainApp < Sinatra::Base
         new_list.to_hash
       end
 
-      # get '/:id' do
-      #   list = Playlist[params[:id].to_i]
-      #   halt 404 if list.nil?
-      #   {
-      #     id: list.id,
-      #     name: list.name,
-      #     songs: list.songs,
-      #   }
-      # end
-
       get '/:id/songs' do
         items = PlaylistSong.select(:song_id, :weight).where(playlist_id: params[:id].to_i).all
         w_items = {}
@@ -300,12 +290,14 @@ class MainApp < Sinatra::Base
     namespace '/smartlists' do
       get '' do
         [
-          { id: 1, name: 'New' },
-          { id: 2, name: 'Fabulous' },
-          { id: 3, name: 'Excellent' },
-          { id: 4, name: 'Great' },
-          { id: 5, name: 'Good' },
-          { id: 6, name: 'Unrated' },
+          { id: 1, name: 'New7d' },
+          { id: 2, name: 'New30d' },
+          { id: 3, name: 'New100' },
+          { id: 4, name: 'Fabulous' },
+          { id: 5, name: 'Excellent' },
+          { id: 6, name: 'Great' },
+          { id: 7, name: 'Good' },
+          { id: 8, name: 'Unrated' },
         ]
       end
 
@@ -316,17 +308,20 @@ class MainApp < Sinatra::Base
                     .order_append{album[:year]}
                     .order_append{album[:title]}
                     .order_append(:track_num, :title)
-        p params
         case params[:id]
         when '1'
           query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
         when '2'
-          query = query.where(rate: 5)
+          query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 30 DAY) > NOW()'))
         when '3'
-          query = query.where{rate >= 4}
+          query = query.order_prepend(:created_at).reverse.limit(100)
         when '4'
-          query = query.where{rate >= 3}
+          query = query.where(rate: 5)
         when '5'
+          query = query.where{rate >= 4}
+        when '6'
+          query = query.where{rate >= 3}
+        when '7'
           query = query.where{rate >= 2}
         when '6'
           query = query.where(rate: 0)

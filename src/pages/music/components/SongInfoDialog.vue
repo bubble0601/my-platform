@@ -178,7 +178,6 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
   }
 
   private async reload(targetIds: number[]) {
-    console.log(targetIds);
     if (!this.song) return;
     if (targetIds) {
       targetIds.forEach((id) => {

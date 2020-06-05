@@ -69,7 +69,7 @@
           <dd>{{ format.tagTypes ? format.tagTypes.join(', ') : '&nbsp;' }}</dd>
         </dl>
         <div class="mt-1">
-          <b-dropdown split variant="success" text="Edit" @click="editSong">
+          <b-dropdown split variant="success" text="Edit" @click="editSong()">
             <b-dropdown-item @click="editSong('tag')">Tag</b-dropdown-item>
             <b-dropdown-item @click="editSong('lyrics')">Lyrics</b-dropdown-item>
             <b-dropdown-item @click="editSong('artwork')">Artwork</b-dropdown-item>
