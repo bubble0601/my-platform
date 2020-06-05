@@ -31,7 +31,16 @@ export default [
       {
         path: 'playlist/:id',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Playlists.vue'),
-        props: (route: Route) => ({ id: Number(route.params.id) || route.params.id }),
+        props: (route: Route) => ({ id: Number(route.params.id) }),
+      },
+      {
+        path: 'smartlist',
+        redirect: 'playlist',
+      },
+      {
+        path: 'smartlist/:id',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/Smartlist.vue'),
+        props: (route: Route) => ({ id: Number(route.params.id) }),
       },
       {
         path: 'settings',

@@ -105,28 +105,6 @@ class MainApp < Sinatra::Base
               .order_append(:track_num, :title)
               .map{|s| s[:weight] = w_items[s[:id]]; s}
               .map(&method(:to_song_data))
-        elsif params[:playlist]
-          query = Song.eager_graph(:album, :artist)
-                      .order{artist[:ruby]}
-                      .order_append{artist[:name]}
-                      .order_append{album[:year]}
-                      .order_append{album[:title]}
-                      .order_append(:track_num, :title)
-          case params[:playlist]
-          when 'fabulous'
-            query = query.where(rate: 5)
-          when 'excellent'
-            query = query.where{rate >= 4}
-          when 'great'
-            query = query.where{rate >= 3}
-          when 'good'
-            query = query.where{rate >= 2}
-          when 'unrated'
-            query = query.where(rate: 0)
-          when 'new'
-            query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
-          end
-          query.map(&method(:to_song_data))
         else # all
           Song.eager_graph(:album, :artist)
               .order{album[:year]}
@@ -304,6 +282,44 @@ class MainApp < Sinatra::Base
         halt 404 if song.nil? or pl.nil?
         pl.remove_song(song)
         status 204
+      end
+    end
+
+    namespace '/smartlists' do
+      get '' do
+        [
+          { id: 1, name: 'New' },
+          { id: 2, name: 'Fabulous' },
+          { id: 3, name: 'Excellent' },
+          { id: 4, name: 'Great' },
+          { id: 5, name: 'Good' },
+          { id: 6, name: 'Unrated' },
+        ]
+      end
+
+      get '/:id/songs' do
+        query = Song.eager_graph(:album, :artist)
+                    .order{artist[:ruby]}
+                    .order_append{artist[:name]}
+                    .order_append{album[:year]}
+                    .order_append{album[:title]}
+                    .order_append(:track_num, :title)
+        p params
+        case params[:id]
+        when '1'
+          query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
+        when '2'
+          query = query.where(rate: 5)
+        when '3'
+          query = query.where{rate >= 4}
+        when '4'
+          query = query.where{rate >= 3}
+        when '5'
+          query = query.where{rate >= 2}
+        when '6'
+          query = query.where(rate: 0)
+        end
+        query.map(&method(:to_song_data))
       end
     end
 

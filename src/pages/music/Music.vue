@@ -1,21 +1,34 @@
 <template>
   <main v-if="$pc" class="d-flex flex-column" :style="mainStyle">
     <div class="d-flex flex-grow-1 overflow-hidden">
+      <!-- side menu -->
       <div class="sidemenu-left py-2">
         <div class="px-2 pb-2">
           <b-button pill variant="success" size="sm" @click="addSong">＋ Add</b-button>
         </div>
         <template v-for="t in tabs">
-          <router-link v-if="t.name" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
+          <template v-if="t.children">
+            <div class="menu-item cursor-pointer px-3" :class="{ active: $route.path.startsWith(`/music/${t.key}`) }" @click="t.expanded = !t.expanded">
+              {{ t.name }}
+            </div>
+            <b-collapse v-model="t.expanded">
+              <router-link v-for="tc in t.children" :key="tc.key" :to="`/music/${tc.key}`" tag="div" class="menu-item pl-4 pr-2" active-class="active">
+                {{ tc.name }}
+              </router-link>
+            </b-collapse>
+          </template>
+          <router-link v-else-if="t.name" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
             {{ t.name }}
           </router-link>
           <div v-else-if="t.key === 'space'" class="mt-auto"/>
           <hr v-else class="mt-2 mb-1">
         </template>
       </div>
+      <!-- main -->
       <div class="center-block flex-grow-1 overflow-auto">
         <router-view/>
       </div>
+      <!-- player info -->
       <div class="sidemenu-right">
         <player-info class="h-100"/>
       </div>
@@ -57,14 +70,16 @@ import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
   },
 })
 export default class Music extends Mixins(SizeMixin) {
-  private mainStyle = {
+  private readonly mainStyle = {
     height: 'auto',
   };
-  private mMainStyle = {
+  private readonly mMainStyle = {
     'padding-bottom': '6rem',
   };
 
   private baseTitle = '';
+
+  private tabs: object[] = [];
 
   private mOpened = true;
   private mTabs = [
@@ -73,22 +88,6 @@ export default class Music extends Mixins(SizeMixin) {
   ];
   private mScrollPos: number = 0;
   private mTouchPath: Touch[] = [];
-
-  get tabs() {
-    const lp = musicModule.livePlaylists.map((p) => ({
-      key: `playlist/${p.id}`,
-      name: p.name,
-    }));
-    return [
-      { key: 'all', name: 'All' },
-      { key: 'artist', name: 'Artist' },
-      { key: 'playlist', name: 'Playlist' },
-      { key: 'div1' },
-      ...lp,
-      { key: 'space' },
-      { key: 'settings', name: 'Settings' },
-    ];
-  }
 
   get currentSong() {
     return musicModule.current;
@@ -115,13 +114,33 @@ export default class Music extends Mixins(SizeMixin) {
     else this.mMainStyle['padding-bottom'] = '4rem';
   }
 
-  protected created() {
+  protected async created() {
     this.baseTitle = document.title;
     this.addSizingCallback(() => {
       if (this.$el instanceof HTMLElement) {
         this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop}px`;
       }
     });
+    const sl: Array<{ key: string, name: string }> = [];
+    this.tabs = [
+      { key: 'all', name: 'All' },
+      { key: 'artist', name: 'Artist' },
+      { key: 'playlist', name: 'Playlist' },
+      {
+        key: 'smartlist',
+        name: 'Smartlist',
+        expanded: this.$route.path.startsWith('/music/smartlist'),
+        children: sl,
+      },
+      { key: 'div1' },
+      { key: 'space' },
+      { key: 'settings', name: 'Settings' },
+    ];
+    await musicModule.FetchSmartlists();
+    sl.push(...musicModule.smartlists.map((l) => ({
+      key: `smartlist/${l.id}`,
+      name: l.name,
+    })));
   }
 
   protected mounted() {
@@ -170,6 +189,9 @@ export default class Music extends Mixins(SizeMixin) {
   display: flex;
   flex-direction: column;
   background-color: #dee2e655;
+  width: 7rem;
+  overflow-x: auto;
+
   .menu-item {
     display: block;
     color: #6c757d;

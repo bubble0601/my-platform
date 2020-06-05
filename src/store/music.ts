@@ -30,7 +30,13 @@ export interface Artist {
 }
 
 export interface Playlist {
-  id: number | string;
+  id: number;
+  name: string;
+  songs?: Song[];
+}
+
+export interface Smartlist {
+  id: number;
   name: string;
   songs?: Song[];
 }
@@ -43,7 +49,7 @@ export interface NormalPlaylist {
 
 interface FetchSongParams {
   artist?: number;
-  playlist?: number | string;
+  playlist?: number;
 }
 
 export enum REPEAT {
@@ -64,15 +70,20 @@ const api = {
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
+  fetchArtistSongs: (id: number) => axios.get<Song[]>(`/api/music/artists/${id}/songs`),
 
   fetchPlaylists: () => axios.get<Playlist[]>('/api/music/playlists'),
-  fetchPlaylist: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}`),
+  // fetchPlaylist: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}`),
+  // fetchPlaylistSongs: (id: number) => axios.get<Required<Playlist>>(`/api/music/playlists/${id}/songs`),
   createPlaylist: (name: string) => axios.post<NormalPlaylist>('/api/music/playlists', { name }),
-  fetchPlaylistSong: (id: number | string, songId: number) => axios.get(`/api/music/playlists/${id}/songs/${songId}`),
+  fetchPlaylistSong: (id: number, songId: number) => axios.get(`/api/music/playlists/${id}/songs/${songId}`),
   addPlaylistSong: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
   updatePlaylistSong: (id: number, songId: number, weight: number) =>
                         axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
   removePlaylistSong: (id: number, songId: number) => axios.delete(`/api/music/playlists/${id}/songs/${songId}`),
+
+  fetchSmartlists: () => axios.get<Smartlist[]>('/api/music/smartlists'),
+  fetchSmartlistSongs: (id: number) => axios.get<Song[]>(`/api/music/smartlists/${id}/songs`),
 };
 
 @Module({ name: 'music' })
@@ -83,16 +94,9 @@ export default class MusicModule extends VuexModule {
   public artists: Artist[] = [];
   public artistId: number | null = null;
   public playlists: Playlist[] = [];
-  public playlistId: number | string | null = null;
-
-  public livePlaylists: Playlist[] = [
-    { id: 'new', name: 'New' },
-    { id: 'fabulous', name: 'Fabulous' },
-    { id: 'excellent', name: 'Excellent' },
-    { id: 'great', name: 'Great' },
-    { id: 'good', name: 'Good' },
-    { id: 'unrated', name: 'Unrated' },
-  ];
+  public playlistId: number  | null = null;
+  public smartlists: Smartlist[] = [];
+  public smartlistId: number | null = null;
 
   public current: Song | null = null;
   public audioData: Blob | null = null;
@@ -145,8 +149,25 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private SET_PLAYLIST_ID(id: number | string | null) {
+  private SET_PLAYLIST_ID(id: number | null) {
     this.playlistId = id;
+  }
+
+  @Mutation
+  private SET_SMARTLISTS(smartlists: Smartlist[]) {
+    this.smartlists = smartlists;
+  }
+
+  @Mutation
+  private SET_SMARTLIST_ID(id: number | null) {
+    this.smartlistId = id;
+  }
+
+  @Mutation
+  private RESET_FETCH_SONGS() {
+    this.artistId = null;
+    this.playlistId = null;
+    this.smartlistId = null;
   }
 
   @Mutation
@@ -341,6 +362,8 @@ export default class MusicModule extends VuexModule {
     if (params.playlist) this.SET_PLAYLIST_ID(params.playlist);
     else this.SET_PLAYLIST_ID(null);
 
+    this.SET_SMARTLIST_ID(null);
+
     const { data } = await api.fetchSongs(params);
     this.SET_SONGS(data);
   }
@@ -406,8 +429,13 @@ export default class MusicModule extends VuexModule {
     params.artist = this.artistId || undefined;
     params.playlist = this.playlistId || undefined;
 
-    const { data } = await api.fetchSongs(params);
-    this.SET_SONGS(data);
+    if (this.smartlistId) {
+      const { data } = await api.fetchSmartlistSongs(this.smartlistId);
+      this.SET_SONGS(data);
+    } else {
+      const { data } = await api.fetchSongs(params);
+      this.SET_SONGS(data);
+    }
   }
 
   @Action
@@ -563,6 +591,20 @@ export default class MusicModule extends VuexModule {
     });
     await Promise.all(promises);
   }
+
+  @Action
+  public async FetchSmartlists() {
+    const { data } = await api.fetchSmartlists();
+    this.SET_SMARTLISTS(data);
+  }
+
+  @Action
+  public async FetchSmartlistSongs(id: number) {
+    const { data } = await api.fetchSmartlistSongs(id);
+    this.RESET_FETCH_SONGS();
+    this.SET_SMARTLIST_ID(id);
+    this.SET_SONGS(data);
+  }
 }
 
 // 永続化する値
@@ -575,7 +617,8 @@ const keys = [
   'repeat',
   'mute',
   'volume',
-  'artistId',
-  'playlistId',
+  // 'artistId',
+  // 'playlistId',
+  // 'smartlistId',
 ];
 export const paths = keys.map((k) => `music.${k}`);

@@ -18,8 +18,8 @@
   </div>
   <div v-else>
     <b-list-group flush class="playlists">
-      <b-list-group-item v-for="p in playlists" :key="p.id"
-                         :to="`/music/playlist/${p.id}`" variant="light"
+      <b-list-group-item v-for="p in playlists" :key="`${p.context}-${p.id}`"
+                         :to="`/music/${p.context}/${p.id}`" variant="light"
                          class="px-3 py-2" active-class="active"
                          @dblclick.native="shuffleAndPlay">
         <small>{{ p.name }}</small>
@@ -32,6 +32,7 @@ import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { NavigationGuard } from 'vue-router';
 import { isString } from 'lodash';
 import { musicModule, screenModule } from '@/store';
+import { Playlist, Smartlist } from '@/store/music';
 import SongList from './SongList.vue';
 
 @Component({
@@ -48,8 +49,8 @@ import SongList from './SongList.vue';
   },
 })
 export default class Playlists extends Vue {
-  @Prop({ type: [Number, String], default: 0 })
-  private id!: number | string;
+  @Prop({ type: Number, default: 0 })
+  private id!: number;
 
   @Ref() private songList!: SongList;
 
@@ -57,11 +58,17 @@ export default class Playlists extends Vue {
     if (this.$pc) {
       return musicModule.playlists;
     }
-    return this.livePlaylists.concat(musicModule.playlists);
-  }
-
-  get livePlaylists() {
-    return musicModule.livePlaylists;
+    const sp = musicModule.smartlists.map((l) => ({
+      id: l.id,
+      name: l.name,
+      context: 'smartlist',
+    }));
+    const pl = musicModule.playlists.map((l) => ({
+      id: l.id,
+      name: l.name,
+      context: 'playlist',
+    }));
+    return sp.concat(pl);
   }
 
   @Watch('id', { immediate: true })
