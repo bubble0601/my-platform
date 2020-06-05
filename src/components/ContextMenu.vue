@@ -1,8 +1,17 @@
 <template>
   <b-list-group v-show="shown" class="context-menu shadow" :style="style" @mousedown.stop @click="destroy">
-    <b-list-group-item v-for="item in items" :key="item.text" href="#" @click="item.action">
-      {{ item.text }}
-    </b-list-group-item>
+    <template v-for="item in items">
+      <b-list-group-item v-if="item.action" :key="item.key" href="#" @click="item.action">
+        {{ item.text }}
+      </b-list-group-item>
+      <b-list-group-item v-else-if="item.children" :key="item.key" href="#" class="p-0" @mouseover="showChildren(item)" @mouseleave="hideChildren(item)">
+        <b-dropdown :ref="`dd-toggle-${item.key}`" dropright :text="item.text" variant="outline-light" toggle-class="menu-parent border-0">
+          <b-dropdown-item v-for="ic in item.children" :key="ic.key" @click="ic.action">
+            {{ ic.text }}
+          </b-dropdown-item>
+        </b-dropdown>
+      </b-list-group-item>
+    </template>
   </b-list-group>
 </template>
 <script lang="ts">
@@ -11,8 +20,14 @@ import { DialogMixin } from '@/utils';
 import { Dict } from '@/types';
 
 export interface MenuItem {
+  key: string | number;
   text: string;
-  action: () => void;
+  action?: () => void;
+  children?: Array<{
+    key: string | number,
+    text: string,
+    action: () => void,
+  }>;
 }
 
 @Component
@@ -53,10 +68,28 @@ export default class ContextMenu extends Mixins(DialogMixin) {
       }
     });
   }
+
+  private showChildren(item: MenuItem) {
+    // @ts-ignore
+    this.$refs[`dd-toggle-${item.key}`][0].show();
+  }
+
+  private hideChildren(item: MenuItem) {
+    // @ts-ignore
+    this.$refs[`dd-toggle-${item.key}`][0].hide();
+  }
 }
 </script>
 <style lang="scss" scoped>
 .context-menu {
   position: absolute;
+}
+
+</style>
+<style lang="scss">
+.dropdown-toggle.menu-parent {
+  color: inherit !important;
+  background-color: transparent !important;
+  padding: 0.75rem 1.25rem !important;
 }
 </style>

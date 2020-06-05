@@ -1,12 +1,12 @@
 <template>
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center">
-      <icon-button v-if="$mobile" icon="chevron-left" @click="$router.push(`/music/${context === 'tab' ? 'playlist' : context}`)"/>
+      <icon-button v-if="$mobile" icon="chevron-left" @click="$router.push(`/music/${context}`)"/>
       <icon-button icon="check-box" tooltip="check all / clear check" @click="toggleSelection"/>
       <icon-button icon="shuffle" tooltip="shuffle and play" class="mr-auto" @click="shuffleAndPlay"/>
-      <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeSong">Remove song</b-button>
+      <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeFromPlaylist">Remove song</b-button>
       <b-dropdown v-else size="sm" toggle-class="lh-1" variant="primary" text="Add to list" class="mr-2">
-        <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addSong(l.id)">
+        <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addToPlaylist(l.id)">
           {{ l.name }}
         </b-dropdown-item>
         <b-dropdown-item class="small px-0" @click="createPlaylist">
@@ -57,6 +57,7 @@ import { Song, REPEAT, getFilepath } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
 import { SongInfoDialog } from './components';
 import { formatTime, download } from '@/utils';
+import { MenuItem } from '@/components/ContextMenu.vue';
 
 @Component({
   components: {
@@ -65,9 +66,6 @@ import { formatTime, download } from '@/utils';
   },
 })
 export default class SongList extends Vue {
-  @Prop({ type: String, default: '' })
-  private tab!: string;
-
   @Prop({ type: String, default: 'tab' })
   private context!: string;
 
@@ -113,6 +111,11 @@ export default class SongList extends Vue {
     musicModule.SET_DISPLAYED_SONGS(val);
   }
 
+  @Watch('context', { immediate: true })
+  private onContextChanged() {
+    if (this.context === 'all') musicModule.FetchSongs();
+  }
+
   private created() {
     musicModule.FetchPlaylists();
   }
@@ -135,12 +138,16 @@ export default class SongList extends Vue {
     }
   }
 
-  private addSong(id: number) {
-    musicModule.AddPlaylistSong({ id, songs: this.selected });
+  private async addToPlaylist(id: number) {
+    const res = await musicModule.AddPlaylistSong({ id, songs: this.selected });
+    if (res && res.data.error_message) {
+      this.$message.warn(res.data.error_message);
+    }
   }
 
-  private removeSong() {
-    musicModule.RemovePlaylistSong({ songs: this.selected });
+  private async removeFromPlaylist() {
+    await musicModule.RemovePlaylistSong({ songs: this.selected });
+    await musicModule.ReloadSongs();
   }
 
   private play(item: Song) {
@@ -175,32 +182,70 @@ export default class SongList extends Vue {
 
   private showContextMenu(item: Song, n: number, e: MouseEvent) {
     e.preventDefault();
-    new ContextMenu().show({
-      items: [
-        { text: '再生', action: () => { this.play(item); } },
-        { text: '次に再生', action: () => { this.insertIntoNext(item); } },
-        { text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
-        {
-          text: '詳細を表示',
-          action: () => {
-            const dialog = new SongInfoDialog({
-              parent: this.$parent,
-              propsData: {
-                getNeighborSong: (current?: Song) => {
-                  if (!current) return {};
-                  const i = this.displayedSongs.indexOf(current);
-                  return {
-                    prevSong: this.displayedSongs[i - 1],
-                    nextSong: this.displayedSongs[i + 1],
-                  };
-                },
+
+    const menuItems: MenuItem[] = [];
+    menuItems.push(
+      { key: 'play', text: '再生', action: () => { this.play(item); } },
+      { key: 'playNext', text: '次に再生', action: () => { this.insertIntoNext(item); } },
+      { key: 'jumpToArtist', text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
+      {
+        key: 'showDetail',
+        text: '詳細を表示',
+        action: () => {
+          const dialog = new SongInfoDialog({
+            parent: this.$parent,
+            propsData: {
+              getNeighborSong: (current?: Song) => {
+                if (!current) return {};
+                const i = this.displayedSongs.indexOf(current);
+                return {
+                  prevSong: this.displayedSongs[i - 1],
+                  nextSong: this.displayedSongs[i + 1],
+                };
               },
-            });
-            dialog.open(item);
-          },
+            },
+          });
+          dialog.open(item);
         },
-        { text: 'ダウンロード', action: () => { download(getFilepath(item)); } },
-      ],
+      },
+    );
+    if (this.context === 'playlist') {
+      menuItems.push({
+        key: 'removeFromPlaylist',
+        text: 'プレイリストから削除',
+        action: async () => {
+          await musicModule.RemovePlaylistSong({ songs: [item] });
+          await musicModule.ReloadSongs();
+        },
+      });
+    } else {
+      menuItems.push({
+        key: 'addToPlaylist',
+        text: 'プレイリストに追加',
+        children: [
+          ...this.playlists.map((l) => ({
+            key: l.id,
+            text: l.name,
+            action: () => {
+              musicModule.AddPlaylistSong({ id: l.id as number, songs: [item] });
+            },
+          })),
+          {
+            key: 'create',
+            text: 'Create new playlist',
+            action: () => {
+              this.$prompt('Playlist name').then((res) => {
+                musicModule.CreatePlaylist({ name: res, songs: this.selected });
+              });
+            },
+          },
+        ],
+      });
+    }
+    menuItems.push({ key: 'download', text: 'ダウンロード', action: () => { download(getFilepath(item)); } });
+
+    new ContextMenu().show({
+      items: menuItems,
       event: e,
     });
   }

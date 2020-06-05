@@ -13,7 +13,7 @@ export default [
       {
         path: 'all',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/SongList.vue'),
-        props: { tab: 'all' },
+        props: { context: 'all' },
       },
       {
         path: 'artist',

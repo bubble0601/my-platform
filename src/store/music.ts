@@ -536,9 +536,9 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public AddPlaylistSong(data: { id: number, songs: Song[] }) {
+  public async AddPlaylistSong(data: { id: number, songs: Song[] }) {
     if (this.songs.length === 0) return;
-    api.addPlaylistSong(data.id, data.songs.map((s) => s.id));
+    return await api.addPlaylistSong(data.id, data.songs.map((s) => s.id));
   }
 
   @Action
@@ -552,13 +552,16 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public RemovePlaylistSong(data: { songs: Song[] }) {
+  public async RemovePlaylistSong(data: { songs: Song[] }) {
     if (this.songs.length === 0) return;
     if (!this.playlistId || !isNumber(this.playlistId)) return;
     const id = this.playlistId;
+    const promises: Array<Promise<any>> = [];
     data.songs.forEach((song) => {
-      api.removePlaylistSong(id, song.id);
+      const p = api.removePlaylistSong(id, song.id);
+      promises.push(p);
     });
+    await Promise.all(promises);
   }
 }
 

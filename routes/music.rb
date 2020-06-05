@@ -127,6 +127,12 @@ class MainApp < Sinatra::Base
             query = query.where(Sequel.lit('DATE_ADD(songs.created_at, INTERVAL 7 DAY) > NOW()'))
           end
           query.map(&method(:to_song_data))
+        else # all
+          Song.eager_graph(:album, :artist)
+              .order{album[:year]}
+              .order_append{album[:title]}
+              .order_append(:track_num, :title)
+              .map(&method(:to_song_data))
         end
       end
 
@@ -267,8 +273,10 @@ class MainApp < Sinatra::Base
         end
         if errors.empty?
           status 204
+        elsif errors.length == @json.length
+          halt 200, 'Selected songs are already added to the playlist'
         else
-          halt 400, 'Some songs are already added to the playlist'
+          halt 200, 'Some songs are already added to the playlist'
         end
       end
 
