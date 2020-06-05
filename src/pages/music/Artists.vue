@@ -67,7 +67,7 @@ export default class Artists extends Vue {
 
   get artists() {
     if (!this.query) return musicModule.artists;
-    return musicModule.artists.filter((artist) => artist.name.includes(this.query));
+    return musicModule.artists.filter((artist) => artist.name.toUpperCase().includes(this.query.toUpperCase()));
   }
 
   @Watch('id', { immediate: true })
