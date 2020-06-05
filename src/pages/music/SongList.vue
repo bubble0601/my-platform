@@ -188,26 +188,6 @@ export default class SongList extends Vue {
       { key: 'play', text: '再生', action: () => { this.play(item); } },
       { key: 'playNext', text: '次に再生', action: () => { this.insertIntoNext(item); } },
       { key: 'jumpToArtist', text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
-      {
-        key: 'showDetail',
-        text: '詳細を表示',
-        action: () => {
-          const dialog = new SongInfoDialog({
-            parent: this.$parent,
-            propsData: {
-              getNeighborSong: (current?: Song) => {
-                if (!current) return {};
-                const i = this.displayedSongs.indexOf(current);
-                return {
-                  prevSong: this.displayedSongs[i - 1],
-                  nextSong: this.displayedSongs[i + 1],
-                };
-              },
-            },
-          });
-          dialog.open(item);
-        },
-      },
     );
     if (this.context === 'playlist') {
       menuItems.push({
@@ -242,6 +222,26 @@ export default class SongList extends Vue {
         ],
       });
     }
+    menuItems.push({
+      key: 'showDetail',
+      text: '詳細を表示',
+      action: () => {
+        const dialog = new SongInfoDialog({
+          parent: this.$parent,
+          propsData: {
+            getNeighborSong: (current?: Song) => {
+              if (!current) return {};
+              const i = this.displayedSongs.indexOf(current);
+              return {
+                prevSong: this.displayedSongs[i - 1],
+                nextSong: this.displayedSongs[i + 1],
+              };
+            },
+          },
+        });
+        dialog.open(item);
+      },
+    });
     menuItems.push({ key: 'download', text: 'ダウンロード', action: () => { download(getFilepath(item)); } });
 
     new ContextMenu().show({

@@ -175,6 +175,16 @@ class MainApp < Sinatra::Base
         status 204
       end
 
+      put '/:id/albumartwork' do
+        song = Song[params[:id].to_i]
+        halt 404, 'The requested resource not found' if song.nil?
+        response = get_response(@json[:artwork])
+        res = song.album.songs.each{ |s|
+          s.update_artwork(response['Content-Type'], response.body)
+        }.map{ |s| s[:id] }
+        return 200, res
+      end
+
       delete '/:id' do
         song = Song[params[:id].to_i]
         halt 404, 'The requested resource not found' if song.nil?

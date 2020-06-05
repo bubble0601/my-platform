@@ -1,30 +1,33 @@
 <template>
   <div>
     <h5>Artwork</h5>
-    <div class="py-3">
-      <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
-      <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
-    </div>
-    <div class="d-md-flex">
-      <b-input v-model.trim="title" placeholder="Title"/>
-      <b-input v-model.trim="album" placeholder="Album" class="mt-2 mt-md-0 ml-md-2"/>
-      <b-input v-model.trim="artist" placeholder="Artist" class="mt-2 mt-md-0 ml-md-2"/>
-    </div>
-    <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchArtwork">
-      <b-spinner v-if="searching" type="grow" small class="mr-2"/>
-      <span>Search Artwork</span>
-    </b-button>
-    <div id="artwork-results" class="d-flex flex-wrap mt-1">
-      <div v-for="(src, i) in searchResults" :key="i" class="m-2">
-        <b-img :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click="selected = src"/>
+    <div id="artwork-search">
+      <div class="py-3">
+        <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
+        <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
       </div>
-      <div class="m-2">
-        <b-button v-if="searchCount === 1" variant="outline-secondary" @click="searchArtwork">More</b-button>
+      <div class="d-md-flex">
+        <b-input v-model.trim="title" placeholder="Title"/>
+        <b-input v-model.trim="album" placeholder="Album" class="mt-2 mt-md-0 ml-md-2"/>
+        <b-input v-model.trim="artist" placeholder="Artist" class="mt-2 mt-md-0 ml-md-2"/>
+      </div>
+      <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchArtwork">
+        <b-spinner v-if="searching" type="grow" small class="mr-2"/>
+        <span>Search Artwork</span>
+      </b-button>
+      <div class="d-flex flex-wrap mt-1">
+        <div v-for="(src, i) in searchResults" :key="i" class="m-2">
+          <b-img :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click="selected = src"/>
+        </div>
+        <div class="m-2">
+          <b-button v-if="searchCount === 1" variant="outline-secondary" @click="searchArtwork">More</b-button>
+        </div>
       </div>
     </div>
     <div class="d-flex mt-2">
       <b-button variant="outline-danger" class="ml-auto" @click="reset">Reset</b-button>
       <b-button variant="success" class="ml-2" @click="save">Save</b-button>
+      <b-button variant="success" class="ml-2" @click="saveToAlbum">Save to album</b-button>
     </div>
   </div>
 </template>
@@ -132,16 +135,31 @@ export default class ArtworkEditor extends Vue {
   }
 
   private save() {
+    if (!this.selected) {
+      this.$message.error('Prease select image');
+      return;
+    }
     axios.put(`/api/music/songs/${this.song.id}/artwork`, { artwork: this.selected }).then(() => {
       this.$message.success('Saved');
       this.$emit('updated');
     });
   }
+
+  private saveToAlbum() {
+    if (!this.selected) {
+      this.$message.error('Prease select image');
+      return;
+    }
+    axios.put<number[]>(`/api/music/songs/${this.song.id}/albumartwork`, { artwork: this.selected }).then((res) => {
+      this.$message.success('Saved');
+      this.$emit('updated', res.data);
+    });
+  }
 }
 </script>
 <style lang="scss" scoped>
-#artwork-results {
-  max-height: 70vh;
+#artwork-search {
+  max-height: 60vh;
   overflow-x: auto;
 }
 </style>
