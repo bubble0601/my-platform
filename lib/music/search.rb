@@ -7,8 +7,10 @@ module Lyrics
   def search(title, artist)
     search_methods = [
       :search_az,
+      :search_musix,
       :search_jlyric,
       :search_utaten,
+      :search_mojim,
     ]
     results = []
     threads = search_methods.map{|s| async_exec{ method(s).call(results, title, artist) }}
@@ -44,6 +46,22 @@ module Lyrics
 
     lyrics = body.children.to_a.filter{|e| e.text?}.map{|e| e.text}.join("\n").strip.gsub("\r", '').gsub("\n\n", "\n")
     results.push({ text: 'azlyrics.com', value: lyrics })
+  end
+
+  def search_musix(results, title, artist)
+    q = [title, artist].filter{|e| e}.join(' ')
+    url = URI.escape("https://www.musixmatch.com/search/#{q}")
+
+    doc = get_doc(url)
+    link = doc.css('a.title')[0]
+    return unless link
+
+    doc = get_doc("https://www.musixmatch.com#{link['href']}")
+    body = doc.css('.mxm-lyrics .mxm-lyrics')[0]
+    return unless body
+
+    lyrics = body.children.map{|e| (e.css('.mxm-lyrics__content span').map{|e| e.text} rescue nil) }.filter{|e| not e.nil?}.join.strip.gsub("\r", '')
+    results.push({ text: 'musixmatch.com', value: lyrics })
   end
 
   def search_jlyric(results, title, artist)
@@ -84,6 +102,26 @@ module Lyrics
                  .map{|e| e.text? ? e.text : (e.name == 'br' ? "\n" : e.css('.rb')[0].text)}
                  .join.strip.gsub("\r", '').gsub("\n\n", "\n")
     results.push({ text: 'utaten.com', value: lyrics })
+  end
+
+  def search_mojim(results, title, artist)
+    q = [title, artist].filter{|e| e}.join(' ')
+    url = URI.escape("http://mojim.com/#{q}.html?j4")
+
+    doc = get_doc(url)
+    link = doc.css('table.iB .mxsh_ss3 a')[0]
+    return unless link
+
+    doc = get_doc("http://mojim.com#{link['href']}")
+    body = doc.css('#fsZx1')[0]
+    return unless body
+
+    flag = false
+    lyrics = body.children.to_a.filter{|e|
+      flag = true if e['id'] == 'fsZx2'
+      flag and ((e.text? and not e.text.include?('Mojim.com')) or e.name == 'br')
+    }.map{|e| e.text? ? e.text : "\n"}.join.strip.gsub("\r", '')
+    results.push({ text: 'mojim.com', value: lyrics} )
   end
 end
 
