@@ -214,6 +214,7 @@ class Song < Sequel::Model(:songs)
     tags.lyrics = lyrics
     tags.save
     self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.has_lyric = true
     self.save
   end
 
@@ -226,6 +227,7 @@ class Song < Sequel::Model(:songs)
     }
     tags.save
     self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.has_artwork = true
     self.save
   end
 

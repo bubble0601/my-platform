@@ -74,8 +74,9 @@ export default class ArtworkEditor extends Vue {
   }
 
   @Watch('song', { immediate: true })
-  private onSongChanged() {
-    this.setQueries();
+  private onSongChanged(newSong: Song, oldSong: Song) {
+    if (newSong.id !== oldSong.id) this.reset();
+    else this.setQueries();
   }
 
   @Watch('metadata', { immediate: true })
@@ -129,6 +130,7 @@ export default class ArtworkEditor extends Vue {
   }
 
   private reset() {
+    this.searchCount = 0;
     this.searchResults = [];
     this.setArtwork();
     this.setQueries();
