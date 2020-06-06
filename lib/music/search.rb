@@ -60,7 +60,7 @@ module Lyrics
     body = doc.css('p#Lyric')[0]
     return unless body
 
-    lyrics = body.children.to_a.filter{|e| e.text?}.map{|e| e.text}.join("\n").strip.gsub("\r", '').gsub("\n\n", "\n")
+    lyrics = body.children.to_a.filter{|e| e.text? or (e.element? and e.name == 'br')}.map{|e| e.text? ? e.text : "\n"}.join("\n").strip.gsub("\r", '').gsub("\n\n", "\n").gsub("\n\n", "\n")
     results.push({ text: 'j-lyric.net', value: lyrics })
   end
 end
