@@ -171,7 +171,7 @@ export default class AudioEditor extends Vue {
 
   private onURLChanged() {
     if (this.url.match(/^[a-zA-Z0-9_-]{11}$/)) {
-      this.url = `https://www.youtube.com?v=${this.url}`;
+      this.url = `https://www.youtube.com/?v=${this.url}`;
     } else if (this.url.startsWith('https://www.youtube.com')) {
       let matched = /&?list=[a-zA-Z0-9_-]+/.exec(this.url);
       if (matched) {
@@ -190,8 +190,9 @@ export default class AudioEditor extends Vue {
       kind: 'download',
       url: this.url,
     };
-    await this.getProcessed(params);
-    this.url = '';
+    this.getProcessed(params).catch(() => {
+      this.$message.error('Failed to download from the url');
+    });
   }
 
   private async upload() {

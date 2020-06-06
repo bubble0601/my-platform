@@ -1,7 +1,7 @@
 <template>
   <b-button v-b-tooltip="tooltip ? { title: tooltip, delay: { show: 1000, hide: 0 } } : tooltip"
                 variant="link" class="icon-button" @click="$emit('click', $event)">
-    <b-icon :icon="icon"/>
+    <b-icon v-bind="attrs"/>
   </b-button>
 </template>
 <script lang="ts">
@@ -14,6 +14,13 @@ export default class IconButton extends Vue {
 
   @Prop({ default: null })
   private tooltip!: string | null;
+
+  get attrs() {
+    return {
+      ...this.$attrs,
+      icon: this.icon,
+    };
+  }
 }
 </script>
 <style lang="scss" scoped>

@@ -3,7 +3,9 @@
     <div class="d-flex align-items-center">
       <icon-button v-if="$mobile" icon="chevron-left" @click="$router.push(`/music/${context}`)"/>
       <icon-button icon="check-box" tooltip="check all / clear check" @click="toggleSelection"/>
-      <icon-button icon="shuffle" tooltip="shuffle and play" class="mr-auto" @click="shuffleAndPlay"/>
+      <icon-button icon="shuffle" tooltip="shuffle and play" @click="shuffleAndPlay"/>
+      <icon-button icon="arrow-clockwise" rotate="45" tooltip="reload songs" @click="reloadSongs"/>
+      <div class="ml-auto"/>
       <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeFromPlaylist">Remove song</b-button>
       <b-dropdown v-else size="sm" toggle-class="lh-1" variant="primary" text="Add to list" class="mr-2">
         <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addToPlaylist(l.id)">
@@ -161,8 +163,8 @@ export default class SongList extends Vue {
     musicModule.PlayAndSet(sample(this.songs));
   }
 
-  private insertIntoNext(item: Song) {
-    musicModule.InsertIntoNext(item);
+  public reloadSongs() {
+    musicModule.ReloadSongs();
   }
 
   private async updateRate(id: number, val: number) {
@@ -182,7 +184,7 @@ export default class SongList extends Vue {
     const menuItems: MenuItem[] = [];
     menuItems.push(
       { key: 'play', text: '再生', action: () => { this.play(item); } },
-      { key: 'playNext', text: '次に再生', action: () => { this.insertIntoNext(item); } },
+      { key: 'playNext', text: '次に再生', action: () => { musicModule.InsertIntoNext(item); } },
       { key: 'jumpToArtist', text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
     );
     if (this.context === 'playlist') {

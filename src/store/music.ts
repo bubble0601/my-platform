@@ -119,8 +119,6 @@ export default class MusicModule extends VuexModule {
     if (song) {
       if (n >= 0) {
         this.songs = this.songs.map((v, i) => n === i ? song : v);
-      } else {
-        this.songs.push(song);
       }
     } else {
       this.songs = this.songs.filter((v, i) => n !== i);

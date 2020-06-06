@@ -507,6 +507,7 @@ class MainApp < Sinatra::Base
       send_file path
     end
 
+    # TODO: make it stateless
     get '/temp/:digest/:name' do
       cache_control :no_store
       reset = params[:reset] == 'true'
