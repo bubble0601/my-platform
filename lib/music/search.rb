@@ -63,6 +63,27 @@ module Lyrics
     lyrics = body.children.to_a.filter{|e| e.text? or (e.element? and e.name == 'br')}.map{|e| e.text? ? e.text : "\n"}.join("\n").strip.gsub("\r", '').gsub("\n\n", "\n").gsub("\n\n", "\n")
     results.push({ text: 'j-lyric.net', value: lyrics })
   end
+
+  def search_utaten(results, title, artist)
+    if artist
+      url = URI.escape("https://utaten.com/search/artist_name=#{artist}/title=#{title}")
+    else
+      url = URI.escape("https://utaten.com/search//title=#{title}")
+    end
+    doc = get_doc(url)
+    link = doc.css('table .searchResult__title a')[0]
+    return unless link
+
+    doc = get_doc('https://utaten.com/' + link['href'])
+    body = doc.css('.lyricBody .hiragana')[0]
+    return unless body
+
+    lyrics = body.children.to_a
+                 .filter{|e| e.text? or e['class'] == 'ruby' or e.name == 'br'}
+                 .map{|e| e.text? ? e.text : (e.name == 'br' ? "\n" : e.css('.rb')[0].text)}
+                 .join.strip.gsub("\r", '').gsub("\n\n", "\n")
+    results.push({ text: 'utaten.com', value: lyrics })
+  end
 end
 
 module Artwork
@@ -73,15 +94,16 @@ module Artwork
     results = []
     threads = [
       async_exec{ search_genius(results, (title or album), artist) },
+      async_exec{ search_yahoo(results, (album or title), artist) },
     ]
-    threads.each { |t| t.join(5) if t }
+    threads.each { |t| t.join(10) if t }
     results
   end
 
-  def search_more(title, album, artist)
+  def search_more(title, album, artist, page)
     results = []
     threads = [
-      async_exec{ search_yahoo(results, (album or title), artist) },
+      async_exec{ search_yahoo(results, (album or title), artist, page) },
     ]
     threads.each { |t| t.join(10) if t }
     results
@@ -102,9 +124,10 @@ module Artwork
   #   doc = get_doc(url)
   # end
 
-  def search_yahoo(results, title, artist)
+  def search_yahoo(results, title, artist, page = 0)
     q = [title, artist].filter{|e| e}.join(' ')
-    url = URI.escape("https://search.yahoo.co.jp/image/search?p=#{q}")
+    b = page * 20 + 1
+    url = URI.escape("https://search.yahoo.co.jp/image/search?p=#{q}&b=#{b}")
 
     doc = get_doc(url)
     images = doc.css('div#gridlist img').to_a.map{|e| e['src']}

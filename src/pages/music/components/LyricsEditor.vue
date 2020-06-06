@@ -56,8 +56,8 @@ export default class LyricsEditor extends Vue {
   }
 
   @Watch('song', { immediate: true })
-  private onSongChanged(newSong: Song, oldSong: Song) {
-    if (newSong.id !== oldSong.id) this.reset();
+  private onSongChanged(newSong: Song, oldSong: Song | null) {
+    if (oldSong && newSong.id !== oldSong.id) this.reset();
     else this.setQueries();
   }
 

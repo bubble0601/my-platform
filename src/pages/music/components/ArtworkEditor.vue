@@ -20,7 +20,7 @@
           <b-img :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click="selected = src"/>
         </div>
         <div class="m-2">
-          <b-button v-if="searchCount === 1" variant="outline-secondary" @click="searchArtwork">More</b-button>
+          <b-button v-if="searchCount > 0" variant="outline-secondary" class="h-100" @click="searchArtwork">More</b-button>
         </div>
       </div>
     </div>
@@ -74,8 +74,8 @@ export default class ArtworkEditor extends Vue {
   }
 
   @Watch('song', { immediate: true })
-  private onSongChanged(newSong: Song, oldSong: Song) {
-    if (newSong.id !== oldSong.id) this.reset();
+  private onSongChanged(newSong: Song, oldSong: Song | null) {
+    if (oldSong && newSong.id !== oldSong.id) this.reset();
     else this.setQueries();
   }
 

@@ -427,7 +427,7 @@ class MainApp < Sinatra::Base
 
       get '/searchartwork' do
         if params[:more]
-          Artwork::search_more(params[:title], params[:album], params[:artist])
+          Artwork::search_more(params[:title], params[:album], params[:artist], params[:more].to_i)
         else
           Artwork::search(params[:title], params[:album], params[:artist])
         end
