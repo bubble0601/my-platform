@@ -8,6 +8,7 @@ module Lyrics
     search_methods = [
       :search_az,
       :search_jlyric,
+      :search_utaten,
     ]
     results = []
     threads = search_methods.map{|s| async_exec{ method(s).call(results, title, artist) }}
