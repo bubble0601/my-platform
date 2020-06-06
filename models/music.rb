@@ -110,7 +110,7 @@ class Song < Sequel::Model(:songs)
     song.filename = song.to_filename(filename)
     song
 
-    song.digest = generate_digest(song)
+    song.digest = generate_digest(path)
 
     new_filename = "#{CONF.storage.music}/#{song.filename}"
     if File.exist?(new_filename) and Song.first(artist_name: song.artist_name, title: song.title) != nil
@@ -131,8 +131,8 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
-  def self.generate_digest(song)
-    Digest::MD5.file(song.to_fullpath).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0,8]
+  def self.generate_digest(path)
+    Digest::MD5.file(path).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0,8]
   end
 
   def to_filename(original_name = nil)
@@ -151,7 +151,7 @@ class Song < Sequel::Model(:songs)
   end
 
   def generate_digest
-    Song.generate_digest(self)
+    Song.generate_digest(self.to_fullpath)
   end
 
   def update_tag(new_tags)

@@ -313,6 +313,7 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
   private onURLChanged() {
     this.titleCandidates = [];
     this.artistCandidates = [];
+    if (!this.url) return;
     if (this.url.match(/^[a-zA-Z0-9_-]{11}$/)) {
       this.url = `https://www.youtube.com?v=${this.url}`;
     } else if (this.url.startsWith('https://www.youtube.com')) {

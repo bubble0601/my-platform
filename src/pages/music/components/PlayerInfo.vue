@@ -40,6 +40,9 @@
           </div>
           <b-button-close class="ml-auto" @mousedown.prevent @click="remove(i)"/>
         </b-list-group-item>
+        <b-list-group-item v-if="queue.length === 0" class="text-muted mt-2">
+          Empty queue
+        </b-list-group-item>
       </b-list-group>
       <div v-else-if="tab === 'info'" class="p-2">
         <dl v-if="song">
