@@ -1,6 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
-import axios, { AxiosRequestConfig } from 'axios';
-import { clone, concat, isNumber, fill, findIndex, last, shuffle as sh, takeRight } from 'lodash';
+import axios from 'axios';
+import { clone, concat, fill, findIndex, last, shuffle as sh, takeRight } from 'lodash';
 import { Dict } from '@/types';
 import { message } from '@/utils/Dialogs';
 
@@ -70,7 +70,7 @@ const api = {
   fetchPlaylists: () => axios.get<Playlist[]>('/api/music/playlists'),
   fetchPlaylistSongs: (id: number) => axios.get<Song[]>(`/api/music/playlists/${id}/songs`),
   createPlaylist: (name: string) => axios.post<NormalPlaylist>('/api/music/playlists', { name }),
-  fetchPlaylistSong: (id: number, songId: number) => axios.get(`/api/music/playlists/${id}/songs/${songId}`),
+  fetchPlaylistSong: (id: number, songId: number) => axios.get<Song>(`/api/music/playlists/${id}/songs/${songId}`),
   addPlaylistSong: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
   updatePlaylistSong: (id: number, songId: number, weight: number) =>
                         axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
@@ -398,26 +398,20 @@ export default class MusicModule extends VuexModule {
 
   @Action
   public async ReloadSong(id: number) {
-    const { data } = await api.fetchSong(id);
+    let data = null;
+    if (this.playlistId) {
+      const res = await api.fetchPlaylistSong(this.playlistId, id);
+      data = res.data;
+    } else {
+      const res = await api.fetchSong(id);
+      data = res.data;
+    }
     this.UPDATE_SONGS({ id, song: data });
     this.UPDATE_QUEUE_ITEM(data);
     if (this.current && this.current.id === id) {
       this.SET_CURRENT(data);
     }
     return data;
-  }
-
-  @Action
-  public async ReloadPlaylistSong(sid: number) {
-    if (this.playlistId) {
-      const { data } = await api.fetchPlaylistSong(this.playlistId, sid);
-      this.UPDATE_SONGS({ id: sid, song: data });
-      if (this.current && this.current.id === sid) {
-        this.SET_CURRENT(data);
-      }
-    } else {
-      message.error('An error occurred');
-    }
   }
 
   @Action
@@ -592,7 +586,7 @@ export default class MusicModule extends VuexModule {
   @Action
   public async UpdatePlaylistSong(payload: { id: number, data: { weight: number } }) {
     const { id, data } = payload;
-    if (isNumber(this.playlistId)) {
+    if (this.playlistId) {
       await api.updatePlaylistSong(this.playlistId, id, data.weight);
     } else {
       message.error('An error occurred');
@@ -602,7 +596,7 @@ export default class MusicModule extends VuexModule {
   @Action
   public async RemovePlaylistSong(data: { songs: Song[] }) {
     if (this.songs.length === 0) return;
-    if (!this.playlistId || !isNumber(this.playlistId)) return;
+    if (!this.playlistId) return;
     const id = this.playlistId;
     const promises: Array<Promise<any>> = [];
     data.songs.forEach((song) => {

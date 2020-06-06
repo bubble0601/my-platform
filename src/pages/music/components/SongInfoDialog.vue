@@ -196,11 +196,8 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     if (!this.song) return;
     const id = this.song.id;
     await musicModule.UpdateSong({ id, data: { rate: val } });
-    if (musicModule.playlistId === null) {
-      musicModule.ReloadSong(id);
-    } else {
-      musicModule.ReloadPlaylistSong(id);
-    }
+    const song = await musicModule.ReloadSong(id);
+    this.song = song;
   }
 }
 </script>

@@ -51,7 +51,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BTable, BvTableFieldArray } from 'bootstrap-vue';
-import { isNumber, sample } from 'lodash';
+import { sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT, getFilepath } from '@/store/music';
 import { ContextMenu, IconButton, Rate } from '@/components';
@@ -90,7 +90,7 @@ export default class SongList extends Vue {
       fields.push({ key: 'year', sortable: true });
       // fields.push({ key: 'created_at', sortable: true });
     }
-    if (this.context === 'playlist' && isNumber(musicModule.playlistId)) {
+    if (this.context === 'playlist') {
       fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });
     }
     return fields;
@@ -167,17 +167,13 @@ export default class SongList extends Vue {
 
   private async updateRate(id: number, val: number) {
     await musicModule.UpdateSong({ id, data: { rate: val } });
-    if (this.context === 'playlist' && isNumber(musicModule.playlistId)) {
-      musicModule.ReloadPlaylistSong(id);
-    } else {
-      musicModule.ReloadSong(id);
-    }
+    musicModule.ReloadSong(id);
   }
 
   private async updateWeight(id: number, val: number) {
     if (val < 0) return;
     await musicModule.UpdatePlaylistSong({ id, data: { weight: val } });
-    await musicModule.ReloadPlaylistSong(id);
+    await musicModule.ReloadSong(id);
   }
 
   private showContextMenu(item: Song, n: number, e: MouseEvent) {

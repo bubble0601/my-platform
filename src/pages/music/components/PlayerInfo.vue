@@ -205,11 +205,7 @@ export default class PlayerInfo extends Vue {
     if (!this.song) return;
     const id = this.song.id;
     await musicModule.UpdateSong({ id, data: { rate: val } });
-    if (musicModule.playlistId === null) {
-      musicModule.ReloadSong(id);
-    } else {
-      musicModule.ReloadPlaylistSong(id);
-    }
+    musicModule.ReloadSong(id);
   }
 
   // Queue
