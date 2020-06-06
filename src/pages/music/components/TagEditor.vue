@@ -2,7 +2,11 @@
   <div>
     <v-form-group v-for="(label, k) in basicTags" :key="k" :label="label" label-cols="4" label-cols-lg="2">
       <div class="d-flex align-items-center">
-        <v-input v-model="edit[k]"/>
+        <template v-if="k === 'TPE2'">
+          <v-input v-model="edit.TPE2" list="dl_tag_TPE2"/>
+          <b-datalist id="dl_tag_TPE2" :options="[edit.TPE1]"/>
+        </template>
+        <v-input v-else v-model="edit[k]"/>
       </div>
     </v-form-group>
     <v-form-group v-for="(v, k) in otherTags" :key="k" :label="TAG_MAP[k] || k" label-cols="4" label-cols-lg="2">
@@ -100,7 +104,7 @@ export default class TagEditor extends Vue {
     this.edit = {};
     if (this.tags) {
       this.tags.forEach((t) => {
-        if ('string' !== typeof t.value) return true;
+        if ('string' !== typeof t.value) return;
         this.$set(this.edit, t.id, t.value);
       });
     }

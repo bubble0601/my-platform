@@ -196,6 +196,7 @@ export default class Music extends Mixins(SizeMixin) {
     display: block;
     color: #6c757d;
     cursor: pointer;
+    white-space: nowrap;
     &:hover {
       color: #595e63;
       background-color: #9993;

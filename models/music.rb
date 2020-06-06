@@ -110,7 +110,7 @@ class Song < Sequel::Model(:songs)
     song.filename = song.to_filename(filename)
     song
 
-    song.digest = Digest::MD5.file(path).hexdigest[0,8]
+    song.digest = generate_digest(song)
 
     new_filename = "#{CONF.storage.music}/#{song.filename}"
     if File.exist?(new_filename) and Song.first(artist_name: song.artist_name, title: song.title) != nil
@@ -131,6 +131,10 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{song.to_filename}"
   end
 
+  def self.generate_digest(song)
+    Digest::MD5.file(song.to_fullpath).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0,8]
+  end
+
   def to_filename(original_name = nil)
     artist = self.artist&.name&.escape_filename || 'Unknown Artist'
     album = self.album&.title&.escape_filename || 'Unknown Album'
@@ -146,6 +150,10 @@ class Song < Sequel::Model(:songs)
     "#{CONF.storage.music}/#{self.filename}"
   end
 
+  def generate_digest
+    Song.generate_digest(self)
+  end
+
   def update_tag(new_tags)
     path = self.to_fullpath
     tags = MP3.new(path).tags
@@ -159,7 +167,7 @@ class Song < Sequel::Model(:songs)
     end
     tags.save
 
-    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.digest = generate_digest
 
     song, album, artist = self.class.load_from_tags(new_tags)
 
@@ -213,7 +221,7 @@ class Song < Sequel::Model(:songs)
     tags = ID3.new(path)
     tags.lyrics = lyrics
     tags.save
-    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.digest = generate_digest
     self.has_lyric = true
     self.save
   end
@@ -226,7 +234,7 @@ class Song < Sequel::Model(:songs)
       data: data,
     }
     tags.save
-    self.digest = Digest::MD5.file(path).hexdigest[0,8]
+    self.digest = generate_digest
     self.has_artwork = true
     self.save
   end
@@ -255,7 +263,7 @@ class Song < Sequel::Model(:songs)
       ntags.save
     end
     FileUtils.move(new_path, old_path)
-    self.digest = Digest::MD5.file(self.to_fullpath).hexdigest[0,8]
+    self.digest = generate_digest
     self.length = MP3.new(old_path).length
     self.save
   end

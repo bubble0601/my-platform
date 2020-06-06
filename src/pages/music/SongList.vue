@@ -219,6 +219,13 @@ export default class SongList extends Vue {
       });
     }
     menuItems.push({
+      key: 'delete',
+      text: '曲を削除',
+      action: () => {
+        musicModule.DeleteSong(item.id);
+      },
+    });
+    menuItems.push({
       key: 'showDetail',
       text: '詳細を表示',
       action: () => {
