@@ -182,6 +182,7 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     if (targetIds) {
       if (targetIds[0] === -1) { // reload all
         musicModule.ReloadSongs();
+        musicModule.FetchArtists();
       } else {
         targetIds.forEach((id) => {
           if (id === this.song?.id) return;

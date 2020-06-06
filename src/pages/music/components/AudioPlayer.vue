@@ -14,7 +14,7 @@
         <b-icon icon="skip-end-fill"/>
       </div>
       <div class="player-progress ml-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="formatTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertPosToTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn btn-repeat position-relative ml-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
         <b-icon icon="arrow-repeat"/>
@@ -52,7 +52,7 @@
     </div>
     <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
       <div class="player-progress-mobile px-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="formatTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertPosToTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
       </div>
       <div class="control-btn ml-3 mr-auto" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
         <b-icon icon="shuffle"/>
@@ -264,7 +264,7 @@ export default class AudioPlayer extends Vue {
 
   private convertPosToTime(pos: number) {
     const time = this.duration * pos / PROGRESS_MAX;
-    return formatTime(time);
+    return formatTime(Math.floor(time));
   }
 }
 </script>

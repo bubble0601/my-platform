@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column">
-    <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @play="onPlay"/>
+    <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @play="onPlay" @keydown.stop/>
     <b-card>
       <template #header>
         <h5 class="mb-0">エフェクト</h5>

@@ -101,7 +101,7 @@ export default class ArtworkEditor extends Vue {
     if (this.song.album.id) this.album = this.song.album.title;
     else this.album = '';
     this.title = this.song.title;
-    this.artist = this.song.artist.name;
+    this.artist = this.song.album.artist || this.song.artist.name;
   }
 
   private onLoadArtworkError() {
@@ -130,6 +130,7 @@ export default class ArtworkEditor extends Vue {
   }
 
   private reset() {
+    this.selected = null;
     this.searchCount = 0;
     this.searchResults = [];
     this.setArtwork();

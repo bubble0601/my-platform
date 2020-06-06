@@ -15,7 +15,7 @@ module Lyrics
     results = []
     threads = search_methods.map{|s| async_exec{ method(s).call(results, title, artist) }}
     threads.each { |t| t.join(10) if t }
-    results
+    results.sort_by{|r| r[:text] == 'mojim.com' ? 1 : 0}
   end
 
   def search_az(results, title, artist)
@@ -60,8 +60,8 @@ module Lyrics
     body = doc.css('.mxm-lyrics .mxm-lyrics')[0]
     return unless body
 
-    lyrics = body.children.map{|e| (e.css('.mxm-lyrics__content span').map{|e| e.text} rescue nil) }.filter{|e| not e.nil?}.join.strip.gsub("\r", '')
-    results.push({ text: 'musixmatch.com', value: lyrics })
+    lyrics = body.children.map{|e| (e.css('.mxm-lyrics__content span').map{|e| e.text}.join("\n") rescue nil) }.filter{|e| not e.nil?}.join.strip.gsub("\r", '')
+    results.push({ text: 'musixmatch.com', value: lyrics }) unless lyrics.empty?
   end
 
   def search_jlyric(results, title, artist)

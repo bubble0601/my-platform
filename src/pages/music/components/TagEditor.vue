@@ -2,11 +2,8 @@
   <div>
     <v-form-group v-for="(label, k) in basicTags" :key="k" :label="label" label-cols="4" label-cols-lg="2">
       <div class="d-flex align-items-center">
-        <template v-if="k === 'TPE2'">
-          <v-input v-model="edit.TPE2" list="dl_tag_TPE2"/>
-          <b-datalist v-show="!edit.TPE2" id="dl_tag_TPE2" :options="[edit.TPE1]"/>
-        </template>
-        <v-input v-else v-model="edit[k]"/>
+        <v-input v-model="edit[k]"/>
+        <b-button-close class="ml-1" @click="deleteTag(k)"/>
       </div>
     </v-form-group>
     <v-form-group v-for="(v, k) in otherTags" :key="k" :label="TAG_MAP[k] || k" label-cols="4" label-cols-lg="2">
@@ -15,12 +12,16 @@
         <b-button-close class="ml-1" @click="deleteTag(k)"/>
       </div>
     </v-form-group>
-    <div class="d-flex">
-      <b-button variant="info" :disabled="searchingInfo" @click="searchInfo">
+    <div class="d-flex overflow-auto">
+      <b-button variant="info" @click="addTag">Add tag</b-button>
+      <b-button variant="info" :disabled="searchingInfo" class="ml-2" @click="searchInfo">
         <b-spinner v-if="searchingInfo" type="grow" small class="mr-1"/>
         <span>Search info</span>
       </b-button>
-      <b-button variant="info" class="ml-2" @click="addTag">Add tag</b-button>
+      <b-button variant="info" class="ml-2" @click="searchGoogle">
+        <span>Search google</span>
+        <b-icon icon="box-arrow-in-up-right" class="ml-1"/>
+      </b-button>
       <b-button variant="success" class="ml-auto" @click="save">Save</b-button>
     </div>
   </div>
@@ -117,7 +118,8 @@ export default class TagEditor extends Vue {
   }
 
   private deleteTag(k: string) {
-    this.edit[k] = null;
+    this.$set(this.edit, k, null);
+    // this.edit[k] = null;
   }
 
   private async searchInfo() {
@@ -149,17 +151,32 @@ export default class TagEditor extends Vue {
     });
   }
 
+  private searchGoogle() {
+    if (!this.song) return;
+    const title = this.edit.TIT2 || this.song.title;
+    const artist = this.edit.TPE1 || this.song.artist.name;
+
+    window.open(encodeURI(`https://www.google.com/search?q=${title} ${artist}`));
+  }
+
   private apply(selected: Array<Dictionary<string>>) {
     if (selected.length) {
       const info = selected[0];
       const year = this.id3Version === 'ID3v2.4' ? 'TDRC' : 'TYER';
-      this.edit.TIT2 = info.title;
-      this.edit.TPE1 = info.artist;
-      this.edit.TALB = info.album;
-      this.edit.TPE2 = info.album_artist;
-      this.edit[year] = info.year;
-      this.edit.TRCK = info.track;
-      this.edit.TPOS = info.disc;
+      this.$set(this.edit, 'TIT2', info.title);
+      this.$set(this.edit, 'TPE1', info.artist);
+      this.$set(this.edit, 'TALB', info.album);
+      this.$set(this.edit, 'TPE2', info.album_artist || info.artist);
+      this.$set(this.edit, year, info.year);
+      this.$set(this.edit, 'TRCK', info.track);
+      this.$set(this.edit, 'TPOS', info.disc);
+      // this.edit.TIT2 = info.title;
+      // this.edit.TPE1 = info.artist;
+      // this.edit.TALB = info.album;
+      // this.edit.TPE2 = info.album_artist;
+      // this.edit[year] = info.year;
+      // this.edit.TRCK = info.track;
+      // this.edit.TPOS = info.disc;
     }
   }
 
