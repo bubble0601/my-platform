@@ -113,11 +113,11 @@
         <template v-for="(u, i) in uploadQueue">
           <!-- multiple files result -->
           <b-list-group-item v-if="u.status === Status.Success && u.songs.length > 1" :key="i">
-            <div class="text-trucate text-nowrap">
+            <div class="d-flex text-trucate text-nowrap">
               <span class="text-secondary mr-3" @click="u.expanded = !u.expanded"><b-icon :icon="u.expanded ? 'caret-down-fill' : 'caret-right-fill'"/></span>
               <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
               <span v-else>{{ u.filename }}</span>
-              <b-button size="sm" variant="primary" @click="play(u.songs)">
+              <b-button size="sm" variant="primary" class="ml-auto" @click="play(u.songs)">
                 <b-icon icon="play"/>
                 <span>Play all</span>
               </b-button>

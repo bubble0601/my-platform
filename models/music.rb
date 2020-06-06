@@ -157,7 +157,8 @@ class Song < Sequel::Model(:songs)
   def update_tag(new_tags)
     path = self.to_fullpath
     tags = MP3.new(path).tags
-    new_tags.each do |k, v|
+    new_tags.each do |_k, v|
+      k = _k[0...4]
       case k
       when 'TYER'
         tags['TDRC'] = v

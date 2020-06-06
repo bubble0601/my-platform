@@ -222,7 +222,9 @@ export default class SongList extends Vue {
       key: 'delete',
       text: '曲を削除',
       action: () => {
-        musicModule.DeleteSong(item.id);
+        this.$confirm('Do you really delete this song?').then(() => {
+          musicModule.DeleteSong(item.id);
+        });
       },
     });
     menuItems.push({

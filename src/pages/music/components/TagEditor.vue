@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center">
         <template v-if="k === 'TPE2'">
           <v-input v-model="edit.TPE2" list="dl_tag_TPE2"/>
-          <b-datalist id="dl_tag_TPE2" :options="[edit.TPE1]"/>
+          <b-datalist v-show="!edit.TPE2" id="dl_tag_TPE2" :options="[edit.TPE1]"/>
         </template>
         <v-input v-else v-model="edit[k]"/>
       </div>
@@ -165,7 +165,7 @@ export default class TagEditor extends Vue {
 
   private async save() {
     await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
-    this.$emit('updated');
+    this.$emit('updated', [-1]);
   }
 }
 </script>
