@@ -1,11 +1,11 @@
 <template>
-  <b-modal ref="modal" v-if="type === 'confirm'" :title="title" @hidden="settle" @keydown.enter.native="onOK">
+  <b-modal ref="modal" v-if="type === 'confirm'" :title="title" :scrollable="scrollable" @hidden="settle" @keydown.enter.native="onOK">
     <pre v-if="pre">{{ message }}</pre>
     <span v-else>{{ message }}</span>
     <template #modal-footer>
       <div class="d-flex justify-content-end">
-        <b-button variant="outline-secondary" class="mr-1" @click="onCancel">キャンセル</b-button>
-        <b-button :variant="variant" @click="onOK">OK</b-button>
+        <b-button variant="outline-secondary" class="mr-1" @click="onCancel">{{ cancelText }}</b-button>
+        <b-button :variant="variant" @click="onOK">{{ okText }}</b-button>
       </div>
     </template>
   </b-modal>
@@ -16,8 +16,8 @@
     </v-field>
     <template #modal-footer>
       <div class="d-flex justify-content-end">
-        <b-button variant="outline-secondary" class="mr-1" @click="onCancel">キャンセル</b-button>
-        <b-button :variant="variant" @click="onOK">OK</b-button>
+        <b-button variant="outline-secondary" class="mr-1" @click="onCancel">{{ cancelText }}</b-button>
+        <b-button :variant="variant" @click="onOK">{{ okText }}</b-button>
       </div>
     </template>
   </b-modal>
@@ -37,6 +37,7 @@ export default class MessageBox extends Mixins(DialogMixin) {
   private type: 'confirm' | 'prompt' = 'confirm';
   private title = '';
   private variant: Variant = '';
+  private scrollable: boolean = false;
   private message = '';
   private pre = false;
   private inputLabel = '';
@@ -44,6 +45,8 @@ export default class MessageBox extends Mixins(DialogMixin) {
   private inputState: boolean | null = null;  // true: valid, false: invalid
   private required = false;
   private placeholder = '';
+  private okText = 'OK';
+  private cancelText = 'キャンセル';
 
   @Ref() private modal!: BModal;
 
@@ -57,12 +60,15 @@ export default class MessageBox extends Mixins(DialogMixin) {
     this.type = options.type === 'prompt' ? 'prompt' : 'confirm';
     this.title = options.title || (this.type === 'confirm' ? '確認' : '入力');
     this.variant = options.variant || (this.type === 'confirm' ? 'danger' : 'primary');
+    this.scrollable = options.scrollable || false;
     this.message = options.message || '';
     this.pre = options.pre !== false;
     this.inputValue = options.inputValue || '';
     this.inputLabel = options.inputLabel || '';
     this.placeholder = options.placeholder || '';
     this.required = options.required !== false;
+    this.okText = options.okText || 'OK';
+    this.cancelText = options.cancelText || 'キャンセル';
     this.$nextTick(() => {
       this.modal.show();
     });

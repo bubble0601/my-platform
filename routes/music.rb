@@ -5,8 +5,9 @@ require 'nokogiri'
 require './lib/music/search'
 
 class MainApp < Sinatra::Base
+  helpers UtilityHelpers
+
   namespace '/api/music' do
-    helpers UtilityHelpers
     helpers do
       def to_song_data(song)
         if song.is_a?(Song)
@@ -440,26 +441,41 @@ class MainApp < Sinatra::Base
     end
 
     namespace '/sync' do
+      helpers do
+        def rsync(test, local, delete)
+          local_dir = "#{CONF.storage.music}/"
+          remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
+          cmd = ['rsync', '-avhuz']
+          cmd.push('-n') if test
+          cmd.push("--exclude='.DS_Store'") if local
+          cmd.push('--delete') if delete
+          cmd.push('-e', 'ssh')
+          if local
+            cmd.push(local_dir)
+            cmd.push(remote_dir)
+          else
+            cmd.push(remote_dir)
+            cmd.push(local_dir)
+          end
+          exec_command(cmd)
+        end
+      end
       get '/testrun' do
         unless CONF.respond_to? :local
           halt 400, 'Not Configured'
         end
-        local_dir = "#{CONF.storage.music}/".escape_shell
-        remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/".escape_shell
-        r1 = `rsync -avhunz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
-        r2 = `rsync -avhunz -e ssh #{remote_dir} #{local_dir}`
-        { output: "#{r1}\n\n#{r2}" }
+        local = params[:local] == 'true'
+        delete = params[:delete] == 'true'
+        { output: rsync(true, local, delete) }
       end
 
       post '/run' do
         unless CONF.respond_to? :local
           halt 400, 'Not Configured'
         end
-        local_dir = "#{CONF.storage.music}/".escape_shell
-        remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/".escape_shell
-        r1 = `rsync -avhuz --exclude='.DS_Store' -e ssh #{local_dir} #{remote_dir}`
-        r2 = `rsync -avhuz -e ssh #{remote_dir} #{local_dir}`
-        { output: "#{r1}\n\n#{r2}" }
+        local = params[:local] == 'true'
+        delete = params[:delete] == 'true'
+        { output: rsync(false, local, delete) }
       end
     end
 
@@ -486,21 +502,6 @@ class MainApp < Sinatra::Base
   end
 
   namespace '/static/music' do
-    helpers do
-      def exec_command(cmd, append = nil)
-        cmd = cmd.map(&:escape_shell).join(' ') if Array === cmd
-        cmd += " #{append}" if append
-        out = `#{cmd}`
-        unless $?.success?
-          logger.error "An error ocurred when execute `#{cmd}`"
-          logger.error out
-          # raise RuntimeError, "An error ocurred when execute `#{cmd}`"
-          halt 500, 'An error ocurred when executing command'
-        end
-        return out
-      end
-    end
-
     get '/:digest/:name' do
       path = Song.get_path(params[:digest], params[:name])
       halt 404 if path.nil?

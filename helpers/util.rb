@@ -43,4 +43,17 @@ module UtilityHelpers
       p e
     end
   end
+
+  def exec_command(cmd, append = nil)
+    cmd = cmd.map(&:escape_shell).join(' ') if Array === cmd
+    cmd += " #{append}" if append
+    out = `#{cmd}`
+    unless $?.success?
+      logger.error "An error ocurred when execute `#{cmd}`"
+      logger.error out
+      # raise RuntimeError, "An error ocurred when execute `#{cmd}`"
+      halt 500, 'An error ocurred when executing command'
+    end
+    return out
+  end
 end
