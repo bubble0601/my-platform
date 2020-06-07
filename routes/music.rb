@@ -442,11 +442,11 @@ class MainApp < Sinatra::Base
 
     namespace '/sync' do
       helpers do
-        def rsync(test, local, delete)
+        def rsync(testrun, local, delete)
           local_dir = "#{CONF.storage.music}/"
           remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
           cmd = ['rsync', '-avhuz']
-          cmd.push('-n') if test
+          cmd.push('-n') if testrun
           cmd.push({ no_escape: "--exclude='.DS_Store'" }) if local
           cmd.push('--delete') if delete
           cmd.push('-e', 'ssh')
