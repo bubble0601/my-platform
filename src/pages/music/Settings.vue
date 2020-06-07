@@ -82,14 +82,14 @@ export default class Settings extends Vue {
       local: dir === 'local',
       delete: p.delete,
     };
-    let res = await axios.get<{ output: string }>('/api/music/sync/testrun', { params }).finally(() => {
+    let res = await axios.get<{ output: string }>('/api/music/tools/sync', { params }).finally(() => {
       p.loading = false;
     });
     if (!res.data.output) return;
 
     this.$confirm('Sync Info', res.data.output, { pre: true, variant: 'success', scrollable: true, okText: 'Run' }).then(async () => {
       this.$bvToast.toast('Syncing...', { title: 'Info', variant: 'info' });
-      res = await axios.post<{ output: string }>('/api/music/sync/run', { params });
+      res = await axios.post<{ output: string }>('/api/music/tools/sync', null, { params });
       const h = this.$createElement;
       this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res.data.output])], {
         title: 'Completed',

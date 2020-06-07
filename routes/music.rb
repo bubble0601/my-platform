@@ -5,8 +5,6 @@ require 'nokogiri'
 require './lib/music/search'
 
 class MainApp < Sinatra::Base
-  helpers UtilityHelpers
-
   namespace '/api/music' do
     helpers do
       def to_song_data(song)
@@ -343,6 +341,26 @@ class MainApp < Sinatra::Base
     end
 
     namespace '/tools' do
+      helpers do
+        def rsync(testrun, local, delete)
+          local_dir = "#{CONF.storage.music}/"
+          remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
+          cmd = ['rsync', '-avhuz']
+          cmd.push('-n') if testrun
+          cmd.push({ no_escape: "--exclude='.DS_Store'" }) if local
+          cmd.push('--delete') if delete
+          cmd.push('-e', 'ssh')
+          if local
+            cmd.push(local_dir)
+            cmd.push(remote_dir)
+          else
+            cmd.push(remote_dir)
+            cmd.push(local_dir)
+          end
+          exec_command(cmd)
+        end
+      end
+
       get '/candidates' do
         url = params[:url]
         if url.start_with?('https://www.youtube.com')
@@ -438,30 +456,8 @@ class MainApp < Sinatra::Base
           Artwork::search(params[:title], params[:album], params[:artist])
         end
       end
-    end
 
-    namespace '/sync' do
-      helpers do
-        def rsync(testrun, local, delete)
-          local_dir = "#{CONF.storage.music}/"
-          remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
-          cmd = ['rsync', '-avhuz']
-          cmd.push('-n') if testrun
-          cmd.push({ no_escape: "--exclude='.DS_Store'" }) if local
-          cmd.push('--delete') if delete
-          cmd.push('-e', 'ssh')
-          if local
-            cmd.push(local_dir)
-            cmd.push(remote_dir)
-          else
-            cmd.push(remote_dir)
-            cmd.push(local_dir)
-          end
-          exec_command(cmd)
-        end
-      end
-
-      get '/testrun' do
+      get '/sync' do
         unless CONF.respond_to? :local
           halt 400, 'Not Configured'
         end
@@ -470,7 +466,7 @@ class MainApp < Sinatra::Base
         { output: rsync(true, local, delete) }
       end
 
-      post '/run' do
+      post '/sync' do
         unless CONF.respond_to? :local
           halt 400, 'Not Configured'
         end

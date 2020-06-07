@@ -1,6 +1,7 @@
 require 'json'
 
 class MainApp < Sinatra::Base
+  helpers UtilityHelpers
   helpers ValidationHelpers
 
   namespace '/api' do
