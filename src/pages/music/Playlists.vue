@@ -91,5 +91,6 @@ export default class Playlists extends Vue {
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;
+  width: 10rem;
 }
 </style>

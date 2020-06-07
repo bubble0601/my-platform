@@ -1,10 +1,7 @@
-require 'shellwords'
+require 'shellwords' # add String#shellescape method
 
 class String
   def escape_filename
     self.gsub(/[\\\/|:*?"<>]/, ' ').strip
-  end
-  def escape_shell
-    Shellwords.escape(self)
   end
 end

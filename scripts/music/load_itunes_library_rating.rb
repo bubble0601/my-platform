@@ -1,7 +1,7 @@
 # iTunesでエクスポートしたxmlを元にデータベースのrateを更新するスクリプト
 require 'rexml/document'
-require_relative '../app/config'
-require_relative '../models/init'
+require './app/config'
+require './models/init'
 
 songs = []
 

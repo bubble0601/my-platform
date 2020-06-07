@@ -94,8 +94,8 @@ class MainApp < Sinatra::Base
         if @json # from media url
           now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
           path = "#{CONF.storage.temp}/temp#{now}"
-          output = "#{path}.%(ext)s".escape_shell
-          out = `youtube-dl -f bestaudio -x --audio-format 'mp3' -o #{output} #{@json[:url].escape_shell} 1>/dev/null 2>&1`
+          output = "#{path}.%(ext)s".shellescape
+          out = `youtube-dl -f bestaudio -x --audio-format 'mp3' -o #{output} #{@json[:url].shellescape} 1>/dev/null 2>&1`
           path += '.mp3'
           if $?.success?
             Song.set_tags(path, @json[:metadata])
@@ -447,7 +447,7 @@ class MainApp < Sinatra::Base
           remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
           cmd = ['rsync', '-avhuz']
           cmd.push('-n') if test
-          cmd.push("--exclude='.DS_Store'") if local
+          cmd.push({ no_escape: "--exclude='.DS_Store'" }) if local
           cmd.push('--delete') if delete
           cmd.push('-e', 'ssh')
           if local
@@ -460,6 +460,7 @@ class MainApp < Sinatra::Base
           exec_command(cmd)
         end
       end
+
       get '/testrun' do
         unless CONF.respond_to? :local
           halt 400, 'Not Configured'
@@ -543,7 +544,8 @@ class MainApp < Sinatra::Base
         FileUtils.move(output_path, input_path) unless reset
       when 'download'
         cmd = ['youtube-dl', '-f', 'bestaudio', '-x', '--audio-format', 'mp3', '-o', "#{path}.tmp.%(ext)s", params[:url]]
-        exec_command(cmd, '1>/dev/null 2>&1')
+        cmd.push({ no_escape: '1>/dev/null 2>&1' })
+        exec_command(cmd)
         FileUtils.move("#{path}.tmp.mp3", "#{path}.mp3")
         FileUtils.rm(Dir["#{path}.tmp.*"])
       end

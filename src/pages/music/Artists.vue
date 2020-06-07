@@ -90,6 +90,7 @@ export default class Artists extends Vue {
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;
+  width: 14rem;
 }
 
 .search_input:focus {

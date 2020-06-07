@@ -44,9 +44,8 @@ module UtilityHelpers
     end
   end
 
-  def exec_command(cmd, append = nil)
-    cmd = cmd.map(&:escape_shell).join(' ') if Array === cmd
-    cmd += " #{append}" if append
+  def exec_command(cmd)
+    cmd = cmd.map{|s| String === s ? s.shellescape : s[:no_escape] }.join(' ') if Array === cmd
     out = `#{cmd}`
     unless $?.success?
       logger.error "An error ocurred when execute `#{cmd}`"
