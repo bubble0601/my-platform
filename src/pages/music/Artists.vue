@@ -1,6 +1,6 @@
 <template>
   <div v-if="$pc" class="d-flex h-100">
-    <div class="artists">
+    <div class="artists pc">
       <b-input-group class="search_input-group">
         <b-input-group-prepend is-text>
           <b-icon icon="search"/>
@@ -90,7 +90,9 @@ export default class Artists extends Vue {
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;
-  width: 14rem;
+  &.pc {
+    width: 14rem;
+  }
 }
 
 .search_input:focus {

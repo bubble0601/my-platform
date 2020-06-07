@@ -1,6 +1,6 @@
 <template>
   <div v-if="$pc" class="d-flex h-100">
-    <b-list-group flush class="playlists">
+    <b-list-group flush class="playlists pc">
       <b-list-group-item v-if="playlists.length === 0" variant="secondary" class="text-muted border-0 px-3 py-1 cursor-default">
         <small>empty</small>
       </b-list-group-item>
@@ -91,6 +91,8 @@ export default class Playlists extends Vue {
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;
-  width: 10rem;
+  &.pc {
+    width: 10rem;
+  }
 }
 </style>
