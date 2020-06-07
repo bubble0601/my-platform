@@ -26,7 +26,9 @@
       </div>
       <!-- main -->
       <div class="center-block flex-grow-1 overflow-auto">
-        <router-view/>
+        <keep-alive include="Settings">
+          <router-view/>
+        </keep-alive>
       </div>
       <!-- player info -->
       <div class="sidemenu-right">
