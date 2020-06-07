@@ -101,6 +101,17 @@ export default class AudioEditor extends Vue {
     this.setData();
   }
 
+  protected mounted() {
+    this.audio.addEventListener('pause', (e) => {
+      // deactivateされたときのpauseイベントはwindowからではなくthis.$elから引き起こされる
+      // @ts-ignore
+      const path = e.path || e.composedPath();
+      if (path.length === 2) {
+        this.audio.play();
+      }
+    });
+  }
+
   private async setData(data?: Blob) {
     if (data) {
       this.audioData = data;

@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'date'
 require 'json'
 require 'net/http'
@@ -359,6 +360,20 @@ class MainApp < Sinatra::Base
           end
           exec_command(cmd)
         end
+
+        def find_empty_dir(results, path)
+          is_empty = {}
+          Dir.each_child(path) do |c|
+            cpath = File.join(path, c)
+            is_empty[cpath] = File.directory?(cpath) ? find_empty_dir(results, cpath) : false
+          end
+          if is_empty.all?{|k, v| v}
+            return true
+          else
+            is_empty.each{|k, v| results.push(k) if v}
+            return false
+          end
+        end
       end
 
       get '/candidates' do
@@ -501,7 +516,7 @@ class MainApp < Sinatra::Base
         Dir["#{CONF.storage.music}/**/*.*"].each do |f|
           if File.extname(f) == '.mp3'
             files[f] = false
-          else
+          elsif File.file?(f)
             deletes.push(f)
           end
         end
@@ -514,9 +529,14 @@ class MainApp < Sinatra::Base
           end
         end
         deletes.concat(files.filter{|k, v| v == false}.map{|k, v| k})
-        del_str = deletes.map{|f| "  #{f}"}.join("\n")
+
+        empty_dirs = []
+        find_empty_dir(empty_dirs, CONF.storage.music)
+
+        delf_str = deletes.map{|f| "  #{f}"}.join("\n")
+        deld_str = empty_dirs.map{|d| "  #{d}"}.join("\n")
         miss_str = missings.map{|f| "  #{f}"}.join("\n")
-        output = ["Delete:\n#{del_str}", "Missing:\n#{miss_str}"].join("\n\n")
+        output = ["Delete file:\n#{delf_str}", "Delete directory:\n#{deld_str}", "Missing:\n#{miss_str}"].join("\n\n")
         { output: output }
       end
 
@@ -526,7 +546,7 @@ class MainApp < Sinatra::Base
         Dir["#{CONF.storage.music}/**/*.*"].each do |f|
           if File.extname(f) == '.mp3'
             files[f] = false
-          else
+          elsif File.file?(f)
             deletes.push(f)
           end
         end
@@ -535,9 +555,16 @@ class MainApp < Sinatra::Base
           files[path] = true if files[path] == false
         end
         deletes.concat(files.filter{|k, v| v == false}.map{|k, v| k})
+
+        empty_dirs = []
+        find_empty_dir(empty_dirs, CONF.storage.music)
+
         deletes.each{|f| FileUtils.rm(f)}
-        del_str = deletes.map{|f| "  #{f}"}.join("\n")
-        { output: "Deleted:\n#{del_str}" }
+        empty_dirs.each{|d| FileUtils.rm_r(d)}
+        delf_str = deletes.map{|f| "  #{f}"}.join("\n")
+        deld_str = empty_dirs.map{|d| "  #{d}"}.join("\n")
+        output = ["Delete file:\n#{delf_str}", "Delete directory:\n#{deld_str}"].join("\n\n")
+        { output: output }
       end
     end
 
