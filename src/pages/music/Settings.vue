@@ -1,6 +1,6 @@
 <template>
   <b-container class="p-2">
-    <b-row v-if="isLocal">
+    <b-row v-if="isLocal" class="mb-2">
       <b-col cols="3" md="2">
         <h5 class="mb-0">Sync</h5>
       </b-col>
@@ -27,7 +27,7 @@
         </b-form-group>
       </b-col>
     </b-row>
-    <b-row v-if="isLocal" class="mt-2">
+    <b-row v-if="isLocal" class="mb-2">
       <b-col cols="3" md="2">
         <h5 class="mb-0">Scan</h5>
       </b-col>
@@ -38,18 +38,27 @@
         </b-button>
       </b-col>
     </b-row>
-    <!-- <div class="mt-2">
-      <b-button variant="info" :disabled="organizing" @click="scan">
-        <b-spinner v-if="organizing" small type="grow" class="mr-1"/>
-        <span>Organize music directory</span>
-      </b-button>
-    </div> -->
+    <b-row>
+      <b-col cols="3" md="2">
+        <h5 class="mb-0">Organize</h5>
+      </b-col>
+      <b-col>
+        <b-button variant="info" :disabled="organizing" @click="organize">
+          <b-spinner v-if="organizing" small type="grow" class="mr-1"/>
+          <span>Organize music directory</span>
+        </b-button>
+      </b-col>
+    </b-row>
+    <!-- <b-row v-if="isMacOS">
+
+    </b-row> -->
   </b-container>
 </template>
 <script lang="ts">
 import axios from 'axios';
 import { Vue, Component } from 'vue-property-decorator';
 import { settingModule } from '@/store';
+import { env } from '@/utils';
 
 @Component
 export default class Settings extends Vue {
@@ -65,10 +74,15 @@ export default class Settings extends Vue {
   };
 
   private scanning = false;
-  // private organizing = false;
+
+  private organizing = false;
 
   get isLocal() {
     return settingModule.isLocal;
+  }
+
+  get isMacOS() {
+    return env.os.mac;
   }
 
   protected created() {
@@ -82,16 +96,16 @@ export default class Settings extends Vue {
       local: dir === 'local',
       delete: p.delete,
     };
-    let res = await axios.get<{ output: string }>('/api/music/tools/sync', { params }).finally(() => {
+    const res1 = await axios.get<{ output: string }>('/api/music/tools/sync', { params }).finally(() => {
       p.loading = false;
     });
-    if (!res.data.output) return;
+    if (!res1.data.output) return;
 
-    this.$confirm('Sync Info', res.data.output, { pre: true, variant: 'success', scrollable: true, okText: 'Run' }).then(async () => {
+    this.$confirm('Sync Info', res1.data.output, { pre: true, variant: 'success', scrollable: true, okText: 'Run' }).then(async () => {
       this.$bvToast.toast('Syncing...', { title: 'Info', variant: 'info' });
-      res = await axios.post<{ output: string }>('/api/music/tools/sync', null, { params });
+      const res2 = await axios.post<{ output: string }>('/api/music/tools/sync', null, { params });
       const h = this.$createElement;
-      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res.data.output])], {
+      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res2.data.output])], {
         title: 'Completed',
         variant: 'success',
         solid: true,
@@ -101,7 +115,7 @@ export default class Settings extends Vue {
 
   private async scan() {
     this.scanning = true;
-    const res = await axios.post<{ output: string }>('/api/music/scan');
+    const res = await axios.post<{ output: string }>('/api/music/tools/scan');
     this.scanning = false;
     const h = this.$createElement;
     this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res.data.output])], {
@@ -111,10 +125,25 @@ export default class Settings extends Vue {
     });
   }
 
-  // private async organize() {
-  //   this.organizing = true;
-  //   const result = await musicModule.Organize();
-  //   this.organizing = false;
-  // }
+  private async organize() {
+    this.organizing = true;
+    const res1 = await axios.get<{ output: string }>('/api/music/tools/organize').catch(() => {
+      this.organizing = false;
+    });
+    if (!res1) return;
+
+    this.$confirm('Organize Info', res1.data.output, { pre: true, variant: 'success', scrollable: true, okText: 'Run' }).then(async () => {
+      this.$bvToast.toast('Organizing...', { title: 'Info', variant: 'info' });
+      const res2 = await axios.post<{ output: string }>('/api/music/tools/organize');
+      const h = this.$createElement;
+      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res2.data.output])], {
+        title: 'Completed',
+        variant: 'success',
+        solid: true,
+      });
+    }).finally(() => {
+      this.organizing = false;
+    });
+  }
 }
 </script>

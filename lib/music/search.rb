@@ -19,7 +19,7 @@ module Lyrics
   end
 
   def search_az(results, title, artist)
-    q = [title, artist].filter{|e| e}.join(' ')
+    q = [title, artist].filter(&:itself).join(' ')
     url = URI.escape("https://search.azlyrics.com/search.php?q=#{q}")
 
     doc = get_doc(url)
@@ -49,7 +49,7 @@ module Lyrics
   end
 
   def search_musix(results, title, artist)
-    q = [title, artist].filter{|e| e}.join(' ')
+    q = [title, artist].filter(&:itself).join(' ')
     url = URI.escape("https://www.musixmatch.com/search/#{q}")
 
     doc = get_doc(url)
@@ -105,7 +105,7 @@ module Lyrics
   end
 
   def search_mojim(results, title, artist)
-    q = [title, artist].filter{|e| e}.join(' ')
+    q = [title, artist].filter(&:itself).join(' ')
     url = URI.escape("http://mojim.com/#{q}.html?j4")
 
     doc = get_doc(url)
@@ -149,7 +149,7 @@ module Artwork
   end
 
   def search_genius(results, title, artist)
-    q = [title, artist].filter{|e| e}.join(' ')
+    q = [title, artist].filter(&:itself).join(' ')
     url = URI.escape("https://api.genius.com/search?q=#{q}")
     json = get_json(url, { 'Authorization': "Bearer #{CONF.app.genius_access_token}" })
     images = json['response']['hits'].map{|h| h['result']['header_image_thumbnail_url']}
@@ -157,14 +157,14 @@ module Artwork
   end
 
   # def search_google(results, title, artist)
-  #   q = [title, artist].filter{|e| e}.join(' ')
+  #   q = [title, artist].filter(&:itself).join(' ')
   #   url = URI.escape("https://www.google.com/search?q=#{q}&tbm=isch")
 
   #   doc = get_doc(url)
   # end
 
   def search_yahoo(results, title, artist, page = 0)
-    q = [title, artist].filter{|e| e}.join(' ')
+    q = [title, artist].filter(&:itself).join(' ')
     b = page * 20 + 1
     url = URI.escape("https://search.yahoo.co.jp/image/search?p=#{q}&b=#{b}")
 

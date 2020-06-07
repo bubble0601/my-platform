@@ -104,9 +104,13 @@ export function formatBytes(bytes: number, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+const ua = window.navigator.userAgent.toLowerCase();
 export const env = {
-  os: {},
-  render: {
+  os: {
+    mac: ua.indexOf('mac os x') !== -1,
+    windows: ua.indexOf('windows nt') !== -1,
+  },
+  renderer: {
     webkit: navigator.userAgent.indexOf('WebKit') !== -1,
   },
   rem() {

@@ -474,10 +474,8 @@ class MainApp < Sinatra::Base
         delete = params[:delete] == 'true'
         { output: rsync(false, local, delete) }
       end
-    end
 
-    namespace '/scan' do
-      post '' do
+      post '/scan' do
         results = []
         Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
           s = nil
@@ -495,7 +493,54 @@ class MainApp < Sinatra::Base
         end
         { output: results.join("\n") }
       end
+
+      get '/organize' do
+        files = {}
+        deletes = []
+        missings = []
+        Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+          if File.extname(f) == '.mp3'
+            files[f] = false
+          else
+            deletes.push(f)
+          end
+        end
+        Song.each do |s|
+          path = s.to_fullpath
+          if files[path].nil?
+            missings.push(path)
+          else
+            files[path] = true
+          end
+        end
+        deletes.concat(files.filter{|k, v| v == false}.map{|k, v| k})
+        del_str = deletes.map{|f| "  #{f}"}.join("\n")
+        miss_str = missings.map{|f| "  #{f}"}.join("\n")
+        output = ["Delete:\n#{del_str}", "Missing:\n#{miss_str}"].join("\n\n")
+        { output: output }
+      end
+
+      post '/organize' do
+        files = {}
+        deletes = []
+        Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+          if File.extname(f) == '.mp3'
+            files[f] = false
+          else
+            deletes.push(f)
+          end
+        end
+        Song.each do |s|
+          path = s.to_fullpath
+          files[path] = true if files[path] == false
+        end
+        deletes.concat(files.filter{|k, v| v == false}.map{|k, v| k})
+        deletes.each{|f| FileUtils.rm(f)}
+        del_str = deletes.map{|f| "  #{f}"}.join("\n")
+        { output: "Deleted:\n#{del_str}" }
+      end
     end
+
   end
 
   namespace '/static/music' do
