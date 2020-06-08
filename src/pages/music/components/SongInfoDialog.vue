@@ -178,18 +178,13 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
   }
 
   private async reload(targetIds: number[]) {
-    if (!this.song) return;
     if (targetIds) {
-      if (targetIds[0] === -1) { // reload all
-        musicModule.ReloadSongs();
-        musicModule.FetchArtists();
-      } else {
-        targetIds.forEach((id) => {
-          if (id === this.song?.id) return;
-          musicModule.ReloadSong(id);
-        });
-      }
+      targetIds.forEach((id) => {
+        if (id === this.song?.id) return;
+        musicModule.ReloadSong(id);
+      });
     }
+    if (!this.song) return;
     const res1 = await musicModule.ReloadSong(this.song.id);
     this.song = res1;
     const res2 = await musicModule.FetchAudio(this.song);

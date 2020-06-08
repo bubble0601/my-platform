@@ -3,13 +3,13 @@
     <v-form-group v-for="(label, k) in basicTags" :key="k" :label="label" label-cols="4" label-cols-lg="2">
       <div class="d-flex align-items-center">
         <v-input v-model="edit[k]"/>
-        <b-button-close class="ml-1" @click="deleteTag(k)"/>
+        <b-button-close class="ml-1" tabindex="-1" @click="deleteTag(k)"/>
       </div>
     </v-form-group>
     <v-form-group v-for="(v, k) in otherTags" :key="k" :label="TAG_MAP[k] || k" label-cols="4" label-cols-lg="2">
       <div class="d-flex align-items-center">
         <v-input v-model="edit[k]"/>
-        <b-button-close class="ml-1" @click="deleteTag(k)"/>
+        <b-button-close class="ml-1" tabindex="-1" @click="deleteTag(k)"/>
       </div>
     </v-form-group>
     <div class="d-flex overflow-auto">
@@ -182,7 +182,7 @@ export default class TagEditor extends Vue {
 
   private async save() {
     await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
-    this.$emit('updated', [-1]);
+    this.$emit('updated');
   }
 }
 </script>

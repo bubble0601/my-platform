@@ -173,7 +173,7 @@ export default class SongList extends Vue {
 
   private async updateRate(id: number, val: number) {
     await musicModule.UpdateSong({ id, data: { rate: val } });
-    musicModule.ReloadSong(id);
+    await musicModule.ReloadSong(id);
   }
 
   private async updateWeight(id: number, val: number) {
