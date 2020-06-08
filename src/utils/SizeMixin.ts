@@ -1,23 +1,24 @@
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
+import { screenModule } from '@/store';
 
 @Component
 export default class extends Vue {
-  private sizingCallbacks: Array<() => void> = [];
+  protected sizingCallbacks: Array<() => void> = [];
 
   protected mounted() {
-    this.sizingCallbacks.forEach((f) => {
-      f();
-      window.addEventListener('resize', f);
-    });
+    this.callSizingCallbacks();
+    window.addEventListener('resize', this.callSizingCallbacks);
   }
 
   protected beforeDestroy() {
-    this.sizingCallbacks.forEach((f) => {
-      window.removeEventListener('resize', f);
-    });
+    window.removeEventListener('resize', this.callSizingCallbacks);
   }
 
   protected addSizingCallback(f: () => void) {
     this.sizingCallbacks.push(f);
+  }
+
+  protected callSizingCallbacks() {
+    this.sizingCallbacks.forEach((f) => f());
   }
 }

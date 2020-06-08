@@ -1,5 +1,5 @@
 <template>
-  <div class="player" :class="{ 'player-mobile': $mobile, expanded: $mobile && !reduced }">
+  <div class="player" :class="{ expanded: $mobile && !reduced }">
     <audio ref="audio" :src="audioSrc" :loop="repeat === REPEAT.ONE" class="d-none"
            @loadeddata="onLoad" @timeupdate="onUpdate" @ended="onEnd" @pause="onPause"/>
     <div v-if="$pc" class="player-controls d-flex align-items-center">
@@ -39,15 +39,12 @@
           <span>{{ song.artist.name }} / {{ song.album.title }}</span>
         </small>
       </div>
-      <div class="control-btn btn-skip ml-auto" @click.stop="prev">
-        <b-icon icon="skip-start-fill"/>
-      </div>
-      <div class="control-btn btn-play" @click.stop="playing = !playing">
+      <div class="control-btn btn-play ml-auto px-1" @click.stop="playing = !playing">
         <b-icon v-if="playing" icon="pause-fill"/>
         <b-icon v-else icon="caret-right-fill"/>
       </div>
-      <div class="control-btn btn-skip mr-2" @click.stop="next">
-        <b-icon icon="skip-end-fill"/>
+      <div class="control-btn btn-menu mx-2 px-2" @click.stop="mShowMenu">
+        <b-icon icon="three-dots-vertical"/>
       </div>
     </div>
     <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
@@ -77,18 +74,19 @@
 <script lang="ts">
 import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
 import { throttle } from 'lodash';
-import { musicModule } from '@/store';
+import { musicModule, screenModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { formatTime } from '@/utils';
+import { ContextMenu } from '@/components';
+import { MenuItem } from '@/components/ContextMenu.vue';
 
 const PROGRESS_MAX = 300;
 
 @Component
 export default class AudioPlayer extends Vue {
-  @Ref() private audio!: HTMLAudioElement;
-
   @Prop({ type: Boolean, default: false })
   private reduced!: boolean;
+
 
   private REPEAT = REPEAT;
 
@@ -160,6 +158,8 @@ export default class AudioPlayer extends Vue {
     return throttle(musicModule.Prefetch, 10);
   }
 
+  @Ref() private audio!: HTMLAudioElement;
+
   @Watch('mute')
   private onMuteChanged = this.setVolume;
 
@@ -226,7 +226,14 @@ export default class AudioPlayer extends Vue {
     }
   }
 
-  private onPause() {
+  private onPause(e: Event) {
+    // deactivateされたときのpauseイベントはwindowからではなくthis.$elから引き起こされる
+    // @ts-ignore
+    const path = e.path || e.composedPath();
+    if (path.length === 2) {
+      this.audio.play();
+      return;
+    }
     if (!this.loading) this.playing = false;
   }
 
@@ -262,6 +269,45 @@ export default class AudioPlayer extends Vue {
     });
   }
 
+  private mShowMenu() {
+    const el = this.$el as HTMLElement;
+    const menuitems: MenuItem[] = [];
+    menuitems.push({
+      key: 'add',
+      text: 'Add',
+      action: () => {
+        console.log('add');
+      },
+    });
+    if (!screenModule.footerFixed) {
+      menuitems.push({
+        key: 'hide',
+        text: 'Hide',
+        action: () => {
+          this.$emit('hide');
+        },
+      });
+    }
+    menuitems.push({
+      key: 'settings',
+      text: 'Settings',
+      action: () => {
+        this.$router.push('/music/settings');
+      },
+    });
+    new ContextMenu({
+      propsData: {
+        itemClass: 'bg-secondary text-light',
+      },
+    }).show({
+      items: menuitems,
+      position: {
+        x: el.clientWidth,
+        y: window.innerHeight - el.clientHeight,
+      },
+    });
+  }
+
   private convertPosToTime(pos: number) {
     const time = this.duration * pos / PROGRESS_MAX;
     return formatTime(Math.floor(time));
@@ -270,17 +316,9 @@ export default class AudioPlayer extends Vue {
 </script>
 <style lang="scss" scoped>
 .player {
-  background-color: #567e;
-  min-height: 4rem;
   height: 4rem;
-  box-shadow: 0 -0.25rem .5rem rgba(0, 0, 0, 0.15);
+  min-height: 4rem;
 
-  &.player-mobile {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 110;
-  }
   &.expanded {
     min-height: 6rem;
     height: 6rem;

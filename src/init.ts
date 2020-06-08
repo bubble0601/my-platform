@@ -52,4 +52,4 @@ Vue.mixin({
   },
 });
 
-window.addEventListener('resize', screenModule.Resize);
+window.addEventListener('resize', screenModule.RESIZE);

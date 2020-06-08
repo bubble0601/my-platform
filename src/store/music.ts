@@ -1,6 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
-import { clone, concat, fill, findIndex, last, shuffle as sh, takeRight } from 'lodash';
+import { clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
 import { Dict } from '@/types';
 import { message } from '@/utils/Dialogs';
 
@@ -494,6 +494,14 @@ export default class MusicModule extends VuexModule {
 
   @Action
   public async PlayAndSet(song: Song | undefined) {
+    if (!song) return;
+    this.Play(song);
+    this.setQueue({ song, songs: this.songs });
+  }
+
+  @Action
+  public PlaySongs(songs: Song[]) {
+    const song = sample(songs);
     if (!song) return;
     this.Play(song);
     this.setQueue({ song, songs: this.songs });

@@ -24,7 +24,7 @@
           <hr v-else class="mt-2 mb-1">
         </template>
       </div>
-      <!-- main -->
+      <!-- center content -->
       <div class="center-block flex-grow-1 overflow-auto">
         <keep-alive include="Settings">
           <router-view/>
@@ -35,7 +35,6 @@
         <player-info class="h-100"/>
       </div>
     </div>
-    <audio-player ref="player"/>
   </main>
   <main v-else class="d-flex flex-column" :style="mMainStyle">
     <player-info v-show="mOpened"
@@ -48,34 +47,32 @@
     <floating-button v-show="!mOpened" icon="plus" :offset="4" @click="addSong"/>
     <v-nav v-show="!mOpened" :items="mTabs" tabs justified do-routing/>
     <router-view v-show="!mOpened" class="overflow-auto"/>
-
-    <audio-player ref="player" :reduced="!mOpened"
-                  @click.native="mOpened = true"
-                  @touchstart.native="mOnTouchStart"
-                  @touchmove.native="mOnTouchMove"
-                  @touchend.native="mOnTouchEnd"/>
   </main>
 </template>
 <script lang="ts">
-import { Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
-import { musicModule } from '@/store';
+import { Vue, Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
+import { musicModule, screenModule } from '@/store';
 import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav } from '@/components';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 
 @Component({
   components: {
-    AudioPlayer,
     FloatingButton,
     PlayerInfo,
     VNav,
   },
+  beforeRouteLeave(to, from, next) {
+    screenModule.SET_FOOTER_PROPS({ reduced: true });
+    screenModule.UNFIX_FOOTER();
+    next();
+  },
 })
 export default class Music extends Mixins(SizeMixin) {
-  private readonly mainStyle = {
+  private mainStyle = {
     height: 'auto',
   };
-  private readonly mMainStyle = {
+  private mMainStyle = {
     'padding-bottom': '6rem',
   };
 
@@ -83,7 +80,7 @@ export default class Music extends Mixins(SizeMixin) {
 
   private tabs: object[] = [];
 
-  private mOpened = true;
+  private mOpened = false;
   private mTabs = [
     { key: 'artist', to: '/music/artist', title: 'Artist' },
     { key: 'playlist', to: '/music/playlist', title: 'Playlist' },
@@ -95,34 +92,47 @@ export default class Music extends Mixins(SizeMixin) {
     return musicModule.current;
   }
 
-  @Ref() private player!: AudioPlayer;
+  get footerHeight() {
+    return screenModule.footerHeight;
+  }
 
   @Watch('currentSong')
   private onSongChanged() {
     if (this.currentSong) {
       if (this.currentSong.artist.name) {
-        document.title = `♪${this.currentSong.title} - ${this.currentSong.artist.name} | ${this.baseTitle}`;
+        document.title = `♪「${this.currentSong.title}」 by ${this.currentSong.artist.name} | ${this.baseTitle}`;
       } else {
-        document.title = `♪${this.currentSong.title} | ${this.baseTitle}`;
+        document.title = `♪「${this.currentSong.title}」 | ${this.baseTitle}`;
       }
     } else {
       document.title = this.baseTitle;
     }
   }
 
+  @Watch('footerHeight')
+  private onfooterHeightChanged() {
+    this.callSizingCallbacks();
+  }
+
   @Watch('mOpened')
   private onMOpenedChanged(val: boolean) {
-    if (val) this.mMainStyle['padding-bottom'] = '6rem';
-    else this.mMainStyle['padding-bottom'] = '4rem';
+    this.$nextTick(this.callSizingCallbacks);
+    screenModule.SET_FOOTER_PROPS({ reduced: !this.mOpened });
   }
 
   protected async created() {
     this.baseTitle = document.title;
     this.addSizingCallback(() => {
       if (this.$el instanceof HTMLElement) {
-        this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop}px`;
+        this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop - this.footerHeight}px`;
+        // this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop}px`;
+        // this.leftMenuStyle.height = `${window.innerHeight - this.$el.offsetTop - this.footerHeight}px`;
+        // this.contentStyle['padding-bottom'] = `${this.footerHeight}px`;
+        // this.rightMenuStyle['padding-bottom'] = `${this.footerHeight}px`;
+        this.mMainStyle['padding-bottom'] = `${this.footerHeight}px`;
       }
     });
+    this.initAudioPlayer();
     const sl: Array<{ key: string, name: string }> = [];
     this.tabs = [
       { key: 'all', name: 'All' },
@@ -146,7 +156,26 @@ export default class Music extends Mixins(SizeMixin) {
   }
 
   protected mounted() {
-    if (musicModule.current) musicModule.FetchAudioForPlay(musicModule.current);
+    if (musicModule.current && !musicModule.audioData) musicModule.FetchAudioForPlay(musicModule.current);
+  }
+
+  private initAudioPlayer() {
+    screenModule.SET_FOOTER({
+      name: 'Audio',
+      component: AudioPlayer,
+      props: {
+        reduced: !this.mOpened,
+      },
+      nativeListeners: {
+        click: () => {
+          this.mOpened = true;
+        },
+        touchstart: this.mOnTouchStart,
+        touchmove: this.mOnTouchStart,
+        touchend: this.mOnTouchStart,
+      },
+    });
+    screenModule.FIX_FOOTER();
   }
 
   private addSong() {
@@ -210,14 +239,11 @@ export default class Music extends Mixins(SizeMixin) {
     }
   }
 }
-.table {
-  font-size: smaller;
+.center-block {
+  border-right: 2px solid #dee2e6;
 }
 .sidemenu-right {
   width: 16rem;
   overflow-x: auto;
-}
-.center-block {
-  border-right: 2px solid #dee2e6;
 }
 </style>
