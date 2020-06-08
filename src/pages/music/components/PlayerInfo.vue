@@ -27,7 +27,7 @@
         </div>
       </template>
       <b-list-group v-else-if="tab === 'queue'" flush :class="{ 'border-bottom': queue.length }">
-        <b-list-group-item v-for="(song, i) in queue" :key="`${i}-${song.id}`" href="#"
+        <b-list-group-item v-for="(song, i) in partQueue" :key="`${i}-${song.id}`" href="#"
                            draggable="true" class="d-flex align-items-center py-2 pl-1 pr-3"
                            @dragstart="dragging = { index: i, song }"
                            @dragenter.self="onDragEnter(i)"
@@ -123,6 +123,11 @@ export default class PlayerInfo extends Vue {
 
   get audioData() {
     return musicModule.audioData;
+  }
+
+  // TODO: load on scroll
+  get partQueue() {
+    return this.queue.slice(0, 100);
   }
 
   get id3Version() {
