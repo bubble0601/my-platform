@@ -87,7 +87,6 @@ export default class AudioPlayer extends Vue {
   @Prop({ type: Boolean, default: false })
   private reduced!: boolean;
 
-
   private REPEAT = REPEAT;
 
   private loading: boolean = false;
