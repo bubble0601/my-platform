@@ -1,12 +1,12 @@
 <template>
   <b-list-group v-show="shown" class="context-menu shadow" :style="style" @mousedown.stop @click="destroy">
     <template v-for="item in items">
-      <b-list-group-item v-if="item.action" :key="item.key" href="#" @click="item.action">
+      <b-list-group-item v-if="item.action" :key="item.key" href="#" :class="itemClass" @click="item.action">
         {{ item.text }}
       </b-list-group-item>
-      <b-list-group-item v-else-if="item.children" :key="item.key" href="#" class="p-0" @mouseover="showChildren(item)" @mouseleave="hideChildren(item)">
+      <b-list-group-item v-else-if="item.children" :key="item.key" href="#" class="p-0" :class="itemClass" @mouseover="showChildren(item)" @mouseleave="hideChildren(item)">
         <b-dropdown :ref="`dd-toggle-${item.key}`" dropright :text="item.text" variant="outline-light" toggle-class="menu-parent border-0">
-          <b-dropdown-item v-for="ic in item.children" :key="ic.key" @click="ic.action">
+          <b-dropdown-item v-for="ic in item.children" :key="ic.key" :class="itemClass" @click="ic.action">
             {{ ic.text }}
           </b-dropdown-item>
         </b-dropdown>
@@ -32,6 +32,9 @@ export interface MenuItem {
 
 @Component
 export default class ContextMenu extends Mixins(DialogMixin) {
+  @Prop({ type: [String, Array, Object], default: () => ({}) })
+  private itemClass!: string | string[] | object;
+
   private shown = false;
   private items: MenuItem[] = [];
   private style: Dict<string> = {
@@ -51,20 +54,20 @@ export default class ContextMenu extends Mixins(DialogMixin) {
     this.$destroy();
   }
 
-  public show(options: { items: MenuItem[], event: MouseEvent }) {
+  public show(options: { items: MenuItem[], position: { x: number, y: number } }) {
     this.shown = true;
     this.items = options.items;
-    const e = options.event;
+    const { x, y } = options.position;
     this.$nextTick(() => {
-      if (this.$el.clientWidth + e.clientX > window.innerWidth) {
-        this.style.left = `${e.clientX - this.$el.clientWidth}px`;
+      if (this.$el.clientWidth + x > window.innerWidth) {
+        this.style.left = `${x - this.$el.clientWidth}px`;
       } else {
-        this.style.left = `${e.clientX}px`;
+        this.style.left = `${x}px`;
       }
-      if (this.$el.clientHeight + e.clientY > window.innerHeight) {
-        this.style.top = `${e.clientY - this.$el.clientHeight}px`;
+      if (this.$el.clientHeight + y > window.innerHeight) {
+        this.style.top = `${y - this.$el.clientHeight}px`;
       } else {
-        this.style.top = `${e.clientY}px`;
+        this.style.top = `${y}px`;
       }
     });
   }
@@ -83,6 +86,7 @@ export default class ContextMenu extends Mixins(DialogMixin) {
 <style lang="scss" scoped>
 .context-menu {
   position: absolute;
+  z-index: 1000;
 }
 
 </style>

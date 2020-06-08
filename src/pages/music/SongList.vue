@@ -160,7 +160,11 @@ export default class SongList extends Vue {
     if (this.songs.length === 0) return;
     musicModule.SetControl({ shuffle: true });
     if (musicModule.repeat === REPEAT.ONE) musicModule.SetControl({ repeat: REPEAT.NONE });
-    musicModule.PlayAndSet(sample(this.songs));
+    if (this.selected.length) {
+      musicModule.PlaySongs(this.selected);
+    } else {
+      musicModule.PlaySongs(this.songs);
+    }
   }
 
   public reloadSongs() {
@@ -192,7 +196,7 @@ export default class SongList extends Vue {
         key: 'removeFromPlaylist',
         text: 'プレイリストから削除',
         action: async () => {
-          await musicModule.RemovePlaylistSong({ songs: [item] });
+          await musicModule.RemovePlaylistSong({ songs: this.selected.length ? this.selected : [item] });
           await musicModule.ReloadSongs();
         },
       });
@@ -205,7 +209,7 @@ export default class SongList extends Vue {
             key: l.id,
             text: l.name,
             action: () => {
-              musicModule.AddPlaylistSong({ id: l.id as number, songs: [item] });
+              musicModule.AddPlaylistSong({ id: l.id as number, songs: this.selected.length ? this.selected : [item] });
             },
           })),
           {
@@ -253,7 +257,10 @@ export default class SongList extends Vue {
 
     new ContextMenu().show({
       items: menuItems,
-      event: e,
+      position: {
+        x: e.clientX,
+        y: e.clientY,
+      },
     });
   }
 }

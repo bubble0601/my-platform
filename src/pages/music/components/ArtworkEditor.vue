@@ -17,7 +17,7 @@
       </b-button>
       <div class="d-flex flex-wrap mt-1">
         <div v-for="(src, i) in searchResults" :key="i" class="m-2">
-          <b-img-lazy :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click="selected = src"/>
+          <b-img-lazy :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click.native="selected = src"/>
         </div>
         <div class="m-2">
           <b-button v-if="searchCount > 0" variant="outline-secondary" class="h-100" @click="searchArtwork">More</b-button>
