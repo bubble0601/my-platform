@@ -450,7 +450,7 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
     if (s) {
       if (isArray(s)) {
         if (s.length === 0) return;
-        musicModule.Insert(s.slice(1));
+        musicModule.InsertIntoNext(s.slice(1));
         musicModule.Play(s[0]);
       } else {
         musicModule.Play(s);

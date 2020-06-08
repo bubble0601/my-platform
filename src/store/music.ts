@@ -546,12 +546,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public InsertIntoNext(song: Song) {
-    this.UNSHIFT_QUEUE(song);
-  }
-
-  @Action
-  public Insert(songs: Song[]) {
+  public InsertIntoNext(songs: Song[]) {
     songs.reverse().forEach((s) => {
       this.UNSHIFT_QUEUE(s);
     });

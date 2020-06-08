@@ -186,17 +186,24 @@ export default class SongList extends Vue {
     e.preventDefault();
 
     const menuItems: MenuItem[] = [];
+    const songs = this.selected.length ? this.selected : [item];
     menuItems.push(
-      { key: 'play', text: '再生', action: () => { this.play(item); } },
-      { key: 'playNext', text: '次に再生', action: () => { musicModule.InsertIntoNext(item); } },
-      { key: 'jumpToArtist', text: `"${item.artist.name}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
+      { key: 'play', text: '再生', action: () => {
+        if (this.selected.length) {
+          musicModule.PlaySongs(this.selected);
+        } else {
+          this.play(item);
+        }
+      } },
+      { key: 'playNext', text: '次に再生', action: () => { musicModule.InsertIntoNext(songs); } },
+      { key: 'jumpToArtist', text: `"${item.album.artist}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
     );
     if (this.context === 'playlist') {
       menuItems.push({
         key: 'removeFromPlaylist',
         text: 'プレイリストから削除',
         action: async () => {
-          await musicModule.RemovePlaylistSong({ songs: this.selected.length ? this.selected : [item] });
+          await musicModule.RemovePlaylistSong({ songs });
           await musicModule.ReloadSongs();
         },
       });
@@ -209,7 +216,7 @@ export default class SongList extends Vue {
             key: l.id,
             text: l.name,
             action: () => {
-              musicModule.AddPlaylistSong({ id: l.id as number, songs: this.selected.length ? this.selected : [item] });
+              musicModule.AddPlaylistSong({ id: l.id as number, songs });
             },
           })),
           {
@@ -217,7 +224,7 @@ export default class SongList extends Vue {
             text: 'Create new playlist',
             action: () => {
               this.$prompt('Playlist name').then((res) => {
-                musicModule.CreatePlaylist({ name: res, songs: this.selected });
+                musicModule.CreatePlaylist({ name: res, songs });
               });
             },
           },
@@ -228,9 +235,18 @@ export default class SongList extends Vue {
       key: 'delete',
       text: '曲を削除',
       action: () => {
-        this.$confirm(`Do you really delete '${item.title}' by ${item.artist.name}?`).then(() => {
-          musicModule.DeleteSong(item.id);
-        });
+        if (this.selected.length) {
+          const songsStr = this.selected.map((s) => `  ${s.title} by ${s.artist.name}`).join('\n');
+          this.$confirm(`Do you really delete these songs?\n${songsStr}`).then(() => {
+            songs.forEach((s) => {
+              musicModule.DeleteSong(s.id);
+            });
+          });
+        } else {
+          this.$confirm(`Do you really delete '${item.title}' by ${item.artist.name}?`).then(() => {
+            musicModule.DeleteSong(item.id);
+          });
+        }
       },
     });
     menuItems.push({
