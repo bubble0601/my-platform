@@ -279,7 +279,7 @@ export default class AudioPlayer extends Vue {
           key: 'song',
           text: 'Song',
           action: () => {
-            console.log('add');
+            this.$router.push('/music/song/new');
           },
         },
       ],

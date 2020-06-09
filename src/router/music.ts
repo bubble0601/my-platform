@@ -16,6 +16,10 @@ export default [
         props: { context: 'all' },
       },
       {
+        path: 'song/new',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/NewSong.vue'),
+      },
+      {
         path: 'artist',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Artists.vue'),
       },

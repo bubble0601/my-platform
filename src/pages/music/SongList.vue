@@ -48,6 +48,8 @@
         <icon-button icon="plus" class="p-0" @click="updateWeight(item.id, value + 1)"/>
       </template>
     </b-table>
+    <!-- dialog -->
+    <song-info-dialog ref="songInfoDialog"/>
   </div>
 </template>
 <script lang="ts">
@@ -65,6 +67,7 @@ import { SongInfoDialog } from './components';
   components: {
     IconButton,
     Rate,
+    SongInfoDialog,
   },
 })
 export default class SongList extends Vue {
@@ -76,6 +79,7 @@ export default class SongList extends Vue {
   private perPage = 100;
 
   @Ref() private table!: BTable;
+  @Ref() private songInfoDialog!: SongInfoDialog;
 
   get fields() {
     const fields: BvTableFieldArray = [
@@ -253,20 +257,7 @@ export default class SongList extends Vue {
       key: 'showDetail',
       text: '詳細を表示',
       action: () => {
-        const dialog = new SongInfoDialog({
-          parent: this.$parent,
-          propsData: {
-            getNeighborSong: (current?: Song) => {
-              if (!current) return {};
-              const i = this.displayedSongs.indexOf(current);
-              return {
-                prevSong: this.displayedSongs[i - 1],
-                nextSong: this.displayedSongs[i + 1],
-              };
-            },
-          },
-        });
-        dialog.open(item);
+        this.songInfoDialog.open(this.displayedSongs, n);
       },
     });
     menuItems.push({ key: 'download', text: 'ダウンロード', action: () => { download(getFilepath(item)); } });

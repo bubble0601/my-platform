@@ -83,10 +83,11 @@
         </div>
       </div>
     </div>
+    <song-info-dialog ref="songInfoDialog"/>
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Watch } from 'vue-property-decorator';
+import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
 import { Dictionary, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
@@ -99,6 +100,7 @@ import SongInfoDialog from './SongInfoDialog.vue';
   components: {
     VNav,
     Rate,
+    SongInfoDialog,
   },
 })
 export default class PlayerInfo extends Vue {
@@ -170,6 +172,8 @@ export default class PlayerInfo extends Vue {
     }
   }
 
+  @Ref() private songInfoDialog!: SongInfoDialog;
+
   @Watch('audioData')
   private onDataChanged() {
     if (this.audioData) {
@@ -239,20 +243,8 @@ export default class PlayerInfo extends Vue {
   // Info
   private editSong(nav = 'info') {
     if (!this.song) return;
-    const dialog = new SongInfoDialog({
-      parent: this.$parent,
-      propsData: {
-        getNeighborSong: (current?: Song) => {
-          if (!current) return {};
-          const i = this.queue.indexOf(current);
-          return {
-            prevSong: this.queue[i - 1],
-            nextSong: this.queue[i + 1],
-          };
-        },
-      },
-    });
-    dialog.open(this.song, nav);
+    const songs = [this.song].concat(this.queue);
+    this.songInfoDialog.open(songs, 0, nav);
   }
 
   private deleteSong() {

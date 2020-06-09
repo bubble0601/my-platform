@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column">
     <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @play="onPlay" @keydown.stop/>
-    <!-- <b-card>
+    <!-- <b-card class="mb-2">
       <template #header>
         <h5 class="mb-0">エフェクト</h5>
       </template>
@@ -14,7 +14,7 @@
         <span>正規化</span>
       </b-button>
     </b-card> -->
-    <b-card class="mt-2">
+    <b-card class="mb-2">
       <template #header>
         <h5 class="mb-0">切り出し</h5>
       </template>
@@ -26,7 +26,7 @@
         </b-button>
       </div>
     </b-card>
-    <b-card class="mt-2">
+    <b-card>
       <template #header>
         <h5 class="mb-0">差し替え</h5>
       </template>
@@ -110,6 +110,10 @@ export default class AudioEditor extends Vue {
         this.audio.play();
       }
     });
+  }
+
+  protected beforeDestroy() {
+    this.audio.pause();
   }
 
   private async setData(data?: Blob) {

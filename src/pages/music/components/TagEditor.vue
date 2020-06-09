@@ -119,7 +119,6 @@ export default class TagEditor extends Vue {
 
   private deleteTag(k: string) {
     this.$set(this.edit, k, null);
-    // this.edit[k] = null;
   }
 
   private async searchInfo() {
@@ -170,13 +169,6 @@ export default class TagEditor extends Vue {
       this.$set(this.edit, year, info.year);
       this.$set(this.edit, 'TRCK', info.track);
       this.$set(this.edit, 'TPOS', info.disc);
-      // this.edit.TIT2 = info.title;
-      // this.edit.TPE1 = info.artist;
-      // this.edit.TALB = info.album;
-      // this.edit.TPE2 = info.album_artist;
-      // this.edit[year] = info.year;
-      // this.edit.TRCK = info.track;
-      // this.edit.TPOS = info.disc;
     }
   }
 

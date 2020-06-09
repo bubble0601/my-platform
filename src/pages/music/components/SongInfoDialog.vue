@@ -1,10 +1,9 @@
 <template>
-    <!-- main -->
-    <b-modal ref="mainDialog" title="Edit song" size="lg" @hidden="onClosed">
-      <v-nav v-model="nav" :items="navItems" pills no-wrap/>
+    <b-modal ref="mainDialog" title="Edit song" size="lg" @hidden="$emit('hidden')">
+      <v-nav v-model="nav" :items="navItems" pills no-wrap class="mb-3"/>
       <keep-alive>
         <!-- info -->
-        <div v-if="nav === 'info'" class="container pt-3">
+        <div v-if="nav === 'info'" class="container">
           <dl v-if="song" class="row">
             <dt class="col-sm-3">Title</dt>
             <dd class="col-sm-9">{{ song.title }}</dd>
@@ -41,13 +40,13 @@
           </dl>
         </div>
         <!-- tag -->
-        <tag-editor v-else-if="nav === 'tag'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
+        <tag-editor v-else-if="nav === 'tag'" :song="song" :metadata="metadata" @updated="reload"/>
         <!-- edit -->
-        <audio-editor v-else-if="nav === 'edit'" :song="song" :data="audioData" class="pt-3" @updated="reload"/>
+        <audio-editor v-else-if="nav === 'edit'" :song="song" :data="audioData" @updated="reload"/>
         <!-- lyrics -->
-        <lyrics-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
+        <lyrics-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" @updated="reload"/>
         <!-- artwork -->
-        <artwork-editor v-else-if="nav === 'artwork'" :song="song" :metadata="metadata" class="pt-3" @updated="reload"/>
+        <artwork-editor v-else-if="nav === 'artwork'" :song="song" :metadata="metadata" @updated="reload"/>
       </keep-alive>
       <template #modal-footer="{ close }">
         <b-button-group class="mr-auto">
@@ -59,11 +58,11 @@
     </b-modal>
 </template>
 <script lang="ts">
-import { Component, Mixins, Prop, Watch, Ref } from 'vue-property-decorator';
+import { Vue, Component, Mixins, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
 import * as mm from 'music-metadata-browser';
-import { find, isArray, isEmpty, omitBy, Dictionary } from 'lodash';
+import { Dictionary, find, findIndex, isArray, isEmpty, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, getFilepath } from '@/store/music';
 import { DialogMixin, formatTime, formatBytes, waitUntil } from '@/utils';
@@ -85,10 +84,7 @@ import i18n from '@/i18n/music';
   },
   i18n,
 })
-export default class SongInfoDialog extends Mixins(DialogMixin) {
-  @Prop({ type: Function, default: null })
-  private getNeighborSong!: ((current: Song | null) => ({ prevSong?: Song, nextSong?: Song })) | null;
-
+export default class SongInfoDialog extends Vue {
   private readonly formatTime = formatTime;
   private readonly formatBytes = formatBytes;
   private readonly getFilepath = getFilepath;
@@ -96,9 +92,8 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
   @Ref() private mainDialog!: BModal;
 
   private nav = 'info';
-  private song: Song | null = null;
-  private prevSong?: Song;
-  private nextSong?: Song;
+  private songs: Song[] = [];
+  private index: number = 0;
   private audioData: Blob | null = null;
   private metadata: mm.IAudioMetadata | null = null;
 
@@ -112,7 +107,22 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     ];
   }
 
-  // info
+  get song() {
+    return this.songs[this.index];
+  }
+
+  set song(song: Song) {
+    this.$set(this.songs, this.index, song);
+  }
+
+  get prevSong(): Song | undefined {
+    return this.songs[this.index - 1];
+  }
+
+  get nextSong(): Song | undefined {
+    return this.songs[this.index + 1];
+  }
+
   get format() {
     if (this.metadata) {
       return this.metadata.format;
@@ -141,60 +151,53 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     }
   }
 
-  // dialog
-  public async open(song: Song, nav = 'info') {
+  public async open(songs: Song[], i: number, nav = 'info') {
+    if (i < 0 || i >= songs.length) {
+      this.$message.error('Invalid operation');
+      return;
+    }
+    this.songs = songs;
+    this.index = i;
     this.nav = nav;
-    await this.changeSong(song);
-    await waitUntil(() => !!this.mainDialog, 500);
+    const { data } = await musicModule.FetchAudio(this.song);
+    this.audioData = data;
     this.mainDialog.show();
   }
 
-  private onClosed() {
-    this.$destroy();
-  }
-
-  private async changeSong(song: Song) {
-    const { data } = await musicModule.FetchAudio(song);
-    this.audioData = data;
-    this.song = song;
-    this.setNeighbors();
-  }
-
-  private prev() {
+  private async prev() {
     if (!this.prevSong) return;
-    this.changeSong(this.prevSong);
+    const { data } = await musicModule.FetchAudio(this.prevSong);
+    this.audioData = data;
+    this.index--;
   }
 
-  private next() {
+  private async next() {
     if (!this.nextSong) return;
-    this.changeSong(this.nextSong);
+    const { data } = await musicModule.FetchAudio(this.nextSong);
+    this.audioData = data;
+    this.index++;
   }
 
-  private setNeighbors() {
-    if (!this.getNeighborSong) return;
-    const ns = this.getNeighborSong(this.song);
-    this.prevSong = ns?.prevSong;
-    this.nextSong = ns?.nextSong;
-  }
-
-  private async reload(targetIds: number[]) {
+  private async reload(targetIds?: number[]) {
     if (targetIds) {
-      targetIds.forEach((id) => {
-        if (id === this.song?.id) return;
-        musicModule.ReloadSong(id);
+      targetIds.forEach(async (id) => {
+        if (id === this.song.id) return;
+        const song = await musicModule.ReloadSong(id);
+        let i = findIndex(this.songs, (s) => s.id === id);
+        do {
+          this.$set(this.songs, i, song);
+          i = findIndex(this.songs, (s) => s.id === id, i + 1);
+        } while (i >= 0);
       });
     }
-    if (!this.song) return;
     const res1 = await musicModule.ReloadSong(this.song.id);
     this.song = res1;
-    this.$emit('reload', res1);
     const res2 = await musicModule.FetchAudio(this.song);
     this.audioData = res2.data;
+    this.$emit('updated', res1);
   }
 
-  // info
   private async updateRate(val: number) {
-    if (!this.song) return;
     const id = this.song.id;
     await musicModule.UpdateSong({ id, data: { rate: val } });
     const song = await musicModule.ReloadSong(id);

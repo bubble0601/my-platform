@@ -55,7 +55,7 @@ import { musicModule, viewModule } from '@/store';
 import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav, ContextMenu } from '@/components';
 import { ContextMenuItem } from '@/types';
-import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
+import { AudioPlayer, PlayerInfo } from './components';
 
 @Component({
   components: {
@@ -188,12 +188,6 @@ export default class Music extends Mixins(SizeMixin) {
       action: () => this.$router.push('/music/song/new'),
     });
     new ContextMenu().show({ items: menuItems, position: { x: t.offsetLeft + t.offsetWidth, y: t.offsetTop - 5 }});
-  }
-
-  private addSong() {
-    new AddSongDialog({
-      parent: this,
-    }).open();
   }
 
   private mOnTouchStart(e: TouchEvent) {

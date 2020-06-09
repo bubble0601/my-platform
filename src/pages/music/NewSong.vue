@@ -53,7 +53,7 @@
                   <b-icon icon="play"/>
                   <span v-if="$pc">Play</span>
                 </b-button>
-                <b-button size="sm" variant="success" class="ml-2" @click="edit(d.song, d)">
+                <b-button size="sm" variant="success" class="ml-2" @click="edit(d)">
                   <b-icon icon="pencil"/>
                   <span v-if="$pc">Edit</span>
                 </b-button>
@@ -136,11 +136,11 @@
                       {{ f.name }}
                     </div>
                     <div v-if="u.songs[i]" class="text-nowrap ml-auto">
-                      <b-button size="sm" variant="primary" @click="play(u.songs[i])">
+                      <b-button size="sm" variant="primary" @click="play(u, i)">
                         <b-icon icon="play"/>
                         <span v-if="$pc">Play</span>
                       </b-button>
-                      <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[i], u)">
+                      <b-button size="sm" variant="success" class="ml-2" @click="edit(u, i)">
                         <b-icon icon="pencil"/>
                         <span v-if="$pc">Edit</span>
                       </b-button>
@@ -188,7 +188,6 @@
         </b-list-group>
       </b-card>
     </div>
-
     <song-info-dialog ref="songInfoDialog"/>
   </div>
 </template>
@@ -196,7 +195,7 @@
 import { Vue, Component, Mixins, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
-import { Dictionary, findIndex, isArray, isEmpty, omitBy } from 'lodash';
+import { Dictionary, findIndex, isArray, isEmpty, isNumber, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { DialogMixin } from '@/utils';
@@ -459,27 +458,25 @@ export default class NewSong extends Vue {
     }
   }
 
-  private edit(song: Song, status: DownloadStatus | UploadStatus) {
-    this.songInfoDialog.open(song);
-    // const dialog = new SongInfoDialog({
-    //   parent: this.$parent,
-    //   propsData: {
-    //     getNeighborSong: (current?: Song) => {
-    //       if (!current || !('songs' in status) || !status.songs) return {};
-    //       const i = status.songs.indexOf(current);
-    //       return {
-    //         prevSong: status.songs[i - 1],
-    //         nextSong: status.songs[i + 1],
-    //       };
-    //     },
-    //   },
-    // });
-    // dialog.$on('reload', (updatedSong: Song) => {
-    //   if ('song' in status) {
-    //     status.song = updatedSong;
-    //   }
-    // });
-    // dialog.open(song);
+  private edit(status: DownloadStatus | UploadStatus, index?: number) {
+    let reload: (song: Song) => void;
+    if ('songs' in status && isNumber(index) && status.songs) {
+      this.songInfoDialog.open(status.songs, index);
+      reload = (song: Song) => {
+        const i = findIndex(status.songs, (s) => s.id === song.id);
+        this.$set(status.songs!, i, song);
+      };
+    } else if ('song' in status && status.song) {
+      this.songInfoDialog.open([status.song], 0);
+      reload = (song: Song) => {
+        status.song = song;
+      };
+    } else {
+      this.$message.error('Invalid arguments');
+      return;
+    }
+    this.songInfoDialog.$on('updated', reload);
+    this.songInfoDialog.$once('hidden', () => this.songInfoDialog.$off('updated', reload));
   }
 
   private dReset() {
