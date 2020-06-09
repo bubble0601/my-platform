@@ -66,6 +66,11 @@
         </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-sidebar v-model="sidebarVisible" shadow backdrop width="15rem">
+        <template #title="{ hide }">
+          <b-navbar-brand to="/" @click="hide">
+            <img class="brand" src="../assets/logo.png" alt="Logo">
+          </b-navbar-brand>
+        </template>
         <template #default="{ hide }">
           <b-nav vertical @click="hide">
             <b-nav-item to="/music" active-class="active">Music</b-nav-item>
