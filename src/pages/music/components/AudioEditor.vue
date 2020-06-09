@@ -177,11 +177,13 @@ export default class AudioEditor extends Vue {
   private testplay() {
     this.audio.currentTime = this.cutRange[0];
     this.audio.play();
-    this.audio.addEventListener('timeupdate', (e) => {
-      if (this.audio.currentTime >= this.cutRange[1]) this.audio.pause();
-    }, {
-      once: true,
-    });
+    const stopTestplay = () => {
+      if (this.audio.currentTime >= this.cutRange[1]) {
+        this.audio.pause();
+        this.audio.removeEventListener('timeupdate', stopTestplay);
+      }
+    }
+    this.audio.addEventListener('timeupdate', stopTestplay);
   }
 
   private async cut() {
