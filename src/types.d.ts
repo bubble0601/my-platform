@@ -1,4 +1,4 @@
-import { Size } from '@/store/screen';
+import { Size } from '@/store/view';
 
 declare module 'vue/types/vue' {
   interface Vue {

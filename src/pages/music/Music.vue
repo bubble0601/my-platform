@@ -51,7 +51,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
-import { musicModule, screenModule } from '@/store';
+import { musicModule, viewModule } from '@/store';
 import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav, ContextMenu } from '@/components';
 import { ContextMenuItem } from '@/types';
@@ -64,8 +64,8 @@ import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
     VNav,
   },
   beforeRouteLeave(to, from, next) {
-    screenModule.SET_FOOTER_PROPS({ reduced: true });
-    screenModule.UNFIX_FOOTER();
+    viewModule.SET_FOOTER_PROPS({ reduced: true });
+    viewModule.UNFIX_FOOTER();
     next();
   },
 })
@@ -94,7 +94,7 @@ export default class Music extends Mixins(SizeMixin) {
   }
 
   get footerHeight() {
-    return screenModule.footerHeight;
+    return viewModule.footerHeight;
   }
 
   @Watch('currentSong')
@@ -118,7 +118,7 @@ export default class Music extends Mixins(SizeMixin) {
   @Watch('mOpened')
   private onMOpenedChanged(val: boolean) {
     this.$nextTick(this.callSizingCallbacks);
-    screenModule.SET_FOOTER_PROPS({ reduced: !this.mOpened });
+    viewModule.SET_FOOTER_PROPS({ reduced: !this.mOpened });
   }
 
   protected async created() {
@@ -161,7 +161,7 @@ export default class Music extends Mixins(SizeMixin) {
   }
 
   private initAudioPlayer() {
-    screenModule.SET_FOOTER({
+    viewModule.SET_FOOTER({
       name: 'Audio',
       component: AudioPlayer,
       props: {
@@ -176,7 +176,7 @@ export default class Music extends Mixins(SizeMixin) {
         touchend: this.mOnTouchStart,
       },
     });
-    screenModule.FIX_FOOTER();
+    viewModule.FIX_FOOTER();
   }
 
   private add(e: MouseEvent) {

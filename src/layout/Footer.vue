@@ -24,22 +24,22 @@
 <script lang="ts">
 import { Vue, Mixins, Component, Ref, Watch } from 'vue-property-decorator';
 import { each } from 'lodash';
-import { screenModule } from '@/store';
-import { Footer as FooterComponent } from '@/store/screen';
+import { viewModule } from '@/store';
+import { Footer as FooterComponent } from '@/store/view';
 import { SizeMixin } from '@/utils';
 
 @Component
 export default class Footer extends Mixins(SizeMixin) {
   get footer() {
-    return screenModule.footer;
+    return viewModule.footer;
   }
 
   get footers() {
-    return screenModule.footers;
+    return viewModule.footers;
   }
 
   get fixed() {
-    return screenModule.footerFixed;
+    return viewModule.footerFixed;
   }
 
   get props() {
@@ -54,7 +54,7 @@ export default class Footer extends Mixins(SizeMixin) {
       ...this.$listeners,
       ...(this.footer?.listeners || []),
       hide: () => {
-        screenModule.SET_FOOTER(null);
+        viewModule.SET_FOOTER(null);
       },
     };
   }
@@ -92,23 +92,23 @@ export default class Footer extends Mixins(SizeMixin) {
   }
 
   private calcHeight() {
-    screenModule.SET_FOOTER_HEIGHT(this.$el.clientHeight);
+    viewModule.SET_FOOTER_HEIGHT(this.$el.clientHeight);
   }
 
   private setFooter(footer: FooterComponent) {
-    screenModule.SET_FOOTER(footer);
+    viewModule.SET_FOOTER(footer);
   }
 
   private toggleFooter(footer: FooterComponent) {
     if (footer.name === this.footer?.name) {
-      screenModule.SET_FOOTER(null);
+      viewModule.SET_FOOTER(null);
     } else {
-      screenModule.SET_FOOTER(footer);
+      viewModule.SET_FOOTER(footer);
     }
   }
 
   private deleteFooter(footer: FooterComponent) {
-    screenModule.REMOVE_FOOTER(footer);
+    viewModule.REMOVE_FOOTER(footer);
   }
 }
 </script>

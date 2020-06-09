@@ -3,7 +3,7 @@ import Component from 'vue-class-component';
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
 import axios from 'axios';
 import VueSlider from 'vue-slider-component';
-import { screenModule } from './store';
+import { viewModule } from './store';
 import { initDialogs } from './utils';
 import { VField, VHelp, VInput } from './components';
 
@@ -40,16 +40,16 @@ if (process.env.NODE_ENV !== 'production') {
 Vue.mixin({
   computed: {
     $mobile() {
-      return screenModule.isMobile;
+      return viewModule.isMobile;
     },
     $pc() {
-      return screenModule.isPC;
+      return viewModule.isPC;
     },
   },
   methods: {
-    $from: screenModule.from,
-    $until: screenModule.until,
+    $from: viewModule.from,
+    $until: viewModule.until,
   },
 });
 
-window.addEventListener('resize', screenModule.RESIZE);
+window.addEventListener('resize', viewModule.RESIZE);

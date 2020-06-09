@@ -31,7 +31,7 @@
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { NavigationGuard } from 'vue-router';
 import { isString } from 'lodash';
-import { musicModule, screenModule } from '@/store';
+import { musicModule, viewModule } from '@/store';
 import { Playlist, Smartlist } from '@/store/music';
 import SongList from './SongList.vue';
 
@@ -41,7 +41,7 @@ import SongList from './SongList.vue';
   },
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
-    if (screenModule.isMobile && id > 0) {
+    if (viewModule.isMobile && id > 0) {
       musicModule.FetchPlaylistSongs(id).then(next);
     } else {
       next();

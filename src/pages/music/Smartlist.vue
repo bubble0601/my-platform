@@ -5,7 +5,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
-import { musicModule, screenModule } from '@/store';
+import { musicModule, viewModule } from '@/store';
 import SongList from './SongList.vue';
 
 @Component({
@@ -14,7 +14,7 @@ import SongList from './SongList.vue';
   },
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
-    if (screenModule.isMobile && id > 0) {
+    if (viewModule.isMobile && id > 0) {
       musicModule.FetchSmartlistSongs(id).then(next);
     } else {
       next();

@@ -74,7 +74,7 @@
 <script lang="ts">
 import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
 import { throttle } from 'lodash';
-import { musicModule, screenModule } from '@/store';
+import { musicModule, viewModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { formatTime } from '@/utils';
 import { ContextMenu } from '@/components';
@@ -284,7 +284,7 @@ export default class AudioPlayer extends Vue {
         },
       ],
     });
-    if (!screenModule.footerFixed) {
+    if (!viewModule.footerFixed) {
       menuitems.push({
         key: 'hide',
         text: 'Hide',
