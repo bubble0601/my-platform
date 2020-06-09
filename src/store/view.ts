@@ -26,8 +26,8 @@ const getScreenSize: () => Size = () => {
   return 'xs';
 };
 
-@Module({ name: 'screen' })
-export default class ScreenModule extends VuexModule {
+@Module({ name: 'view' })
+export default class ViewModule extends VuexModule {
   private readonly devices = {
     xs: 0,
     sm: 1,

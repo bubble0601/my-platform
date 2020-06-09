@@ -41,7 +41,7 @@
           <b-icon v-else-if="d.status === Status.Success" icon="check" scale="1.5" variant="success"/>
           <b-icon v-else-if="d.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
           <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
-          <div class="text-truncate text-nowrap ml-2">
+          <div class="text-truncate ml-2">
             <span v-if="d.metadata.title && d.metadata.artist">{{ d.metadata.title }} / {{ d.metadata.artist }}</span>
             <span v-else>{{ d.url }}</span>
           </div>
@@ -52,7 +52,7 @@
                 <b-icon icon="play"/>
                 <span v-if="$pc">Play</span>
               </b-button>
-              <b-button size="sm" variant="success" class="ml-2" @click="edit(d.song)">
+              <b-button size="sm" variant="success" class="ml-2" @click="edit(d.song, d)">
                 <b-icon icon="pencil"/>
                 <span v-if="$pc">Edit</span>
               </b-button>
@@ -77,7 +77,7 @@
         </template>
         <b-form-file v-model="files" accept="audio/*" multiple :directory="!isFile"
                      :placeholder="`No ${isFile ? 'File'  : 'Folder'} chosen`"
-                     class="overflow-hidden text-nowrap">
+                     class="overflow-hidden">
           <template #file-name>
             {{ filename }}
           </template>
@@ -113,7 +113,7 @@
         <template v-for="(u, i) in uploadQueue">
           <!-- multiple files result -->
           <b-list-group-item v-if="u.status === Status.Success && u.songs.length > 1" :key="i">
-            <div class="d-flex text-trucate text-nowrap">
+            <div class="d-flex text-truncate">
               <span class="text-secondary mr-3" @click="u.expanded = !u.expanded"><b-icon :icon="u.expanded ? 'caret-down-fill' : 'caret-right-fill'"/></span>
               <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
               <span v-else>{{ u.filename }}</span>
@@ -127,15 +127,15 @@
                 <b-list-group-item v-for="(f, i) in u.files" :key="f.name" class="d-flex align-items-center">
                   <b-icon v-if="u.songs[i]" icon="check" scale="1.5" variant="success"/>
                   <b-icon v-else icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
-                  <div class="text-truncate text-nowrap ml-2">
+                  <div class="text-truncate ml-2">
                     {{ f.name }}
                   </div>
                   <div v-if="u.songs[i]" class="ml-auto">
-                    <b-button size="sm" variant="primary" @click="play(u.songs[i], u.songs)">
+                    <b-button size="sm" variant="primary" @click="play(u.songs[i])">
                       <b-icon icon="play"/>
                       <span v-if="$pc">Play</span>
                     </b-button>
-                    <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[i], u.songs)">
+                    <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[i], u)">
                       <b-icon icon="pencil"/>
                       <span v-if="$pc">Edit</span>
                     </b-button>
@@ -188,7 +188,7 @@
 import { Component, Mixins, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
-import { isArray, isEmpty, omitBy, Dictionary } from 'lodash';
+import { Dictionary, findIndex, isArray, isEmpty, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { DialogMixin } from '@/utils';
@@ -458,19 +458,24 @@ export default class AddSongDialog extends Mixins(DialogMixin) {
     }
   }
 
-  private edit(song: Song, songs?: Song[]) {
+  private edit(song: Song, status: DownloadStatus | UploadStatus) {
     const dialog = new SongInfoDialog({
       parent: this.$parent,
       propsData: {
         getNeighborSong: (current?: Song) => {
-          if (!current || !songs) return {};
-          const i = songs.indexOf(current);
+          if (!current || !('songs' in status) || !status.songs) return {};
+          const i = status.songs.indexOf(current);
           return {
-            prevSong: songs[i - 1],
-            nextSong: songs[i + 1],
+            prevSong: status.songs[i - 1],
+            nextSong: status.songs[i + 1],
           };
         },
       },
+    });
+    dialog.$on('reload', (updatedSong: Song) => {
+      if ('song' in status) {
+        status.song = updatedSong;
+      }
     });
     dialog.open(song);
   }

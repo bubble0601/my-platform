@@ -33,8 +33,8 @@
       </div>
     </div>
     <div v-else-if="reduced" class="player-controls d-flex align-items-center position-relative">
-      <div v-if="song" class="text-light ml-2">
-        <h5 class="mb-1">{{ song.title }}</h5>
+      <div v-if="song" class="text-truncate text-light ml-2">
+        <h5 class="overflow-hidden mb-1">{{ song.title }}</h5>
         <small>
           <span>{{ song.artist.name }} / {{ song.album.title }}</span>
         </small>

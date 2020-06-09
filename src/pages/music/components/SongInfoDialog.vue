@@ -187,6 +187,7 @@ export default class SongInfoDialog extends Mixins(DialogMixin) {
     if (!this.song) return;
     const res1 = await musicModule.ReloadSong(this.song.id);
     this.song = res1;
+    this.$emit('reload', res1);
     const res2 = await musicModule.FetchAudio(this.song);
     this.audioData = res2.data;
   }
