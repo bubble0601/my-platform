@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column">
     <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @play="onPlay" @keydown.stop/>
-    <b-card>
+    <!-- <b-card>
       <template #header>
         <h5 class="mb-0">エフェクト</h5>
       </template>
@@ -13,7 +13,7 @@
         <b-spinner v-if="processing === 'norm'" type="grow" small class="mr-2"/>
         <span>正規化</span>
       </b-button>
-    </b-card>
+    </b-card> -->
     <b-card class="mt-2">
       <template #header>
         <h5 class="mb-0">切り出し</h5>
@@ -153,19 +153,19 @@ export default class AudioEditor extends Vue {
     });
   }
 
-  private async removeNoise() {
-    const params: Dictionary<string> = {
-      kind: 'noisered',
-    };
-    await this.getProcessed(params);
-  }
+  // private async removeNoise() {
+  //   const params: Dictionary<string> = {
+  //     kind: 'noisered',
+  //   };
+  //   await this.getProcessed(params);
+  // }
 
-  private async normalize() {
-    const params: Dictionary<string> = {
-      kind: 'norm',
-    };
-    await this.getProcessed(params);
-  }
+  // private async normalize() {
+  //   const params: Dictionary<string> = {
+  //     kind: 'norm',
+  //   };
+  //   await this.getProcessed(params);
+  // }
 
   private async cut() {
     const params: Dictionary<string> = {

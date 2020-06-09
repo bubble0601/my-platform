@@ -616,22 +616,23 @@ class MainApp < Sinatra::Base
       case params[:kind]
       when 'trim'
         params[:start] = '0' unless params[:start]
-        cmd = ['sox', input_path, output_path, 'trim', params[:start]]
-        cmd.push("=#{params[:end]}") if params[:end]
+        cmd = ['ffmpeg', '-y', '-ss', params[:start]]
+        cmd.push('-to', params[:end]) if params[:end]
+        cmd.push('-i', input_path, '-c', 'copy', output_path)
         exec_command(cmd)
         FileUtils.move(output_path, input_path) unless reset
-      when 'noisered'
-        noise_path = "#{path}_noise"
-        cmd1 = ['sox', input_path, '-n', 'trim', '0', '1', 'noiseprof', noise_path]
-        exec_command(cmd1)
-        cmd2 = ['sox', input_path, output_path, 'noisered', noise_path, '0.21']
-        exec_command(cmd2)
-        FileUtils.rm(noise_path)
-        FileUtils.move(output_path, input_path) unless reset
-      when 'norm'
-        cmd = ['sox', input_path, output_path, 'gain', '-n', '-1']
-        exec_command(cmd)
-        FileUtils.move(output_path, input_path) unless reset
+      # when 'noisered'
+      #   noise_path = "#{path}_noise"
+      #   cmd1 = ['sox', input_path, '-n', 'trim', '0', '1', 'noiseprof', noise_path]
+      #   exec_command(cmd1)
+      #   cmd2 = ['sox', input_path, output_path, 'noisered', noise_path, '0.21']
+      #   exec_command(cmd2)
+      #   FileUtils.rm(noise_path)
+      #   FileUtils.move(output_path, input_path) unless reset
+      # when 'norm'
+      #   cmd = ['sox', input_path, output_path, 'gain', '-n', '-1']
+      #   exec_command(cmd)
+      #   FileUtils.move(output_path, input_path) unless reset
       when 'download'
         cmd = ['youtube-dl', '-f', 'bestaudio', '-x', '--audio-format', 'mp3', '-o', "#{path}.tmp.%(ext)s", params[:url]]
         cmd.push({ no_escape: '1>/dev/null 2>&1' })
