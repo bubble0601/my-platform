@@ -9,9 +9,6 @@ declare module 'vue/types/vue' {
   }
 }
 
-export interface Dict<T = any> {
-  [key: string]: T;
-}
 export type Variant = '' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'light' | 'dark';
 
 export interface MsgBoxOptions {
@@ -36,3 +33,15 @@ export interface MsgOptions {
   duration?: number;
   dismissible?: boolean;
 }
+
+export interface ContextMenuItem {
+  key: string | number;
+  text: string;
+  action?: () => void;
+  children?: Array<{
+    key: string | number,
+    text: string,
+    action: () => void,
+  }>;
+}
+

@@ -88,11 +88,10 @@
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
-import { clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
+import { Dictionary, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
 import { VNav, Rate } from '@/components';
-import { Dict } from '@/types';
 import { formatTime, formatBytes } from '@/utils';
 import SongInfoDialog from './SongInfoDialog.vue';
 

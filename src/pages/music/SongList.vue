@@ -56,10 +56,10 @@ import { BTable, BvTableFieldArray } from 'bootstrap-vue';
 import { sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT, getFilepath } from '@/store/music';
-import { ContextMenu, IconButton, Rate } from '@/components';
-import { SongInfoDialog } from './components';
 import { formatTime, download } from '@/utils';
-import { MenuItem } from '@/components/ContextMenu.vue';
+import { ContextMenu, IconButton, Rate } from '@/components';
+import { ContextMenuItem } from '@/types';
+import { SongInfoDialog } from './components';
 
 @Component({
   components: {
@@ -185,7 +185,7 @@ export default class SongList extends Vue {
   private showContextMenu(item: Song, n: number, e: MouseEvent) {
     e.preventDefault();
 
-    const menuItems: MenuItem[] = [];
+    const menuItems: ContextMenuItem[] = [];
     const songs = this.selected.length ? this.selected : [item];
     menuItems.push(
       { key: 'play', text: '再生', action: () => {

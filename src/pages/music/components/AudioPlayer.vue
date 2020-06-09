@@ -78,7 +78,7 @@ import { musicModule, screenModule } from '@/store';
 import { Song, REPEAT } from '@/store/music';
 import { formatTime } from '@/utils';
 import { ContextMenu } from '@/components';
-import { MenuItem } from '@/components/ContextMenu.vue';
+import { ContextMenuItem } from '@/types';
 
 const PROGRESS_MAX = 300;
 
@@ -270,7 +270,7 @@ export default class AudioPlayer extends Vue {
 
   private mShowMenu() {
     const el = this.$el as HTMLElement;
-    const menuitems: MenuItem[] = [];
+    const menuitems: ContextMenuItem[] = [];
     menuitems.push({
       key: 'add',
       text: 'Add',

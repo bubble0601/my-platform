@@ -1,7 +1,6 @@
 import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
-import { clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
-import { Dict } from '@/types';
+import { Dictionary, clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
 import { message } from '@/utils/Dialogs';
 
 export interface Song {
@@ -61,7 +60,7 @@ const api = {
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
 
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
-  updateSongTag: (id: number, data: Dict<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
+  updateSongTag: (id: number, data: Dictionary<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
@@ -560,7 +559,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async UpdateSongTag(payload: { id: number, data: Dict<string | null> }) {
+  public async UpdateSongTag(payload: { id: number, data: Dictionary<string | null> }) {
     const { id, data } = payload;
     await api.updateSongTag(id, data);
   }

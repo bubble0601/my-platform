@@ -16,19 +16,9 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Mixins, Prop } from 'vue-property-decorator';
+import { Dictionary } from 'lodash';
 import { DialogMixin } from '@/utils';
-import { Dict } from '@/types';
-
-export interface MenuItem {
-  key: string | number;
-  text: string;
-  action?: () => void;
-  children?: Array<{
-    key: string | number,
-    text: string,
-    action: () => void,
-  }>;
-}
+import { ContextMenuItem } from '@/types';
 
 @Component
 export default class ContextMenu extends Mixins(DialogMixin) {
@@ -36,8 +26,8 @@ export default class ContextMenu extends Mixins(DialogMixin) {
   private itemClass!: string | string[] | object;
 
   private shown = false;
-  private items: MenuItem[] = [];
-  private style: Dict<string> = {
+  private items: ContextMenuItem[] = [];
+  private style: Dictionary<string> = {
     left: '0',
     top: '0',
   };
@@ -54,7 +44,7 @@ export default class ContextMenu extends Mixins(DialogMixin) {
     this.$destroy();
   }
 
-  public show(options: { items: MenuItem[], position: { x: number, y: number } }) {
+  public show(options: { items: ContextMenuItem[], position: { x: number, y: number } }) {
     this.shown = true;
     this.items = options.items;
     const { x, y } = options.position;
@@ -72,12 +62,12 @@ export default class ContextMenu extends Mixins(DialogMixin) {
     });
   }
 
-  private showChildren(item: MenuItem) {
+  private showChildren(item: ContextMenuItem) {
     // @ts-ignore
     this.$refs[`dd-toggle-${item.key}`][0].show();
   }
 
-  private hideChildren(item: MenuItem) {
+  private hideChildren(item: ContextMenuItem) {
     // @ts-ignore
     this.$refs[`dd-toggle-${item.key}`][0].hide();
   }
