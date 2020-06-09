@@ -1,5 +1,9 @@
 <template>
   <b-modal ref="modal" v-bind="attrs" v-on="listeners">
+    <div class="d-flex">
+      <b-button @click="selectAll">Select all</b-button>
+      <b-button class="ml-2" @click="unselectAll">Unselect all</b-button>
+    </div>
     <b-form-group v-for="item in filteredItems" :key="item.key" :label="item.label">
       <b-form-checkbox-group v-model="item.selected" :options="item.options" stacked/>
     </b-form-group>
@@ -43,6 +47,18 @@ export default class SelectItemDialog extends Vue {
 
   public show() {
     this.modal.show();
+  }
+
+  private selectAll() {
+    this.items.forEach((i) => {
+      i.selected = i.options;
+    });
+  }
+
+  private unselectAll() {
+    this.items.forEach((i) => {
+      i.selected = [];
+    });
   }
 }
 </script>
