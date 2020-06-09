@@ -5,8 +5,9 @@
         {{ item.text }}
       </b-list-group-item>
       <b-list-group-item v-else-if="item.children" :key="item.key" href="#" class="p-0" :class="itemClass" @mouseover="showChildren(item)" @mouseleave="hideChildren(item)">
-        <b-dropdown :ref="`dd-toggle-${item.key}`" dropright :text="item.text" variant="outline-light" toggle-class="menu-parent border-0">
-          <b-dropdown-item v-for="ic in item.children" :key="ic.key" :class="itemClass" @click="ic.action">
+        <b-dropdown :ref="`dd-toggle-${item.key}`" :dropright="childDir === 'right'" :dropleft="childDir === 'left'"
+                    :text="item.text" variant="outline-light" toggle-class="menu-parent border-0" menu-class="rounded py-0">
+          <b-dropdown-item v-for="ic in item.children" :key="ic.key" :link-class="linkClass" @click="ic.action">
             {{ ic.text }}
           </b-dropdown-item>
         </b-dropdown>
@@ -16,7 +17,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Mixins, Prop } from 'vue-property-decorator';
-import { Dictionary } from 'lodash';
+import { Dictionary, isArray } from 'lodash';
 import { DialogMixin } from '@/utils';
 import { ContextMenuItem } from '@/types';
 
@@ -27,10 +28,23 @@ export default class ContextMenu extends Mixins(DialogMixin) {
 
   private shown = false;
   private items: ContextMenuItem[] = [];
+  private childDir: string = 'right';
   private style: Dictionary<string> = {
     left: '0',
     top: '0',
   };
+
+  get linkClass() {
+    if (typeof this.itemClass === 'string') {
+      return `${this.itemClass} py-2`;
+    } else if (isArray(this.itemClass)) {
+      return this.itemClass.concat(['py-2']);
+    }
+    return {
+      ...this.itemClass,
+      'py-2': true,
+    };
+  }
 
   protected created() {
     window.addEventListener('mousedown', this.destroy);
@@ -44,17 +58,19 @@ export default class ContextMenu extends Mixins(DialogMixin) {
     this.$destroy();
   }
 
-  public show(options: { items: ContextMenuItem[], position: { x: number, y: number } }) {
+  public show(options: { items: ContextMenuItem[], position: { x: number, y: number }, childDir?: string }) {
     this.shown = true;
     this.items = options.items;
     const { x, y } = options.position;
+    const { childDir = 'right' } = options;
+    this.childDir = childDir;
     this.$nextTick(() => {
       if (this.$el.clientWidth + x > window.innerWidth) {
         this.style.left = `${x - this.$el.clientWidth}px`;
       } else {
         this.style.left = `${x}px`;
       }
-      if (this.$el.clientHeight + y > window.innerHeight) {
+      if (this.$el.clientHeight + y > window.innerHeight && y - this.$el.clientHeight > 0) {
         this.style.top = `${y - this.$el.clientHeight}px`;
       } else {
         this.style.top = `${y}px`;

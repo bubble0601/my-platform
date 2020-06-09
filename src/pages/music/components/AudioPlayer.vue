@@ -274,9 +274,15 @@ export default class AudioPlayer extends Vue {
     menuitems.push({
       key: 'add',
       text: 'Add',
-      action: () => {
-        console.log('add');
-      },
+      children: [
+        {
+          key: 'song',
+          text: 'Song',
+          action: () => {
+            console.log('add');
+          },
+        },
+      ],
     });
     if (!screenModule.footerFixed) {
       menuitems.push({
@@ -304,6 +310,7 @@ export default class AudioPlayer extends Vue {
         x: el.clientWidth,
         y: window.innerHeight - el.clientHeight,
       },
+      childDir: 'left',
     });
   }
 

@@ -4,7 +4,7 @@
       <!-- side menu -->
       <div class="sidemenu-left py-2">
         <div class="px-2 pb-2">
-          <b-button pill variant="success" size="sm" @click="addSong">＋ Add</b-button>
+          <b-button pill variant="success" size="sm" @click="add">＋ Add</b-button>
         </div>
         <template v-for="t in tabs">
           <template v-if="t.children">
@@ -53,7 +53,8 @@
 import { Vue, Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
 import { musicModule, screenModule } from '@/store';
 import { SizeMixin } from '@/utils';
-import { FloatingButton, VNav } from '@/components';
+import { FloatingButton, VNav, ContextMenu } from '@/components';
+import { ContextMenuItem } from '@/types';
 import { AddSongDialog, AudioPlayer, PlayerInfo } from './components';
 
 @Component({
@@ -176,6 +177,17 @@ export default class Music extends Mixins(SizeMixin) {
       },
     });
     screenModule.FIX_FOOTER();
+  }
+
+  private add(e: MouseEvent) {
+    const t = e.target as HTMLElement;
+    const menuItems: ContextMenuItem[] = [];
+    menuItems.push({
+      key: 'song',
+      text: 'Song',
+      action: this.addSong,
+    });
+    new ContextMenu().show({ items: menuItems, position: { x: t.offsetLeft + t.offsetWidth, y: t.offsetTop - 5 }});
   }
 
   private addSong() {
