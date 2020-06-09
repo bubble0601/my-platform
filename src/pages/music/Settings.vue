@@ -100,10 +100,6 @@ export default class Settings extends Vue {
 
   @Ref() private selectDialog!: SelectItemDialog;
 
-  protected created() {
-    settingModule.init();
-  }
-
   private onSelectOK(selected: Dictionary<string[]>) {
     if (this.selectedHandler) {
       this.selectedHandler(selected);

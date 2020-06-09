@@ -10,6 +10,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Navbar, Footer } from './layout';
+import { settingModule } from './store';
 
 @Component({
   components: {
@@ -17,7 +18,11 @@ import { Navbar, Footer } from './layout';
     Footer,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  protected created() {
+    settingModule.init();
+  }
+}
 </script>
 <style lang="scss">
 @import 'assets/scss/common';
