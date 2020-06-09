@@ -4,6 +4,7 @@ export { default as FloatingButton } from './FloatingButton.vue';
 export { default as IconButton } from './IconButton.vue';
 export { default as Message } from './Message.vue';
 export { default as MessageBox } from './MessageBox.vue';
+export { default as SelectItemDialog } from './SelectItemDialog.vue';
 export { default as Rate } from './Rate.vue';
 export { default as VField } from './VField.vue';
 export { default as VForm } from './VForm.vue';

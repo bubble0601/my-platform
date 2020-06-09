@@ -78,6 +78,11 @@ class MainApp < Sinatra::Base
         url = URI.escape("https://musicbrainz.org/ws/2/recording?query=title:#{title} AND artist:#{artist}&fmt=json")
         get_json(url, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
       end
+
+      def is_child_path(parent, path)
+        parent = File.absolute_path(parent)
+        File.absolute_path(path).start_with?(parent)
+      end
     end
 
     namespace '/songs' do
@@ -490,30 +495,47 @@ class MainApp < Sinatra::Base
         { output: rsync(false, local, delete) }
       end
 
+      get '/scan' do
+        files = {}
+        Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
+          files[f] = false
+        end
+        Song.each do |s|
+          path = s.to_fullpath
+          files[path] = true unless files[path].nil?
+        end
+        targets = files.filter{|k, v| v == false}.map{|k, v| k}
+        { targets: targets }
+      end
+
       post '/scan' do
         results = []
-        Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
+        @json.each do |f|
+          unless is_child_path(CONF.storage.music, f)
+            results.push("Invalid path: #{f}")
+            next
+          end
           s = nil
           begin
             s = Song.create_from_file(f)
           rescue
-            begin
-              Song.fix_mp3(f)
-              s = Song.create_from_file(f)
-            rescue => e
-              results.push("Error: #{e.message} at #{f}")
-            end
+            results.push("Error: #{e.message} at #{f}")
+            next
           end
-          results.push(s.filename) if s
+          if s
+            results.push("Added: #{f} => #{s.filename}")
+          else
+            results.push("Already exists: #{f}")
+          end
         end
-        { output: results.join("\n") }
+        { results: results }
       end
 
       get '/organize' do
         files = {}
         deletes = []
-        missings = []
-        Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+        missing_files = []
+        Dir["#{CONF.storage.music}/**/*"].each do |f|
           if File.extname(f) == '.mp3'
             files[f] = false
           elsif File.file?(f)
@@ -523,7 +545,7 @@ class MainApp < Sinatra::Base
         Song.each do |s|
           path = s.to_fullpath
           if files[path].nil?
-            missings.push(path)
+            missing_files.push(path)
           else
             files[path] = true
           end
@@ -532,39 +554,39 @@ class MainApp < Sinatra::Base
 
         empty_dirs = []
         find_empty_dir(empty_dirs, CONF.storage.music)
-
-        delf_str = deletes.map{|f| "  #{f}"}.join("\n")
-        deld_str = empty_dirs.map{|d| "  #{d}"}.join("\n")
-        miss_str = missings.map{|f| "  #{f}"}.join("\n")
-        output = ["Delete file:\n#{delf_str}", "Delete directory:\n#{deld_str}", "Missing:\n#{miss_str}"].join("\n\n")
-        { output: output }
+        {
+          target_files: deletes,
+          target_dirs: empty_dirs,
+          # missing_files: missing_files,
+        }
       end
 
       post '/organize' do
-        files = {}
-        deletes = []
-        Dir["#{CONF.storage.music}/**/*.*"].each do |f|
-          if File.extname(f) == '.mp3'
-            files[f] = false
-          elsif File.file?(f)
-            deletes.push(f)
+        deleted_files = []
+        deleted_dirs = []
+        @json[:target_files].each do |f|
+          begin
+            raise ArgumentError, 'Invalid path' unless is_child_path(CONF.storage.music, f)
+            FileUtils.rm(f)
+            deleted_files.push(f)
+          rescue => e
+            logger.error('organize'){e.message}
           end
         end
-        Song.each do |s|
-          path = s.to_fullpath
-          files[path] = true if files[path] == false
+        @json[:target_dirs].each do |f|
+          begin
+            raise ArgumentError, 'Invalid path' unless is_child_path(CONF.storage.music, f)
+            FileUtils.rm_r(f)
+            deleted_dirs.push(f)
+          rescue => e
+            logger.error('organize'){e.message}
+          end
         end
-        deletes.concat(files.filter{|k, v| v == false}.map{|k, v| k})
 
-        empty_dirs = []
-        find_empty_dir(empty_dirs, CONF.storage.music)
-
-        deletes.each{|f| FileUtils.rm(f)}
-        empty_dirs.each{|d| FileUtils.rm_r(d)}
-        delf_str = deletes.map{|f| "  #{f}"}.join("\n")
-        deld_str = empty_dirs.map{|d| "  #{d}"}.join("\n")
-        output = ["Delete file:\n#{delf_str}", "Delete directory:\n#{deld_str}"].join("\n\n")
-        { output: output }
+        {
+          deleted_files: deleted_files,
+          deleted_dirs: deleted_dirs,
+        }
       end
     end
 
