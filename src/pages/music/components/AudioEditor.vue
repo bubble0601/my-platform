@@ -20,7 +20,10 @@
       </template>
       <vue-slider v-model="cutRange" :min="0" :max="duration" :interval="0.1" :tooltip-formatter="formatTime" class="mb-3"/>
       <div class="d-flex">
-        <b-button variant="primary" class="ml-auto" :disabled="!!processing" @click="cut">
+        <b-button variant="outline-primary" :disabled="!!processing" class="ml-auto" @click="testplay">
+          Testplay
+        </b-button>
+        <b-button variant="primary" class="ml-2" :disabled="!!processing" @click="cut">
           <b-spinner v-if="processing === 'trim'" type="grow" small class="mr-2"/>
           <span>OK</span>
         </b-button>
@@ -170,6 +173,16 @@ export default class AudioEditor extends Vue {
   //   };
   //   await this.getProcessed(params);
   // }
+
+  private testplay() {
+    this.audio.currentTime = this.cutRange[0];
+    this.audio.play();
+    this.audio.addEventListener('timeupdate', (e) => {
+      if (this.audio.currentTime >= this.cutRange[1]) this.audio.pause();
+    }, {
+      once: true,
+    });
+  }
 
   private async cut() {
     const params: Dictionary<string> = {
