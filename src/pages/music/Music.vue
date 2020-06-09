@@ -185,7 +185,7 @@ export default class Music extends Mixins(SizeMixin) {
     menuItems.push({
       key: 'song',
       text: 'Song',
-      action: this.addSong,
+      action: () => this.$router.push('/music/song/new'),
     });
     new ContextMenu().show({ items: menuItems, position: { x: t.offsetLeft + t.offsetWidth, y: t.offsetTop - 5 }});
   }
