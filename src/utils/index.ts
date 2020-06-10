@@ -6,10 +6,27 @@ export { default as SizeMixin } from './SizeMixin';
 export { default as DialogMixin } from './DialogMixin';
 export { default as initDialogs } from './Dialogs';
 
+const ua = window.navigator.userAgent.toLowerCase();
+export const env = {
+  os: {
+    mac: ua.indexOf('mac os x') !== -1,
+    windows: ua.indexOf('windows nt') !== -1,
+  },
+  renderer: {
+    webkit: navigator.userAgent.indexOf('WebKit') !== -1,
+  },
+  rem() {
+    const fontsize = getComputedStyle(document.documentElement || document.body).fontSize;
+    if (fontsize != null) {
+      return parseFloat(fontsize);
+    }
+  },
+};
+
 const beforeUnloads: { [s: string]: (e: BeforeUnloadEvent) => any } = {};
-export function setBeforeUnload(name: string, isChanged: () => boolean) {
+export function setBeforeUnload(name: string, hasChanged: () => boolean) {
   beforeUnloads[name] = (e: BeforeUnloadEvent) => {
-    if (isChanged()) {
+    if (hasChanged()) {
       e.returnValue = '';
       return '';
     }
@@ -103,23 +120,6 @@ export function formatBytes(bytes: number, decimals = 2) {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
-
-const ua = window.navigator.userAgent.toLowerCase();
-export const env = {
-  os: {
-    mac: ua.indexOf('mac os x') !== -1,
-    windows: ua.indexOf('windows nt') !== -1,
-  },
-  renderer: {
-    webkit: navigator.userAgent.indexOf('WebKit') !== -1,
-  },
-  rem() {
-    const fontsize = getComputedStyle(document.documentElement || document.body).fontSize;
-    if (fontsize != null) {
-      return parseFloat(fontsize);
-    }
-  },
-};
 
 export function createVueInstance(comp: VueConstructor) {
   return new Vue({

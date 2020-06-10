@@ -14,7 +14,9 @@ import SongList from './SongList.vue';
   },
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
-    if (viewModule.isMobile && id > 0) {
+    if (viewModule.isPC && !id && musicModule.smartlistId) {
+      next(`/music/smartlist/${musicModule.smartlistId}`);
+    } else if (viewModule.isMobile && id > 0) {
       musicModule.FetchSmartlistSongs(id).then(next);
     } else {
       next();

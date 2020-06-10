@@ -37,6 +37,7 @@ if (process.env.NODE_ENV !== 'production') {
     },
   });
 }
+
 Vue.mixin({
   computed: {
     $mobile() {

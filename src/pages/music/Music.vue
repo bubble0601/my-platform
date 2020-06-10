@@ -26,7 +26,7 @@
       </div>
       <!-- center content -->
       <div class="center-block flex-grow-1 overflow-auto">
-        <keep-alive include="Settings">
+        <keep-alive :include="['Settings', 'NewSong']">
           <router-view/>
         </keep-alive>
       </div>

@@ -65,7 +65,7 @@ import * as mm from 'music-metadata-browser';
 import { Dictionary, find, findIndex, isArray, isEmpty, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, getFilepath } from '@/store/music';
-import { DialogMixin, formatTime, formatBytes, waitUntil } from '@/utils';
+import { formatTime, formatBytes, waitUntil } from '@/utils';
 import { VNav, Rate } from '@/components';
 import TagEditor from './TagEditor.vue';
 import AudioEditor from './AudioEditor.vue';

@@ -41,7 +41,9 @@ import SongList from './SongList.vue';
   },
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
-    if (viewModule.isMobile && id > 0) {
+    if (viewModule.isPC && !id && musicModule.playlistId) {
+      next(`/music/playlist/${musicModule.playlistId}`);
+    } else if (viewModule.isMobile && id > 0) {
       musicModule.FetchPlaylistSongs(id).then(next);
     } else {
       next();

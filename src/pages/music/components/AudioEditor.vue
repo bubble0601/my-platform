@@ -182,7 +182,7 @@ export default class AudioEditor extends Vue {
         this.audio.pause();
         this.audio.removeEventListener('timeupdate', stopTestplay);
       }
-    }
+    };
     this.audio.addEventListener('timeupdate', stopTestplay);
   }
 
@@ -220,7 +220,9 @@ export default class AudioEditor extends Vue {
       kind: 'download',
       url: this.url,
     };
-    this.getProcessed(params).catch(() => {
+    this.getProcessed(params).then(() => {
+      this.url = '';
+    }).catch(() => {
       this.$message.error('Failed to download from the url');
     });
   }

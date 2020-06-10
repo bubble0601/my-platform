@@ -50,7 +50,9 @@ import SongList from './SongList.vue';
   },
   beforeRouteEnter(to, from, next) {
     const id = Number(to.params.id);
-    if (viewModule.isMobile && id >= 0) {
+    if (viewModule.isPC && !id && musicModule.artistId) {
+      next(`/music/artist/${musicModule.artistId}`);
+    } else if (viewModule.isMobile && id >= 0) {
       musicModule.FetchArtistSongs(id).then(next);
     } else {
       next();

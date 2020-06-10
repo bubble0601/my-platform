@@ -198,7 +198,6 @@ import axios from 'axios';
 import { Dictionary, findIndex, isArray, isEmpty, isNumber, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { DialogMixin } from '@/utils';
 import { VNav, VForm, VInput } from '@/components';
 import SongInfoDialog from './components/SongInfoDialog.vue';
 

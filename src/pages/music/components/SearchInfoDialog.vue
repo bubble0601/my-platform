@@ -21,10 +21,9 @@
 <script lang="ts">
 import { Vue, Component, Prop, Mixins } from 'vue-property-decorator';
 import { Dictionary } from 'lodash';
-import { DialogMixin } from '@/utils';
 
 @Component
-export default class SeaarchInfoDialog extends Mixins(DialogMixin) {
+export default class SeaarchInfoDialog extends Vue {
   @Prop({ type: Object, required: true })
   private edit!: Dictionary<string | null>;
 
