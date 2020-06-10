@@ -4,7 +4,10 @@ export default [
   {
     path: '/music',
     component: () => import(/* webpackChunkName: "music" */ '../pages/music/Music.vue'),
-    meta: { title: 'Music' },
+    meta: {
+      title: 'Music',
+      i18n: require('@/i18n/music'),
+    },
     children: [
       {
         path: '',
@@ -45,6 +48,10 @@ export default [
         path: 'smartlist/:id',
         component: () => import(/* webpackChunkName: "music" */ '../pages/music/Smartlist.vue'),
         props: (route: Route) => ({ id: Number(route.params.id) }),
+      },
+      {
+        path: 'instant',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/InstantPlaylist.vue'),
       },
       {
         path: 'settings',

@@ -71,7 +71,6 @@ import TagEditor from './TagEditor.vue';
 import AudioEditor from './AudioEditor.vue';
 import LyricsEditor from './LyricsEditor.vue';
 import ArtworkEditor from './ArtworkEditor.vue';
-import i18n from '@/i18n/music';
 
 @Component({
   components: {
@@ -82,7 +81,17 @@ import i18n from '@/i18n/music';
     LyricsEditor,
     ArtworkEditor,
   },
-  i18n,
+  i18n: {
+    messages: {
+      ja: {
+        info: '情報',
+        tag: 'タグ',
+        edit: '加工',
+        lyrics: '歌詞',
+        artwork: 'アートワーク',
+      },
+    },
+  },
 })
 export default class SongInfoDialog extends Vue {
   private readonly formatTime = formatTime;
@@ -99,11 +108,11 @@ export default class SongInfoDialog extends Vue {
 
   get navItems() {
     return [
-      { key: 'info', title: this.$t('navs.info') },
-      { key: 'tag', title: this.$t('navs.tag') },
-      { key: 'edit', title: this.$t('navs.edit') },
-      { key: 'lyrics', title: this.$t('navs.lyrics') },
-      { key: 'artwork', title: this.$t('navs.artwork') },
+      { key: 'info', title: this.$t('info') },
+      { key: 'tag', title: this.$t('tag') },
+      { key: 'edit', title: this.$t('edit') },
+      { key: 'lyrics', title: this.$t('lyrics') },
+      { key: 'artwork', title: this.$t('artwork') },
     ];
   }
 

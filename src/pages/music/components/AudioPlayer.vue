@@ -282,6 +282,13 @@ export default class AudioPlayer extends Vue {
             this.$router.push('/music/song/new');
           },
         },
+        {
+          key: 'instant',
+          text: 'Instant',
+          action: () => {
+            this.$router.push('/music/instant');
+          },
+        },
       ],
     });
     if (!viewModule.footerFixed) {

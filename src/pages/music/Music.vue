@@ -43,8 +43,6 @@
                  @touchstart.native="mOnTouchStart"
                  @touchmove.native="mOnTouchMove"
                  @touchend.native="mOnTouchEnd"/>
-
-    <floating-button v-show="!mOpened" icon="plus" :offset="4" @click="addSong"/>
     <v-nav v-show="!mOpened" :items="mTabs" tabs justified do-routing/>
     <router-view v-show="!mOpened" class="overflow-auto"/>
   </main>
@@ -82,10 +80,6 @@ export default class Music extends Mixins(SizeMixin) {
   private tabs: object[] = [];
 
   private mOpened = false;
-  private mTabs = [
-    { key: 'artist', to: '/music/artist', title: 'Artist' },
-    { key: 'playlist', to: '/music/playlist', title: 'Playlist' },
-  ];
   private mScrollPos: number = 0;
   private mTouchPath: Touch[] = [];
 
@@ -95,6 +89,13 @@ export default class Music extends Mixins(SizeMixin) {
 
   get footerHeight() {
     return viewModule.footerHeight;
+  }
+
+  get mTabs() {
+    return [
+      { key: 'artist', to: '/music/artist', title: this.$t('music.artist') },
+      { key: 'playlist', to: '/music/playlist', title: this.$t('music.playlist') },
+    ];
   }
 
   @Watch('currentSong')
@@ -137,17 +138,17 @@ export default class Music extends Mixins(SizeMixin) {
     const sl: Array<{ key: string, name: string }> = [];
     this.tabs = [
       { key: 'all', name: 'All' },
-      { key: 'artist', name: 'Artist' },
-      { key: 'playlist', name: 'Playlist' },
+      { key: 'artist', name: this.$t('music.artist') },
+      { key: 'playlist', name: this.$t('music.playlist') },
       {
         key: 'smartlist',
-        name: 'Smartlist',
+        name: this.$t('music.smartlist'),
         expanded: this.$route.path.startsWith('/music/smartlist'),
         children: sl,
       },
       { key: 'div1' },
       { key: 'space' },
-      { key: 'settings', name: 'Settings' },
+      { key: 'settings', name: this.$t('settings') },
     ];
     await musicModule.FetchSmartlists();
     sl.push(...musicModule.smartlists.map((l) => ({
@@ -186,6 +187,10 @@ export default class Music extends Mixins(SizeMixin) {
       key: 'song',
       text: 'Song',
       action: () => this.$router.push('/music/song/new'),
+    }, {
+      key: 'instant',
+      text: 'Instant playlist',
+      action: () => this.$router.push('/music/instant'),
     });
     new ContextMenu().show({ items: menuItems, position: { x: t.offsetLeft + t.offsetWidth, y: t.offsetTop - 5 }});
   }
@@ -226,7 +231,7 @@ export default class Music extends Mixins(SizeMixin) {
   display: flex;
   flex-direction: column;
   background-color: #dee2e655;
-  width: 7rem;
+  width: 10rem;
   overflow-x: auto;
 
   .menu-item {

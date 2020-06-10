@@ -386,8 +386,8 @@ class MainApp < Sinatra::Base
         if url.start_with?('https://www.youtube.com')
           doc = get_doc(params[:url])
           title = doc.title.gsub(/ - YouTube$/, '')
-          title.gsub!(/[(（【]?(Official Music Video|Official Video|Music Video|Official)[)）】]?/i, '')
-          title.gsub!(/[(（]?(MV|PV)[)）]?/, '')
+          title.gsub!(/[(（\[【]?(Official Music Video|Official Video|Music Video|Official)[)）\]】]?/i, '')
+          title.gsub!(/[(（\[【]]?(MV|PV)[)）\]】]?/, '')
           title.strip!
           matched = /(.*)[「『](.*)[」』]/.match(title)
           if matched

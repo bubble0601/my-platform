@@ -17,6 +17,13 @@ export interface Song {
   weight?: number;
 }
 
+export interface Rule {
+  key: string;
+  field: 'title' | 'artist' | 'album' | 'album_artist' | 'rate' | 'created_at';
+  operator: string;
+  value: string | number;
+}
+
 export interface Album {
   id: number;
   title: string;
@@ -55,7 +62,7 @@ export enum REPEAT {
 export const getFilepath = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
 
 const api = {
-  fetchSongs: () => axios.get<Song[]>('/api/music/songs'),
+  fetchSongs: (params: Dictionary<any> = {}) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
 
@@ -90,6 +97,7 @@ export default class MusicModule extends VuexModule {
   public playlistId: number  | null = null;
   public smartlists: Smartlist[] = [];
   public smartlistId: number | null = null;
+  public instantPlaylist: Song[] = [];
 
   public current: Song | null = null;
   public audioData: Blob | null = null;
@@ -166,6 +174,13 @@ export default class MusicModule extends VuexModule {
     this.displayedSongs = songs;
   }
 
+  @Mutation
+  public SET_INSTANT_PLAYLIST(songs: Song[]) {
+    this.instantPlaylist = songs;
+    this.songs = songs;
+  }
+
+  // player control
   @Mutation
   public SET_CURRENT(song: Song | null) {
     this.current = song;
@@ -346,6 +361,11 @@ export default class MusicModule extends VuexModule {
     this.RESET_FETCH_SONGS();
     const { data } = await api.fetchSongs();
     this.SET_SONGS(data);
+  }
+
+  @Action
+  public async FetchSongs(params: { rules: Rule[][], max?: number, sortBy?: string }) {
+    return await api.fetchSongs(params);
   }
 
   @Action
