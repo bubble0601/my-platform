@@ -315,12 +315,21 @@ export default class NewSong extends Vue {
     if (!this.url) return;
     if (this.url.match(/^[a-zA-Z0-9_-]{11}$/)) {
       this.url = `https://www.youtube.com/?v=${this.url}`;
-    } else if (this.url.startsWith('https://www.youtube.com')) {
+    } else if (this.url.match(/^youtube.com/)) {
+      this.url = `https://www.${this.url}`;
+    } else if (this.url.match(/^https?:\/\//)) {
+      this.url = `http://${this.url}`;
+    }
+    if (this.url.startsWith('https://www.youtube.com')) {
       let matched = /&?list=[a-zA-Z0-9_-]+/.exec(this.url);
       if (matched) {
         this.url = this.url.replace(matched[0], '');
       }
       matched = /&?index=[0-9]+/.exec(this.url);
+      if (matched) {
+        this.url = this.url.replace(matched[0], '');
+      }
+      matched = /&?t=[0-9]+s/.exec(this.url);
       if (matched) {
         this.url = this.url.replace(matched[0], '');
       }
