@@ -20,9 +20,7 @@ class MainApp < Sinatra::Base
 
     post '/login' do
       # check if cookie is enabled
-      unless request.cookies.has_key?(CONF.session.name) then
-        halt 401, 'Please enable cookies'
-      end
+      halt 401, 'Please enable cookies' unless request.cookies.key?(CONF.session.name)
       @user = User.authenticate(@json[:username], @json[:password])
       halt 403, 'Invalid username or password' if @user.nil?
       regenerate_session
@@ -37,12 +35,12 @@ class MainApp < Sinatra::Base
     end
   end
   namespace '/api/users' do
-    post '/new' do
+    post '' do
       # register
       validates @json, :username, :password
       begin
         @user = User.create_user(@json[:username], @json[:password])
-      rescue
+      rescue RuntimeError
         halt 401, 'Invalid username or password'
       end
       status 204

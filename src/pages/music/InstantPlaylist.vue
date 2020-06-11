@@ -1,5 +1,5 @@
 <template>
-  <div v-if="list.length">
+  <div v-if="list">
     <div class="d-flex my-2 px-2">
       <b-button v-t="'reset'" variant="outline-danger" size="sm" class="ml-auto" @click="reset"/>
       <b-button v-t="'save'" variant="success" size="sm" class="ml-2"/>
@@ -104,7 +104,7 @@ export default class InstantPlaylist extends Vue {
     return musicModule.instantPlaylist;
   }
 
-  set list(songs: Song[]) {
+  set list(songs: Song[] | null) {
     musicModule.SET_INSTANT_PLAYLIST(songs);
   }
 
@@ -144,9 +144,10 @@ export default class InstantPlaylist extends Vue {
   }
 
   private reset() {
-    this.list = [];
+    this.list = null;
     this.ruleGroups = [];
     this.ruleCount = 0;
+    this.addRule();
   }
 
   private async create() {

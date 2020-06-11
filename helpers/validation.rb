@@ -1,13 +1,12 @@
 module ValidationHelpers
   def validates(obj, *keys, halt: nil, **opts)
-    raise if obj.nil? or not Hash === obj
-    keys.each{|k| raise unless obj.key?(k)}
-    return true
-  rescue
-    if halt == false
-      return false
-    else
-      halt 401, 'Invalid Request'
-    end
+    raise if obj.nil? || !obj.is_a?(Hash)
+
+    keys.each{ |k| raise unless obj.key?(k) }
+    true
+  rescue RuntimeError
+    return false if halt == false
+
+    halt 401, 'Invalid Request'
   end
 end

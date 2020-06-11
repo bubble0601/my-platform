@@ -5,15 +5,14 @@ require 'bcrypt'
 class User < Sequel::Model(:users)
   def self.authenticate(username, password)
     user = self[name: username]
-    if user && BCrypt::Password.new(user.password) == password
-      user
-    else
-      nil
-    end
+    return user if user && BCrypt::Password.new(user.password) == password
+
+    nil
   end
 
   def self.create_user(username, password)
-    raise 'Invalid password length' if password.length < 8 or password.length > 72
+    raise 'Invalid password length' if password.length < 8 || password.length > 72
+
     create(name: username, password: BCrypt::Password.create(password))
   end
 

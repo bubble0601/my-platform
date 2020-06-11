@@ -97,7 +97,7 @@ export default class MusicModule extends VuexModule {
   public playlistId: number  | null = null;
   public smartlists: Smartlist[] = [];
   public smartlistId: number | null = null;
-  public instantPlaylist: Song[] = [];
+  public instantPlaylist: Song[] | null = null;
 
   public current: Song | null = null;
   public audioData: Blob | null = null;
@@ -175,9 +175,9 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  public SET_INSTANT_PLAYLIST(songs: Song[]) {
+  public SET_INSTANT_PLAYLIST(songs: Song[] | null) {
     this.instantPlaylist = songs;
-    this.songs = songs;
+    this.songs = songs || [];
   }
 
   // player control

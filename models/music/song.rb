@@ -1,13 +1,12 @@
 require 'digest/md5'
-require 'fileutils'
 require './lib/music/mp3'
 
 class Song < Sequel::Model(:songs)
-  many_to_one :album, order: [:year, :title]
+  many_to_one :album, order: %i[year title]
   many_to_one :artist, order: [:name]
   many_to_many :playlists
 
-  def self.set_tags(filename, data, delete: false)
+  def self.set_tags(filename, data)
     return if data.nil?
     tags = MP3.new(filename).tags
     tags.update_to_v24
@@ -108,8 +107,6 @@ class Song < Sequel::Model(:songs)
 
     song.length = mp3.length
     song.filename = song.to_filename(filename)
-    song
-
     song.digest = generate_digest(path)
 
     new_filename = "#{CONF.storage.music}/#{song.filename}"
@@ -268,23 +265,4 @@ class Song < Sequel::Model(:songs)
     self.length = MP3.new(old_path).length
     self.save
   end
-end
-
-class Album < Sequel::Model(:albums)
-  one_to_many :songs
-  many_to_one :artist
-end
-
-class Artist < Sequel::Model(:artists)
-  one_to_many :songs
-  one_to_many :albums
-end
-
-class Playlist < Sequel::Model(:playlists)
-  many_to_many :songs
-end
-
-class PlaylistSong < Sequel::Model(:playlists_songs)
-  many_to_one :playlists
-  many_to_one :songs
 end

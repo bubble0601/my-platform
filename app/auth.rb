@@ -1,4 +1,4 @@
-class MainApp < Sinatra::Base
+class MainApp
   set(:auth) do |role|
     condition do
       case role
@@ -19,6 +19,7 @@ class MainApp < Sinatra::Base
       opts[:auth] = :user if opts[:auth].nil?
       super(path, opts, &block)
     end
+
     def delete(path, opts = {}, &block)
       opts[:auth] = :user if opts[:auth].nil?
       super(path, opts, &block)

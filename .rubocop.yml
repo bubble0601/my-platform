@@ -1,0 +1,33 @@
+AllCops:
+  DisplayStyleGuide: true
+  NewCops: enable
+  # EnabledByDefault: true
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+Layout/SpaceBeforeBlockBraces:
+  EnforcedStyle: no_space
+
+Metrics/AbcSize:
+  Max: 30
+Metrics/ClassLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/MethodCallWithArgsParentheses:
+  IgnoredMethods: ['require', 'p', 'puts', 'print']
+Style/NumericPredicate:
+  IgnoredMethods: ['where', 'having']
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma

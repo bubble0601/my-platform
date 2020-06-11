@@ -231,7 +231,7 @@ export default class Music extends Mixins(SizeMixin) {
   display: flex;
   flex-direction: column;
   background-color: #dee2e655;
-  width: 10rem;
+  width: 9rem;
   overflow-x: auto;
 
   .menu-item {

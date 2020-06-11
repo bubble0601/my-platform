@@ -15,11 +15,11 @@ class MainApp < Sinatra::Base
   # expires_after must be less than 2592000(=30days)
   # expires_after controls the expiration of both the cookie and the memcached
   use Rack::Session::Dalli,
-    namespace: "#{CONF.app.name}:session",
-    memcache_server: 'localhost:11211',
-    expire_after: 3600 * 24 * 28,
-    key: CONF.session.name,
-    httponly: true
+      namespace: "#{CONF.app.name}:session",
+      memcache_server: 'localhost:11211',
+      expire_after: 3600 * 24 * 28,
+      key: CONF.session.name,
+      httponly: true
 
   set :sessions, secure: true if CONF.server.ssl
 

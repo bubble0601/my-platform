@@ -5,17 +5,18 @@ DB = Sequel.connect(
   host: CONF.db.host,
   user: CONF.db.user,
   password: CONF.db.password,
-  database: CONF.db.database,
+  database: CONF.db.database
 )
 
 module Sequel
   class Model
     def slice(*keys)
-      self.values.slice(*keys)
+      values.slice(*keys)
     end
   end
 end
 
 Sequel::Model.plugin :timestamps, update_on_create: true
 
-Dir.glob(Pathname.new(__dir__).join('*.rb')).sort.each {|f| require f }
+Dir.glob('*/init.rb', base: __dir__).sort.each{ |f| require_relative f }
+Dir.glob('*.rb', base: __dir__).sort.each{ |f| require_relative f }
