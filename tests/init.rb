@@ -33,6 +33,6 @@ class TestBase < Minitest::Test
   end
 
   def run(*args, &block)
-    DB.transaction(:rollback=>:always, :auto_savepoint=>true){super}
+    DB.transaction(rollback: :always, auto_savepoint: true){ super }
   end
 end

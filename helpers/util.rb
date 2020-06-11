@@ -22,10 +22,10 @@ module UtilityHelpers
         warn "redirected to #{location}"
         get_response(location, limit - 1)
       else
-        puts [uri.to_s, response.value].join("\n")
+        logger.warn('http'){ [uri.to_s, response.value].join("\n") }
       end
     rescue StandardError => e
-      puts [uri.to_s, e.class, e].join("\n")
+      logger.warn('http'){ [uri.to_s, e.class, e].join("\n") }
     end
   end
 
