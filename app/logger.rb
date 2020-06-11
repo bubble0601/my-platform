@@ -1,13 +1,12 @@
-class MainApp < Sinatra::Base
+class MainApp
   enable :logging
   configure :production do
     use Rack::CommonLogger, Logger.new(CONF.log.access, 'daily')
   end
   def logger
     return super if settings.development?
-    return @logger unless @logger.nil?
 
-    @logger = Logger.new(CONF.log.app, 'monthly')
+    @logger ||= Logger.new(CONF.log.app, 'monthly')
   end
 end
 

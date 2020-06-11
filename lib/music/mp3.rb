@@ -1,8 +1,8 @@
 require 'pycall/import'
 
-include PyCall::Import
 module PyMP3
-  pyfrom 'mutagen.id3', import: [:ID3, :Encoding, :Frame, :Frames, :PictureType, :ID3FileType]
+  include PyCall::Import
+  pyfrom 'mutagen.id3', import: %i[ID3 Encoding Frame Frames PictureType ID3FileType]
   pyfrom 'mutagen.mp3', import: [:MP3]
 end
 
@@ -13,7 +13,7 @@ class MP3
   end
 
   def tags
-    @tags = ID3.new(@filename) unless @tags
+    @tags ||= ID3.new(@filename)
     @tags
   end
 
@@ -27,27 +27,25 @@ class MP3
 end
 
 class ID3
-  KEYS = {}
-  TAGS = {}
+  @keys = {}
+  @tags = {}
 
-  def self.registerKey(key, tag, getter, setter, deleter = nil)
-    unless deleter
-      deleter = Proc.new do |id3|
-        id3.delall(tag)
-      end
+  def self.register_key(key, tag, getter, setter, deleter = nil)
+    deleter ||= proc do |id3|
+      id3.delall(tag)
     end
-    KEYS[key] = tag
-    TAGS[tag] = {
+    @keys[key] = tag
+    @tags[tag] = {
       get: getter,
       set: setter,
       del: deleter,
     }
   end
 
-  def self.registerTextKey(key, tag)
-    get = Proc.new do |id3|
+  def self.register_text_key(key, tag)
+    get = proc do |id3|
       values = id3.getall(tag)
-      if values.length == 0
+      if values.empty?
         nil
       elsif values.length == 1
         values[0].text[0].to_s
@@ -55,19 +53,19 @@ class ID3
         raise
       end
     end
-    set = Proc.new do |id3, value|
-      if value.kind_of?(PyMP3::Frame)
+    set = proc do |id3, value|
+      if value.is_a?(PyMP3::Frame)
         value.encoding = PyMP3::Encoding.UTF8
         id3.setall(tag, [value])
       else
         id3.setall(tag, [PyMP3::Frames[tag].new(encoding: PyMP3::Encoding.UTF8, text: [value])])
       end
     end
-    del = Proc.new do |id3|
+    del = proc do |id3|
       id3.delall(tag)
     end
-    KEYS[key] = tag
-    TAGS[tag] = {
+    @keys[key] = tag
+    @tags[tag] = {
       get: get,
       set: set,
       del: del,
@@ -80,13 +78,12 @@ class ID3
 
   def get_all(convert = false)
     return @id3.items.to_h unless convert
-    @id3.items.to_h.transform_keys{|k| k[0...4]}.map{|k, v| TAGS[k] ? [k, TAGS[k][:get].call(@id3)] : [k, v]}.to_h
+
+    @id3.items.to_h.transform_keys{ |k| k[0...4] }.map{ |k, v| @tags[k] ? [k, @tags[k][:get].call(@id3)] : [k, v] }.to_h
   end
 
   def each
-    if block_given?
-      get_all(true).to_enum.each{|*args| yield(*args)}
-    end
+    get_all(true).to_enum.each{ |*args| yield(*args) } if block_given?
     get_all(true).to_enum
   end
 
@@ -96,40 +93,39 @@ class ID3
 
   def to_utf8
     get_all.each do |key, value|
-      begin
-        next if (not value.respond_to?('encoding')) || value.encoding == PyMP3::Encoding.UTF8
-        tag = key[0...4]
-        if TAGS[tag]
-          TAGS[tag][:set].call(@id3, value)
-        else
-          values = @id3.getall(tag)
-          values =  values.map{ |v| v.encoding = PyMP3::Encoding.UTF8; v }
-          @id3.setall(tag, values)
-        end
-      rescue => e
-        p key, value
-        raise e
+      next if !value.respond_to?('encoding') || value.encoding == PyMP3::Encoding.UTF8
+
+      tag = key[0...4]
+      if @tags[tag]
+        @tags[tag][:set].call(@id3, value)
+      else
+        values = @id3.getall(tag)
+        values = values.map{ |v| v.encoding = PyMP3::Encoding.UTF8; v }
+        @id3.setall(tag, values)
       end
+    rescue StandardError => e
+      p key, value
+      raise e
     end
     @id3
   end
 
   def [](key)
-    if TAGS[key]
-      TAGS[key][:get].call(@id3)
+    if @tags[key]
+      @tags[key][:get].call(@id3)
     else
       method_missing(:[], key)
     end
   end
 
   def []=(key, value)
-    if TAGS[key]
+    if @tags[key]
       if value
-        TAGS[key][:set].call(@id3, value)
+        @tags[key][:set].call(@id3, value)
       else
-        TAGS[key][:del].call(@id3)
+        @tags[key][:del].call(@id3)
       end
-    elsif key.length === 4 && value == nil
+    elsif key.length == 4 && value.nil?
       @id3.delall(key)
     else
       method_missing(:[]=, key, value)
@@ -144,11 +140,23 @@ class ID3
       mode = :del unless args[0]
       key = name[0...-1].to_sym
     end
-    if tag = KEYS[key]
-      TAGS[tag][mode].call(@id3, *args)
-    else
+    if (tag = @keys[key])
+      @tags[tag][mode].call(@id3, *args)
+    elsif @id3.respond_to?(name)
       @id3.method(name).call(*args)
+    else
+      super
     end
+  end
+
+  def respond_to_missing?(name)
+    key = name.to_sym
+    key = name[0...-1].to_sym if name[-1] == '='
+
+    return true unless @keys[key].nil?
+    return true if @id3.respond_to?(name)
+
+    super
   end
 end
 
@@ -166,7 +174,7 @@ end
 end
 
 def lyrics_set(id3, value)
-  if value.kind_of?(PyMP3::Frame)
+  if value.is_a?(PyMP3::Frame)
     value.encoding = PyMP3::Encoding.UTF8
     id3.setall('USLT', [value])
   else
@@ -178,30 +186,35 @@ def lyrics_set(id3, value)
     end
     unless lang
       lang = 'eng'
-      lang = 'jpn' if /[亜-熙ぁ-んァ-ヶ]/.match?(value)
+      lang = 'jpn' if /[亜-熙ぁ-んァ-ヶ]/.match?(text)
     end
-    id3.setall('USLT', [PyMP3::Frames['USLT'].new(encoding: PyMP3::Encoding.UTF8, lang: lang, text: value)])
+    id3.setall('USLT', [PyMP3::Frames['USLT'].new(encoding: PyMP3::Encoding.UTF8, lang: lang, text: text)])
   end
 end
 
-ID3.registerKey(:lyrics, 'USLT', ->(id3){id3.getall('USLT')[0].text}, method(:lyrics_set))
+ID3.registerKey(:lyrics, 'USLT', ->(id3){ id3.getall('USLT')[0].text }, method(:lyrics_set))
 
 def picture_get(id3)
   id3.getall('APIC').map do |apic|
     def apic.inspect
-      "APIC(encoding=#{self.encoding.__repr__}, mime='#{self.mime}', type=#{self.type.__repr__}, desc='#{self.desc}', data=<#{self.data.length} bytes>)"
+      "APIC(encoding=#{encoding.__repr__}, mime='#{mime}', type=#{type.__repr__}, desc='#{desc}', data=<#{data.length} bytes>)"
     end
     apic
   end
 end
 
 def picture_set(id3, value)
-  if value.kind_of?(PyMP3::Frames['APIC'])
+  if value.is_a?(PyMP3::Frames['APIC'])
     value.encoding = PyMP3::Encoding.UTF8
     value.type = PyMP3::PictureType.COVER_FRONT
     id3.setall('APIC', [value])
   else
-    apic = PyMP3::Frames['APIC'].new(encoding: PyMP3::Encoding.UTF8, mime: value[:mime], type: PyMP3::PictureType.COVER_FRONT, data: value[:data])
+    apic = PyMP3::Frames['APIC'].new(
+      encoding: PyMP3::Encoding.UTF8,
+      mime: value[:mime],
+      type: PyMP3::PictureType.COVER_FRONT,
+      data: value[:data]
+    )
     id3.setall('APIC', [apic])
   end
 end

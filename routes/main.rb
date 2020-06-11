@@ -1,6 +1,6 @@
 require 'json'
 
-class MainApp < Sinatra::Base
+class MainApp
   helpers UtilityHelpers
   helpers ValidationHelpers
 
@@ -11,7 +11,7 @@ class MainApp < Sinatra::Base
       cache_control :no_cache
       if request.content_type
         ctype = request.content_type.split(';')[0].downcase
-        if ['json', 'javascript'].any?{|x| ctype.include?(x)}
+        if %w[json javascript].any?{ |x| ctype.include?(x) }
           @json = JSON.parse(request.body.read, symbolize_names: true)
         end
       end
@@ -23,7 +23,7 @@ class MainApp < Sinatra::Base
 
   # Sinatra will check if a static file exists in public folder and serve it before checking for a matching route.
   not_found do
-    if @is_api or request.path.start_with?('/static')
+    if @is_api || request.path.start_with?('/static')
       halt 404, 'Not found'
     else
       send_file './static/index.html'

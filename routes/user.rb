@@ -1,4 +1,4 @@
-class MainApp < Sinatra::Base
+class MainApp
   namespace '/api/auth' do
     helpers do
       # regenerate session for session fixation protection
@@ -34,6 +34,7 @@ class MainApp < Sinatra::Base
       status 204
     end
   end
+
   namespace '/api/users' do
     post '' do
       # register

@@ -1,4 +1,4 @@
-class MainApp < Sinatra::Base
+class MainApp
   namespace '/api/setting' do
     get '/init' do
       {
