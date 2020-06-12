@@ -8,6 +8,7 @@ class String
 
   def no_shellescape
     @no_shellescape = true
+    self
   end
 
   def shellescape

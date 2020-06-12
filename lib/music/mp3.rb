@@ -14,7 +14,6 @@ class MP3
 
   def tags
     @tags ||= ID3.new(@filename)
-    @tags
   end
 
   def length
@@ -27,15 +26,15 @@ class MP3
 end
 
 class ID3
-  @keys = {}
-  @tags = {}
+  @@keys = {}
+  @@tags = {}
 
   def self.register_key(key, tag, getter, setter, deleter = nil)
     deleter ||= proc do |id3|
       id3.delall(tag)
     end
-    @keys[key] = tag
-    @tags[tag] = {
+    @@keys[key] = tag
+    @@tags[tag] = {
       get: getter,
       set: setter,
       del: deleter,
@@ -45,7 +44,7 @@ class ID3
   def self.register_text_key(key, tag)
     get = proc do |id3|
       values = id3.getall(tag)
-      if values.empty?
+      if values.length.zero?
         nil
       elsif values.length == 1
         values[0].text[0].to_s
@@ -64,8 +63,8 @@ class ID3
     del = proc do |id3|
       id3.delall(tag)
     end
-    @keys[key] = tag
-    @tags[tag] = {
+    @@keys[key] = tag
+    @@tags[tag] = {
       get: get,
       set: set,
       del: del,
@@ -77,9 +76,10 @@ class ID3
   end
 
   def get_all(convert = false)
-    return @id3.items.to_h unless convert
+    items = @id3.items.to_h
+    return items unless convert
 
-    @id3.items.to_h.transform_keys{ |k| k[0...4] }.map{ |k, v| @tags[k] ? [k, @tags[k][:get].call(@id3)] : [k, v] }.to_h
+    items.transform_keys{ |k| k[0...4] }.map{ |k, v| @@tags[k] ? [k, @@tags[k][:get].call(@id3)] : [k, v] }.to_h
   end
 
   def each
@@ -96,8 +96,8 @@ class ID3
       next if !value.respond_to?('encoding') || value.encoding == PyMP3::Encoding.UTF8
 
       tag = key[0...4]
-      if @tags[tag]
-        @tags[tag][:set].call(@id3, value)
+      if @@tags[tag]
+        @@tags[tag][:set].call(@id3, value)
       else
         values = @id3.getall(tag)
         values = values.map{ |v| v.encoding = PyMP3::Encoding.UTF8; v }
@@ -111,19 +111,19 @@ class ID3
   end
 
   def [](key)
-    if @tags[key]
-      @tags[key][:get].call(@id3)
+    if @@tags[key]
+      @@tags[key][:get].call(@id3)
     else
       method_missing(:[], key)
     end
   end
 
   def []=(key, value)
-    if @tags[key]
+    if @@tags[key]
       if value
-        @tags[key][:set].call(@id3, value)
+        @@tags[key][:set].call(@id3, value)
       else
-        @tags[key][:del].call(@id3)
+        @@tags[key][:del].call(@id3)
       end
     elsif key.length == 4 && value.nil?
       @id3.delall(key)
@@ -140,8 +140,8 @@ class ID3
       mode = :del unless args[0]
       key = name[0...-1].to_sym
     end
-    if (tag = @keys[key])
-      @tags[tag][mode].call(@id3, *args)
+    if (tag = @@keys[key])
+      @@tags[tag][mode].call(@id3, *args)
     elsif @id3.respond_to?(name)
       @id3.method(name).call(*args)
     else
@@ -153,7 +153,7 @@ class ID3
     key = name.to_sym
     key = name[0...-1].to_sym if name[-1] == '='
 
-    return true unless @keys[key].nil?
+    return true unless @@keys[key].nil?
     return true if @id3.respond_to?(name)
 
     super

@@ -21,8 +21,8 @@ Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
   begin
     tit2 = tags.getall('TIT2')
     tpe2 = tags.getall('TPE2')
-    raise if !tit2.empty? && tit2[0].encoding != PyMP3::Encoding.UTF8
-    raise if !tpe2.empty? && tpe2[0].encoding != PyMP3::Encoding.UTF8
+    raise if !tit2.length.zero? && tit2[0].encoding != PyMP3::Encoding.UTF8
+    raise if !tpe2.length.zero? && tpe2[0].encoding != PyMP3::Encoding.UTF8
   rescue RuntimeError
     puts f
     p tags.get_all(true)

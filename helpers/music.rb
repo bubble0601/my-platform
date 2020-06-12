@@ -72,7 +72,7 @@ module MusicHelpers
       '--extract-audio',
       '--no-playlist',
       '--geo-bypass',
-      '--audio-format', "'mp3'",
+      '--audio-format', 'mp3',
       '-o', output,
       url,
       '1>/dev/null 2>&1'.no_shellescape,
@@ -80,7 +80,7 @@ module MusicHelpers
     begin
       exec_command(cmd)
     rescue RuntimeError
-      halt 400, 'Failed to download from the url'
+      halt 500, 'Failed to download from the url'
     end
   end
 

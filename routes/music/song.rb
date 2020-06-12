@@ -74,6 +74,7 @@ class MainApp
         output = "#{path}.%(ext)s"
         path += '.mp3'
         youtube_dl(@json[:url], output)
+        p path, @json[:metadata]
         Song.set_tags(path, @json[:metadata])
         res = Song.create_from_file(path)
         logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
