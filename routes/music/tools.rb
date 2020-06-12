@@ -5,9 +5,8 @@ class MainApp
         local_dir = "#{CONF.storage.music}/"
         remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
         cmd = ['rsync', '-avhuz']
-        cmd.push('--iconv=UTF-8-MAC,UTF-8'.no_shellescape) if env[:os][:mac]
         cmd.push('-n') if testrun
-        cmd.push("--exclude='.DS_Store'".no_shellescape) if local
+        cmd.push('--iconv=UTF-8-MAC,UTF-8'.no_shellescape, "--exclude='.DS_Store'".no_shellescape) if env[:os][:mac]
         cmd.push('--delete') if delete
         cmd.push('-e', 'ssh')
         if local
@@ -126,11 +125,7 @@ class MainApp
     end
 
     get '/searchartwork' do
-      if params[:more]
-        Artwork.search_more(params[:title], params[:album], params[:artist], params[:more].to_i)
-      else
-        Artwork.search(params[:title], params[:album], params[:artist])
-      end
+      Artwork.search(params[:title], params[:album], params[:artist], params[:page].to_i)
     end
 
     get '/sync' do

@@ -2,7 +2,7 @@
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center">
       <icon-button v-if="$mobile" icon="chevron-left" @click="$emit('back')"/>
-      <icon-button icon="check-box" tooltip="全チェック / クリア" @click="toggleSelection"/>
+      <icon-button icon="check-square" tooltip="全チェック / クリア" @click="toggleSelection"/>
       <icon-button icon="shuffle" tooltip="シャッフル再生" @click="shuffleAndPlay"/>
       <icon-button icon="arrow-clockwise" rotate="45" tooltip="更新" @click="reloadSongs"/>
       <div class="ml-auto"/>

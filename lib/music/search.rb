@@ -145,19 +145,10 @@ module Artwork
 
   module_function
 
-  def search(title, album, artist)
+  def search(title, album, artist, page = 0)
     results = []
     threads = [
-      async_exec{ search_genius(results, (title or album), artist) },
-      async_exec{ search_yahoo(results, (album or title), artist) },
-    ]
-    threads.each{ |t| t&.join(10) }
-    results
-  end
-
-  def search_more(title, album, artist, page)
-    results = []
-    threads = [
+      # async_exec{ search_genius(results, (title or album), artist) },
       async_exec{ search_yahoo(results, (album or title), artist, page) },
     ]
     threads.each{ |t| t&.join(10) }

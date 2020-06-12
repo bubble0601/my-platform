@@ -119,7 +119,7 @@ export default class ArtworkEditor extends Vue {
       album: this.album || null,
     };
     if (this.artist) params.artist = this.artist;
-    if (this.searchCount) params.more = this.searchCount.toString();
+    if (this.searchCount) params.page = this.searchCount.toString();
     axios.get('/api/music/tools/searchartwork', { params }).then((res) => {
       if (this.searchCount > 0) this.searchResults.push(...res.data);
       else this.searchResults = res.data;

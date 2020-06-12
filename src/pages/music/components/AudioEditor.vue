@@ -153,11 +153,10 @@ export default class AudioEditor extends Vue {
     }
     this.processing = params.kind;
     if (this.audioSrc === this.originalSrc) params.reset = 'true';
-    axios.get<Blob>(`/static/music/temp/${this.song.digest}/${this.song.filename}`, { params, responseType: 'blob' }).then((res) => {
-      this.setData(res.data);
-    }).finally(() => {
+    const { data } = await axios.get<Blob>(`/static/music/temp/${this.song.digest}/${this.song.filename}`, { params, responseType: 'blob' }).finally(() => {
       this.processing = null;
     });
+    this.setData(data);
   }
 
   // private async removeNoise() {
