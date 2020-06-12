@@ -4,7 +4,7 @@
       <!-- side menu -->
       <div class="sidemenu-left py-2">
         <div class="px-2 pb-2">
-          <b-button pill variant="success" size="sm" @click="add">＋ Add</b-button>
+          <b-button pill variant="success" size="sm" @click="add">＋ <span v-t="'add'"/></b-button>
         </div>
         <template v-for="t in tabs">
           <template v-if="t.children">
@@ -26,7 +26,7 @@
       </div>
       <!-- center content -->
       <div class="center-block flex-grow-1 overflow-auto">
-        <keep-alive :include="['Settings', 'NewSong']">
+        <keep-alive :include="['NewSong', 'TemporaryPlaylist', 'Settings']">
           <router-view/>
         </keep-alive>
       </div>
@@ -54,6 +54,7 @@ import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav, ContextMenu } from '@/components';
 import { ContextMenuItem } from '@/types';
 import { AudioPlayer, PlayerInfo } from './components';
+import music from '../../i18n/music';
 
 @Component({
   components: {
@@ -77,11 +78,37 @@ export default class Music extends Mixins(SizeMixin) {
 
   private baseTitle = '';
 
-  private tabs: object[] = [];
-
   private mOpened = false;
   private mScrollPos: number = 0;
   private mTouchPath: Touch[] = [];
+
+  get tabs() {
+    const tabs: object[] = [
+      { key: 'all', name: this.$t('music.all') },
+    ];
+    if (musicModule.temporaryPlaylist) {
+      tabs.push({
+        key: 'temp', name: this.$t('music.temporary'),
+      });
+    }
+    tabs.push(
+      { key: 'artist', name: this.$t('music.artist') },
+      { key: 'playlist', name: this.$t('music.playlist') },
+      {
+        key: 'smartlist',
+        name: this.$t('music.smartlist'),
+        expanded: this.$route.path.startsWith('/music/smartlist'),
+        children: musicModule.smartlists.map((sl) => ({
+          key: `smartlist/${sl.id}`,
+          name: sl.name,
+        })),
+      },
+      { key: 'div1' },
+      { key: 'space' },
+      { key: 'settings', name: this.$t('settings') },
+    );
+    return Vue.observable(tabs);
+  }
 
   get currentSong() {
     return musicModule.current;
@@ -122,7 +149,7 @@ export default class Music extends Mixins(SizeMixin) {
     viewModule.SET_FOOTER_PROPS({ reduced: !this.mOpened });
   }
 
-  protected async created() {
+  protected created() {
     this.baseTitle = document.title;
     this.addSizingCallback(() => {
       if (this.$el instanceof HTMLElement) {
@@ -135,26 +162,8 @@ export default class Music extends Mixins(SizeMixin) {
       }
     });
     this.initAudioPlayer();
-    const sl: Array<{ key: string, name: string }> = [];
-    this.tabs = [
-      { key: 'all', name: 'All' },
-      { key: 'artist', name: this.$t('music.artist') },
-      { key: 'playlist', name: this.$t('music.playlist') },
-      {
-        key: 'smartlist',
-        name: this.$t('music.smartlist'),
-        expanded: this.$route.path.startsWith('/music/smartlist'),
-        children: sl,
-      },
-      { key: 'div1' },
-      { key: 'space' },
-      { key: 'settings', name: this.$t('settings') },
-    ];
-    await musicModule.FetchSmartlists();
-    sl.push(...musicModule.smartlists.map((l) => ({
-      key: `smartlist/${l.id}`,
-      name: l.name,
-    })));
+    musicModule.FetchPlaylists();
+    musicModule.FetchSmartlists();
   }
 
   protected mounted() {
@@ -185,12 +194,12 @@ export default class Music extends Mixins(SizeMixin) {
     const menuItems: ContextMenuItem[] = [];
     menuItems.push({
       key: 'song',
-      text: 'Song',
+      text: this.$t('music.song') as string,
       action: () => this.$router.push('/music/song/new'),
     }, {
-      key: 'instant',
-      text: 'Instant playlist',
-      action: () => this.$router.push('/music/instant'),
+      key: 'temp',
+      text: this.$t('music.temporaryPlaylist') as string,
+      action: () => this.$router.push('/music/temp'),
     });
     new ContextMenu().show({ items: menuItems, position: { x: t.offsetLeft + t.offsetWidth, y: t.offsetTop - 5 }});
   }
@@ -232,7 +241,9 @@ export default class Music extends Mixins(SizeMixin) {
   flex-direction: column;
   background-color: #dee2e655;
   width: 9rem;
+  min-width: 9rem;
   overflow-x: auto;
+  user-select: none;
 
   .menu-item {
     display: block;
@@ -252,9 +263,11 @@ export default class Music extends Mixins(SizeMixin) {
 }
 .center-block {
   border-right: 2px solid #dee2e6;
+  overflow: auto;
 }
 .sidemenu-right {
   width: 16rem;
+  min-width: 16rem;
   overflow-x: auto;
 }
 </style>

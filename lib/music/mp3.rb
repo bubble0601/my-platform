@@ -1,7 +1,7 @@
 require 'pycall/import'
 
 module PyMP3
-  include PyCall::Import
+  extend PyCall::Import
   pyfrom 'mutagen.id3', import: %i[ID3 Encoding Frame Frames PictureType ID3FileType]
   pyfrom 'mutagen.mp3', import: [:MP3]
 end
@@ -165,12 +165,12 @@ end
   album: 'TALB',
   artist: 'TPE1',
   album_artist: 'TPE2',
-  album_artist_sort: 'TSO2',  # iTunes extension
+  album_artist_sort: 'TSO2', # iTunes extension
   track: 'TRCK',
   disc: 'TPOS',
   year: 'TDRC',
 }.each do |key, tag|
-  ID3.registerTextKey(key, tag)
+  ID3.register_text_key(key, tag)
 end
 
 def lyrics_set(id3, value)
@@ -192,7 +192,7 @@ def lyrics_set(id3, value)
   end
 end
 
-ID3.registerKey(:lyrics, 'USLT', ->(id3){ id3.getall('USLT')[0].text }, method(:lyrics_set))
+ID3.register_key(:lyrics, 'USLT', ->(id3){ id3.getall('USLT')[0].text }, method(:lyrics_set))
 
 def picture_get(id3)
   id3.getall('APIC').map do |apic|
@@ -219,4 +219,4 @@ def picture_set(id3, value)
   end
 end
 
-ID3.registerKey(:picture, 'APIC', method(:picture_get), method(:picture_set))
+ID3.register_key(:picture, 'APIC', method(:picture_get), method(:picture_set))

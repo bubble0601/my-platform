@@ -36,13 +36,13 @@ export default class ContextMenu extends Mixins(DialogMixin) {
 
   get linkClass() {
     if (typeof this.itemClass === 'string') {
-      return `${this.itemClass} py-2`;
+      return `${this.itemClass} child-link`;
     } else if (isArray(this.itemClass)) {
-      return this.itemClass.concat(['py-2']);
+      return this.itemClass.concat(['child-link']);
     }
     return {
       ...this.itemClass,
-      'py-2': true,
+      'child-link': true,
     };
   }
 
@@ -101,5 +101,10 @@ export default class ContextMenu extends Mixins(DialogMixin) {
   color: inherit !important;
   background-color: transparent !important;
   padding: 0.75rem 1.25rem !important;
+}
+
+.context-menu .child-link {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
 }
 </style>

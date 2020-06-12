@@ -1,6 +1,6 @@
 <template>
   <div>
-    <song-list context="smartlist"/>
+    <song-list context="smartlist" @back="$router.push('/music/smartlist')"/>
   </div>
 </template>
 <script lang="ts">

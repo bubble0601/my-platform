@@ -19,7 +19,7 @@
     <song-list ref="songList" context="artist" class="w-100"/>
   </div>
   <div v-else-if="id >= 0">
-    <song-list ref="songList" context="artist" class="w-100"/>
+    <song-list ref="songList" context="artist" class="w-100" @back="$router.push('/music/artist')"/>
   </div>
   <div v-else class="artists">
     <b-input-group class="search_input-group">

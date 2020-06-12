@@ -59,7 +59,7 @@ export enum REPEAT {
   ONE,
 }
 
-export const getFilepath = (song: Song) => `/static/music/${song.digest}/${song.filename}`;
+export const getFilepath = (song: Song) => encodeURI(`/static/music/${song.digest}/${song.filename}`);
 
 const api = {
   fetchSongs: (params: Dictionary<any> = {}) => axios.get<Song[]>('/api/music/songs', { params }),
@@ -97,7 +97,7 @@ export default class MusicModule extends VuexModule {
   public playlistId: number  | null = null;
   public smartlists: Smartlist[] = [];
   public smartlistId: number | null = null;
-  public instantPlaylist: Song[] | null = null;
+  public temporaryPlaylist: Song[] | null = null;
 
   public current: Song | null = null;
   public audioData: Blob | null = null;
@@ -115,7 +115,7 @@ export default class MusicModule extends VuexModule {
   public volume = 100;
 
   @Mutation
-  private SET_SONGS(songs: Song[]) {
+  public SET_SONGS(songs: Song[]) {
     this.songs = songs;
   }
 
@@ -175,9 +175,26 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  public SET_INSTANT_PLAYLIST(songs: Song[] | null) {
-    this.instantPlaylist = songs;
-    this.songs = songs || [];
+  public SET_TEMPORARY_PLAYLIST(songs?: Song[] | null) {
+    if (songs === undefined) {
+      if (this.temporaryPlaylist) this.songs = this.temporaryPlaylist;
+    } else {
+      this.temporaryPlaylist = songs;
+      this.songs = songs || [];
+    }
+  }
+
+  @Mutation
+  public ADD_TO_TEMPORARY_PLAYLIST(songs: Song[]) {
+    if (!this.temporaryPlaylist) return;
+    this.temporaryPlaylist.push(...songs);
+  }
+
+  @Mutation
+  public REMOVE_FROM_TEMPORARY_PLAYLIST(songs: Song[]) {
+    if (!this.temporaryPlaylist) return;
+    const targetIds = songs.map((s) => s.id);
+    this.temporaryPlaylist = this.temporaryPlaylist.filter((s) => !targetIds.includes(s.id));
   }
 
   // player control
@@ -364,7 +381,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public async FetchSongs(params: { rules: Rule[][], max?: number, sortBy?: string }) {
+  public async FetchSongs(params: { rules: Rule[][], limit?: number, sortBy?: string }) {
     return await api.fetchSongs(params);
   }
 

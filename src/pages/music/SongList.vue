@@ -1,20 +1,23 @@
 <template>
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center">
-      <icon-button v-if="$mobile" icon="chevron-left" @click="$router.push(`/music/${context}`)"/>
-      <icon-button icon="check-box" tooltip="check all / clear check" @click="toggleSelection"/>
-      <icon-button icon="shuffle" tooltip="shuffle and play" @click="shuffleAndPlay"/>
-      <icon-button icon="arrow-clockwise" rotate="45" tooltip="reload songs" @click="reloadSongs"/>
+      <icon-button v-if="$mobile" icon="chevron-left" @click="$emit('back')"/>
+      <icon-button icon="check-box" tooltip="全チェック / クリア" @click="toggleSelection"/>
+      <icon-button icon="shuffle" tooltip="シャッフル再生" @click="shuffleAndPlay"/>
+      <icon-button icon="arrow-clockwise" rotate="45" tooltip="更新" @click="reloadSongs"/>
       <div class="ml-auto"/>
-      <b-button v-if="context === 'playlist'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeFromPlaylist">Remove song</b-button>
-      <b-dropdown v-else size="sm" toggle-class="lh-1" variant="primary" text="Add to list" class="mr-2">
-        <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addToPlaylist(l.id)">
-          {{ l.name }}
-        </b-dropdown-item>
-        <b-dropdown-item class="small px-0" @click="createPlaylist">
-          Create new playlist
-        </b-dropdown-item>
-      </b-dropdown>
+      <template v-if="$pc">
+        <b-button v-if="context === 'playlist' || context === 'temp'" size="sm" variant="danger" class="lh-1 mr-2" @click="removeFromPlaylist">プレイリストから削除</b-button>
+        <b-dropdown v-else size="sm" toggle-class="lh-1" variant="primary" text="プレイリストに追加" class="mr-2">
+          <b-dropdown-item v-if="temporaryPlaylist" v-t="'music.temporary'" class="small px-0" @click="addToTemplist"/>
+          <b-dropdown-item v-for="l in playlists" :key="l.id" class="small px-0" @click="addToPlaylist(l.id)">
+            {{ l.name }}
+          </b-dropdown-item>
+          <b-dropdown-item class="small px-0" @click="createPlaylist">
+            新規作成
+          </b-dropdown-item>
+        </b-dropdown>
+      </template>
       <b-pagination v-model="currentPage" :total-rows="songs.length" :per-page="perPage" size="sm" class="my-0 mr-2"/>
     </div>
     <b-table
@@ -84,20 +87,20 @@ export default class SongList extends Vue {
   get fields() {
     const fields: BvTableFieldArray = [
       { key: 'checkbox', label: '', sortable: false, tdClass: 'px-1' },
-      { key: 'title', sortable: true },
-      { key: 'artist', formatter: (value) => value.name , sortable: true, sortByFormatted: true },
+      { key: 'title', label: this.$t('music.fields.title') as string, sortable: true },
+      { key: 'artist', label: this.$t('music.fields.artist') as string, formatter: (value) => value.name , sortable: true, sortByFormatted: true },
     ];
     if (this.$pc) {
-      fields.push({ key: 'album', formatter: (value) => value.title, sortable: true, sortByFormatted: true });
+      fields.push({ key: 'album', label: this.$t('music.fields.album') as string, formatter: (value) => value.title, sortable: true, sortByFormatted: true });
     }
-    fields.push({ key: 'rate', sortable: true });
+    fields.push({ key: 'rate', label: this.$t('music.fields.rate') as string, sortable: true });
     if (this.$pc) {
-      fields.push({ key: 'time', sortable: true, formatter: formatTime });
-      fields.push({ key: 'year', sortable: true });
-      // fields.push({ key: 'created_at', sortable: true });
+      fields.push({ key: 'time', label: this.$t('music.fields.time') as string, sortable: true, formatter: formatTime });
+      fields.push({ key: 'year', label: this.$t('music.fields.year') as string, sortable: true });
+      // fields.push({ key: 'created_at', label: this.$t('music.fields.created_at') as string, sortable: true });
     }
     if (this.context === 'playlist') {
-      fields.push({ key: 'weight', sortable: true, tdClass: this.$pc ? '' : 'px-0' });
+      fields.push({ key: 'weight', label: this.$t('music.fields.weight') as string, sortable: true, tdClass: this.$pc ? '' : 'px-0' });
     }
     return fields;
   }
@@ -108,6 +111,10 @@ export default class SongList extends Vue {
 
   get playlists() {
     return musicModule.playlists;
+  }
+
+  get temporaryPlaylist() {
+    return musicModule.temporaryPlaylist;
   }
 
   get displayedSongs() {
@@ -151,9 +158,18 @@ export default class SongList extends Vue {
     }
   }
 
+  private addToTemplist(id: number) {
+    musicModule.ADD_TO_TEMPORARY_PLAYLIST(this.selected);
+  }
+
   private async removeFromPlaylist() {
-    await musicModule.RemovePlaylistSong({ songs: this.selected });
-    await musicModule.ReloadSongs();
+    if (this.context === 'playlist') {
+      await musicModule.RemovePlaylistSong({ songs: this.selected });
+      await musicModule.ReloadSongs();
+    } else {
+      musicModule.REMOVE_FROM_TEMPORARY_PLAYLIST(this.selected);
+      if (musicModule.temporaryPlaylist) musicModule.SET_SONGS(musicModule.temporaryPlaylist);
+    }
   }
 
   private play(item: Song) {
@@ -202,13 +218,18 @@ export default class SongList extends Vue {
       { key: 'playNext', text: '次に再生', action: () => { musicModule.InsertIntoNext(songs); } },
       { key: 'jumpToArtist', text: `"${item.album.artist}"へ`, action: () =>  { this.$router.push(`/music/artist/${item.artist.id}`); } },
     );
-    if (this.context === 'playlist') {
+    if (this.context === 'playlist' || this.context === 'temp') {
       menuItems.push({
         key: 'removeFromPlaylist',
         text: 'プレイリストから削除',
         action: async () => {
-          await musicModule.RemovePlaylistSong({ songs });
-          await musicModule.ReloadSongs();
+          if (this.context === 'playlist') {
+            await musicModule.RemovePlaylistSong({ songs });
+            await musicModule.ReloadSongs();
+          } else {
+            musicModule.REMOVE_FROM_TEMPORARY_PLAYLIST(songs);
+            if (musicModule.temporaryPlaylist) musicModule.SET_SONGS(musicModule.temporaryPlaylist);
+          }
         },
       });
     } else {
@@ -216,11 +237,18 @@ export default class SongList extends Vue {
         key: 'addToPlaylist',
         text: 'プレイリストに追加',
         children: [
+          {
+            key: 'temp',
+            text: this.$t('music.temporary') as string,
+            action: () => {
+              musicModule.ADD_TO_TEMPORARY_PLAYLIST(songs);
+            },
+          },
           ...this.playlists.map((l) => ({
             key: l.id,
             text: l.name,
             action: () => {
-              musicModule.AddPlaylistSong({ id: l.id as number, songs });
+              musicModule.AddPlaylistSong({ id: l.id, songs });
             },
           })),
           {

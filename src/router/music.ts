@@ -50,8 +50,8 @@ export default [
         props: (route: Route) => ({ id: Number(route.params.id) }),
       },
       {
-        path: 'instant',
-        component: () => import(/* webpackChunkName: "music" */ '../pages/music/InstantPlaylist.vue'),
+        path: 'temp',
+        component: () => import(/* webpackChunkName: "music" */ '../pages/music/TemporaryPlaylist.vue'),
       },
       {
         path: 'settings',

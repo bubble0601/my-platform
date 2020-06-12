@@ -1,5 +1,4 @@
 AllCops:
-  DisplayStyleGuide: true
   NewCops: enable
 
 Layout/FirstHashElementIndentation:

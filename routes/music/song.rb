@@ -7,8 +7,7 @@ class MainApp
         when 'artist' then :artist_name
         when 'album' then Sequel[:albums][:title]
         when 'album_artist' then Sequel[:artists][:name]
-        # when 'album_artist' then Sequel.qualify(:artist, :name)
-        else raise ArgumentError
+        else field.to_sym
         end
       end
 
@@ -57,9 +56,9 @@ class MainApp
         end
       end
       if params[:sortBy]
-        sort_by = params[:sortBy].parse_json
-        col = to_col(sort_by[:field])
-        order = sort_by[:asc] ? Sequel.asc(col) : Sequel.deesc(col)
+        s = params[:sortBy].split('__')
+        col = to_col(s[0])
+        order = s[1] == 'asc' ? Sequel.asc(col) : Sequel.desc(col)
         query = query.order_prepend(order)
       end
       query = query.limit(params[:limit].to_i) if params[:limit]

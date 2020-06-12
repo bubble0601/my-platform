@@ -48,6 +48,10 @@ export function waitUntil(check: () => boolean, timeout: number = 1000) {
   return new Promise(exec);
 }
 
+export function proper(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function escapeHtml(str: string) {
   if (!str) return str;
   return str.replace(/&/g, '&amp;')

@@ -273,20 +273,20 @@ export default class AudioPlayer extends Vue {
     const menuitems: ContextMenuItem[] = [];
     menuitems.push({
       key: 'add',
-      text: 'Add',
+      text: this.$t('add') as string,
       children: [
         {
           key: 'song',
-          text: 'Song',
+          text: this.$t('music.song') as string,
           action: () => {
             this.$router.push('/music/song/new');
           },
         },
         {
-          key: 'instant',
-          text: 'Instant',
+          key: 'temp',
+          text: this.$t('music.temporaryPlaylist') as string,
           action: () => {
-            this.$router.push('/music/instant');
+            this.$router.push('/music/temp');
           },
         },
       ],
@@ -294,7 +294,7 @@ export default class AudioPlayer extends Vue {
     if (!viewModule.footerFixed) {
       menuitems.push({
         key: 'hide',
-        text: 'Hide',
+        text: this.$t('hide') as string,
         action: () => {
           this.$emit('hide');
         },
@@ -302,7 +302,7 @@ export default class AudioPlayer extends Vue {
     }
     menuitems.push({
       key: 'settings',
-      text: 'Settings',
+      text: this.$t('settings') as string,
       action: () => {
         this.$router.push('/music/settings');
       },

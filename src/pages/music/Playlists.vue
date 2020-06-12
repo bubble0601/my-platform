@@ -14,7 +14,7 @@
     <song-list ref="songList" context="playlist" class="w-100"/>
   </div>
   <div v-else-if="id !== 0">
-    <song-list ref="songList" context="playlist" class="w-100"/>
+    <song-list ref="songList" context="playlist" class="w-100" @back="$router.push('/music/playlist')"/>
   </div>
   <div v-else>
     <b-list-group flush class="playlists">
