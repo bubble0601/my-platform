@@ -39,7 +39,7 @@ class MainApp
         doc = get_doc(params[:url])
         title = doc.title.gsub(/ - YouTube$/, '')
         title.gsub!(/[(（\[【]?(Official Music Video|Official Video|Music Video|Official)[)）\]】]?/i, '')
-        title.gsub!(/[(（\[【]]?(MV|PV)[)）\]】]?/, '')
+        title.gsub!(/[(（\[【]?(MV|PV)[)）\]】]?/, '')
         title.strip!
         if (m = /(.*)[「『](.*)[」』]/.match(title))
           return {
