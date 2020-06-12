@@ -72,18 +72,12 @@ class MainApp
         now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
         path = "#{CONF.storage.temp}/temp#{now}"
         output = "#{path}.%(ext)s"
-        cmd = ['youtube-dl', '-f', 'bestaudio', '-x', '--audio-format', "'mp3'", '-o', output, @json[:url]]
-        cmd.push('1>/dev/null 2>&1'.no_shellescape)
         path += '.mp3'
-        begin
-          exec_command(cmd)
-          Song.set_tags(path, @json[:metadata])
-          res = Song.create_from_file(path)
-          logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
-          return 200, to_song_data(res) if res
-        rescue RuntimeError
-          halt 400, 'Failed to download from the url'
-        end
+        youtube_dl(@json[:url], output)
+        Song.set_tags(path, @json[:metadata])
+        res = Song.create_from_file(path)
+        logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
+        return 200, to_song_data(res) if res
       else # upload file
         metadata = params[:data] ? JSON.parse(params[:data], symbolize_names: true) : nil
         case params[:file]

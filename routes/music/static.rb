@@ -41,10 +41,7 @@ class MainApp
       #   exec_command(cmd)
       #   FileUtils.move(output_path, input_path) unless reset
       when 'download'
-        cmd = [
-          'youtube-dl', '-f', 'bestaudio', '-x', '--audio-format', 'mp3', '-o', "#{path}.tmp.%(ext)s", params[:url],
-        ]
-        cmd.push('1>/dev/null 2>&1'.no_shellescape)
+        youtube_dl(params[:url], "#{path}.tmp.%(ext)s")
         exec_command(cmd)
         FileUtils.move("#{path}.tmp.mp3", "#{path}.mp3")
         FileUtils.rm(Dir["#{path}.tmp.*"])
