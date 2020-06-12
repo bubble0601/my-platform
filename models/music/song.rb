@@ -161,7 +161,7 @@ class Song < Sequel::Model(:songs)
       when 'TYER'
         tags['TDRC'] = v
       else
-        tags[k] = v
+        tags[key] = v
       end
     end
     tags.save
@@ -202,7 +202,7 @@ class Song < Sequel::Model(:songs)
     end
 
     if filename != to_filename
-      filename = to_filename
+      self.filename = to_filename
       new_filename = "#{CONF.storage.music}/#{filename}"
       dir = File.dirname(new_filename)
       FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
