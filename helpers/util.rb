@@ -6,6 +6,14 @@ require 'net/http'
 require 'nokogiri'
 
 module UtilityHelpers
+  def env
+    {
+      os: {
+        mac: RUBY_PLATFORM =~ /(darwin|mac os)/,
+      },
+    }
+  end
+
   def get_response(url, headers = nil, limit = 10)
     raise ArgumentError, 'HTTP redirect too deep' if limit.zero?
 

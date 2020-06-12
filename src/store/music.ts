@@ -372,7 +372,7 @@ export default class MusicModule extends VuexModule {
   }
 
   /* Fetchers */
-  @Action({ rawError: true })
+  @Action
   public async FetchAll() {
     this.SET_SONGS([]);
     this.RESET_FETCH_SONGS();
@@ -470,7 +470,7 @@ export default class MusicModule extends VuexModule {
     return api.fetchAudio(song);
   }
 
-  @Action({ rawError: true })
+  @Action
   public async FetchAudioForPlay(song: Song) {
     if (!song) return;
     if (song === this.nextSong && this.nextAudio) {
@@ -515,7 +515,7 @@ export default class MusicModule extends VuexModule {
     }
   }
 
-  @Action({ rawError: true })
+  @Action
   public async Play(song: Song | undefined) {
     if (!song) return;
     this.SET_CURRENT(song);
@@ -595,7 +595,7 @@ export default class MusicModule extends VuexModule {
     await api.updateSong(id, data);
   }
 
-  @Action({ rawError: true })
+  @Action
   public async UpdateSongTag(payload: { id: number, data: Dictionary<string | null> }) {
     const { id, data } = payload;
     await api.updateSongTag(id, data);
