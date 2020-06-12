@@ -85,7 +85,8 @@ module MusicHelpers
   end
 
   def search_info(title, artist)
-    url = CGI.escape("https://musicbrainz.org/ws/2/recording?query=title:#{title} AND artist:#{artist}&fmt=json")
+    url = 'https://musicbrainz.org/ws/2/recording?'
+    url += URI.encode_www_form(query: "title:#{title} AND artist:#{artist}", fmt: 'json')
     get_json(url, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
   end
 end

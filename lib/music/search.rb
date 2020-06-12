@@ -21,7 +21,7 @@ module Lyrics
 
   def search_az(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = CGI.escape("https://search.azlyrics.com/search.php?q=#{q}")
+    url = 'https://search.azlyrics.com/search.php?' + URI.encode_www_form(q: q)
 
     doc = get_doc(url)
     links = doc.css('td a:not(.btn)')
@@ -51,7 +51,8 @@ module Lyrics
 
   def search_musix(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = CGI.escape("https://www.musixmatch.com/search/#{q}")
+    url = 'https://www.musixmatch.com/search/' + CGI.escape(q).gsub('+', '%20')
+    puts url
 
     doc = get_doc(url)
     link = doc.css('a.title')[0]
@@ -70,9 +71,9 @@ module Lyrics
 
   def search_jlyric(results, title, artist)
     url = if artist
-            CGI.escape("http://search.j-lyric.net/index.php?kt=#{title}&ct=2&ka=#{artist}&ca=2")
+            'http://search.j-lyric.net/index.php?' + URI.encode_www_form(kt: title, ct: 2, ka: artist, ca: 2)
           else
-            CGI.escape("http://search.j-lyric.net/index.php?kt=#{title}&ct=2")
+            'http://search.j-lyric.net/index.php?' + URI.encode_www_form(kt: title, ct: 2)
           end
 
     doc = get_doc(url)
@@ -91,9 +92,9 @@ module Lyrics
 
   def search_utaten(results, title, artist)
     url = if artist
-            CGI.escape("https://utaten.com/search/artist_name=#{artist}/title=#{title}")
+            'https://utaten.com/search?' + URI.encode_www_form(artist_name: artist, title: title)
           else
-            CGI.escape("https://utaten.com/search//title=#{title}")
+            'https://utaten.com/search?' + URI.encode_www_form(title: title)
           end
     doc = get_doc(url)
     link = doc.css('table .searchResult__title a')[0]
@@ -119,7 +120,7 @@ module Lyrics
 
   def search_mojim(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = CGI.escape("http://mojim.com/#{q}.html?j4")
+    url = 'http://mojim.com/' + CGI.escape(q) + '.html?j4'
 
     doc = get_doc(url)
     link = doc.css('table.iB .mxsh_ss3 a')[0]
@@ -165,7 +166,7 @@ module Artwork
 
   def search_genius(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = CGI.escape("https://api.genius.com/search?q=#{q}")
+    url = 'https://api.genius.com/search?' + URI.encode_www_form(q: q)
     json = get_json(url, { 'Authorization': "Bearer #{CONF.app.genius_access_token}" })
     images = json['response']['hits'].map{ |h| h['result']['header_image_thumbnail_url'] }
     results.push(*images)
@@ -181,7 +182,7 @@ module Artwork
   def search_yahoo(results, title, artist, page = 0)
     q = [title, artist].filter(&:itself).join(' ')
     b = page * 20 + 1
-    url = CGI.escape("https://search.yahoo.co.jp/image/search?p=#{q}&b=#{b}")
+    url = 'https://search.yahoo.co.jp/image/search?' + URI.encode_www_form(p: q, b: b)
 
     doc = get_doc(url)
     images = doc.css('div#gridlist img').to_a.map{ |e| e['src'] }

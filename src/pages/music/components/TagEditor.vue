@@ -142,6 +142,7 @@ export default class TagEditor extends Vue {
           },
         });
         dialog.$on('apply', this.apply);
+        dialog.open();
       } else {
         this.$message.warn('No results');
       }
