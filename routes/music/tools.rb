@@ -1,5 +1,5 @@
 class MainApp
-  namespace '/tools' do
+  namespace '/api/music/tools' do
     helpers do
       def rsync(testrun, local, delete)
         local_dir = "#{CONF.storage.music}/"
