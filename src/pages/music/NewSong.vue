@@ -317,7 +317,7 @@ export default class NewSong extends Vue {
       this.url = `https://www.youtube.com/?v=${this.url}`;
     } else if (this.url.match(/^youtube.com/)) {
       this.url = `https://www.${this.url}`;
-    } else if (this.url.match(/^https?:\/\//)) {
+    } else if (!this.url.match(/^https?:\/\//)) {
       this.url = `http://${this.url}`;
     }
     if (this.url.startsWith('https://www.youtube.com')) {
