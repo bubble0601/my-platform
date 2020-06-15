@@ -23,10 +23,9 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { IAudioMetadata } from 'music-metadata-browser';
 import { find, Dictionary } from 'lodash';
 import { IconButton } from '@/components';
-import { Song } from '@/store/music';
+import { Song, Metadata } from '@/store/music';
 
 @Component({
   components: {
@@ -38,7 +37,7 @@ export default class LyricsEditor extends Vue {
   private song!: Song;
 
   @Prop({ type: Object, default: null })
-  private metadata!: IAudioMetadata | null;
+  private metadata!: Metadata | null;
 
   private lyrics = '';
   private title = '';
@@ -46,14 +45,6 @@ export default class LyricsEditor extends Vue {
   private selected: string | null = null;
   private searching = false;
   private searchResults: Array<{ text: string, value: string }> = [];
-
-  get id3Version() {
-    if (this.metadata) {
-      if (this.metadata.native['ID3v2.4']) return 'ID3v2.4';
-      else if (this.metadata.native['ID3v2.3']) return 'ID3v2.3';
-    }
-    return null;
-  }
 
   @Watch('song', { immediate: true })
   private onSongChanged(newSong: Song, oldSong: Song | null) {
@@ -74,10 +65,8 @@ export default class LyricsEditor extends Vue {
   }
 
   private setLyrics() {
-    if (this.metadata && this.id3Version) {
-      const uslt = find(this.metadata.native[this.id3Version], { id: 'USLT' });
-      if (uslt) this.lyrics = uslt.value.text;
-      else this.lyrics = '';
+    if (this.metadata) {
+      this.lyrics = this.metadata.tags.lyrics || '';
     }
   }
 

@@ -18,7 +18,7 @@ class MainApp
           .order{ album[:year] }
           .order_append{ album[:title] }
           .order_append(:track_num, :title)
-          .map(&method(:to_song_data))
+          .map(&method(:song_to_hash))
     end
   end
 end

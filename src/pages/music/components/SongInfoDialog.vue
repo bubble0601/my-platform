@@ -30,13 +30,13 @@
             <dt class="col-sm-3">File size</dt>
             <dd class="col-sm-9">{{ filesize ? filesize : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Codec</dt>
-            <dd class="col-sm-9">{{ format.codec }} / {{ format.codecProfile }}</dd>
+            <dd class="col-sm-9">{{ format.codec }}</dd>
             <dt class="col-sm-3">Bitrate</dt>
             <dd class="col-sm-9">{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Sampling rate</dt>
             <dd class="col-sm-9">{{ format.sampleRate ? `${format.sampleRate / 1000}kHz` : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Tag types</dt>
-            <dd class="col-sm-9">{{ format.tagTypes ? format.tagTypes.join(', ') : '&nbsp;' }}</dd>
+            <dd class="col-sm-9">{{ format.tagType || '&nbsp;' }}</dd>
           </dl>
         </div>
         <!-- tag -->
@@ -61,10 +61,9 @@
 import { Vue, Component, Mixins, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
 import axios from 'axios';
-import * as mm from 'music-metadata-browser';
 import { Dictionary, find, findIndex, isArray, isEmpty, omitBy } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, getFilepath } from '@/store/music';
+import { Song, Metadata, getFilepath } from '@/store/music';
 import { formatTime, formatBytes, waitUntil } from '@/utils';
 import { VNav, Rate } from '@/components';
 import TagEditor from './TagEditor.vue';
@@ -104,7 +103,7 @@ export default class SongInfoDialog extends Vue {
   private songs: Song[] = [];
   private index: number = 0;
   private audioData: Blob | null = null;
-  private metadata: mm.IAudioMetadata | null = null;
+  private metadata: Metadata | null = null;
 
   get navItems() {
     return [
@@ -147,17 +146,10 @@ export default class SongInfoDialog extends Vue {
 
   @Ref() private searchInfoDialog!: BModal;
 
-  @Watch('audioData')
-  private onAudioDataChanged() {
-    if (this.audioData) {
-      mm.parseBlob(this.audioData).then((metadata) => {
-        this.metadata = metadata;
-      }).catch(() => {
-        this.$message.error('Failed to load audio metadata');
-      });
-    } else {
-      this.metadata = null;
-    }
+  private async changeSong(song: Song) {
+    const res = await musicModule.FetchAudio(song);
+    this.audioData = res.audio;
+    this.metadata = res.meta;
   }
 
   public async open(songs: Song[], i: number, nav = 'info') {
@@ -168,22 +160,19 @@ export default class SongInfoDialog extends Vue {
     this.songs = songs;
     this.index = i;
     this.nav = nav;
-    const { data } = await musicModule.FetchAudio(this.song);
-    this.audioData = data;
+    await this.changeSong(this.song);
     this.mainDialog.show();
   }
 
   private async prev() {
     if (!this.prevSong) return;
-    const { data } = await musicModule.FetchAudio(this.prevSong);
-    this.audioData = data;
+    await this.changeSong(this.prevSong);
     this.index--;
   }
 
   private async next() {
     if (!this.nextSong) return;
-    const { data } = await musicModule.FetchAudio(this.nextSong);
-    this.audioData = data;
+    await this.changeSong(this.nextSong);
     this.index++;
   }
 
@@ -202,7 +191,8 @@ export default class SongInfoDialog extends Vue {
     const res1 = await musicModule.ReloadSong(this.song.id);
     this.song = res1;
     const res2 = await musicModule.FetchAudio(this.song);
-    this.audioData = res2.data;
+    this.audioData = res2.audio;
+    this.metadata = res2.meta;
     this.$emit('updated', res1);
   }
 

@@ -37,6 +37,6 @@ class MainApp < Sinatra::Base
   # error do
   #   err = request.env['sinatra.error']
   #   logger.warn err.message
-  #   logger.puts err.backtrace.join("\t\n")
+  #   logger.info err.backtrace.join("\t\n")
   # end
 end

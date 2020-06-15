@@ -46,7 +46,7 @@ class MainApp
       when '10'
         query = query.where(has_artwork: false)
       end
-      query.map(&method(:to_song_data))
+      query.map(&method(:song_to_hash))
     end
   end
 end

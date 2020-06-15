@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { config } from 'vuex-module-decorators';
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
 import axios from 'axios';
 import VueSlider from 'vue-slider-component';
@@ -21,8 +20,6 @@ Vue.component('VField', VField);
 Vue.component('VHelp', VHelp);
 Vue.component('VInput', VInput);
 initDialogs();
-
-config.rawError = true;
 
 axios.interceptors.response.use(undefined, (err) => {
   const { data } = err.response;

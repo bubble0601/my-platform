@@ -1,6 +1,15 @@
 class MainApp
   namespace '/api/music/tools' do
     helpers do
+      def get_title(url, limit = 5)
+        return '' if limit == 0
+
+        title = get_doc(url).title
+        return title if title != 'YouTube'
+
+        get_title(url, limit - 1)
+      end
+
       def rsync(testrun, local, delete)
         local_dir = "#{CONF.storage.music}/"
         remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
@@ -31,13 +40,17 @@ class MainApp
         is_empty.each{ |k, v| results.push(k) if v }
         false
       end
+
+      def audio?(path)
+        Audio.supported_formats.include?(File.extname(path)[1..])
+      end
     end
 
     get '/candidates' do
       url = params[:url]
       if url.start_with?('https://www.youtube.com')
-        doc = get_doc(params[:url])
-        title = doc.title.gsub(/ - YouTube$/, '')
+        title = get_title(params[:url])
+        title = title.gsub(/ - YouTube$/, '')
         title.gsub!(/[(（\[【]?(Official Music Video|Official Video|Music Video|Official)[)）\]】]?/i, '')
         title.gsub!(/[(（\[【]?(MV|PV)[)）\]】]?/, '')
         title.strip!
@@ -72,7 +85,9 @@ class MainApp
 
     get '/searchinfo' do
       results = []
-      search_result = search_info(params[:title], params[:artist])
+      url = 'https://musicbrainz.org/ws/2/recording?'
+      url += URI.encode_www_form(query: "title:#{params[:title]} AND artist:#{params[:artist]}", fmt: 'json')
+      search_result = get_json(url, { 'User-Agent' => "#{CONF.app.name}/1.0.0" })
       search_result['recordings'].each do |rec|
         # 候補2つ以上のときスコア70未満は無視
         break if rec['score'] < 70 && results.length > 1
@@ -144,7 +159,9 @@ class MainApp
 
     get '/scan' do
       files = {}
-      Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
+      Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+        next unless audio?(f)
+
         files[f] = false
       end
       Song.each do |s|
@@ -183,7 +200,7 @@ class MainApp
       deletes = []
       missing_files = []
       Dir["#{CONF.storage.music}/**/*"].each do |f|
-        if File.extname(f) == '.mp3'
+        if audio?(f)
           files[f] = false
         elsif File.file?(f)
           deletes.push(f)

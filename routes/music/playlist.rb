@@ -21,8 +21,8 @@ class MainApp
           .order_append{ album[:year] }
           .order_append{ album[:title] }
           .order_append(:track_num, :title)
-          .each{ |s| s[:weight] = w_items[s[:id]] }
-          .map(&method(:to_song_data))
+          .map(&method(:song_to_hash))
+          .map{ |s| s[:weight] = w_items[s[:id]]; s }
     end
 
     post '/:id/songs' do
@@ -49,7 +49,8 @@ class MainApp
       ps = PlaylistSong.first(playlist_id: pid, song_id: sid)
       halt 404 if ps.nil?
       song = Song[sid]
-      to_song_data(song).merge({ weight: ps.weight })
+      halt 404 if song.nil?
+      song_to_hash(song).merge({ weight: ps.weight })
     end
 
     put '/:id/songs/:sid' do

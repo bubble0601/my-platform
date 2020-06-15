@@ -24,6 +24,7 @@ export default {
         rate: 'レート',
         time: '時間',
         year: '年',
+        weight: 'Weight',
       },
     },
   },

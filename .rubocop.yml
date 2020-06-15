@@ -10,26 +10,52 @@ Layout/LineLength:
 Layout/SpaceBeforeBlockBraces:
   EnforcedStyle: no_space
 
+Lint/UnderscorePrefixedVariableName:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 30
+  Exclude:
+    - 'tests/**/*'
+Metrics/CyclomaticComplexity:
+  Max: 15
+Metrics/PerceivedComplexity:
+  Max: 15
 Metrics/ClassLength:
   Enabled: false
 Metrics/ModuleLength:
   Enabled: false
 Metrics/MethodLength:
-  Enabled: false
+  Max: 30
+  Exclude:
+    - 'tests/**/*'
 Metrics/BlockLength:
-  Enabled: false
+  Max: 30
+  Exclude:
+    - 'routes/**/*'
+
+Naming/MethodParameterName:
+  MinNameLength: 2
 
 Style/AsciiComments:
+  Enabled: false
+Style/ConditionalAssignment:
   Enabled: false
 Style/Documentation:
   Enabled: false
 Style/FrozenStringLiteralComment:
   Enabled: false
+Style/GuardClause:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
 Style/MethodCallWithArgsParentheses:
   IgnoredMethods: ['require', 'p', 'puts', 'print']
+Style/NumericLiterals:
+  MinDigits: 7
 Style/NumericPredicate:
+  Enabled: false
+Style/RedundantSelf:
   Enabled: false
 Style/Semicolon:
   AllowAsExpressionSeparator: true

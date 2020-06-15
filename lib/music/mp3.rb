@@ -1,222 +1,206 @@
-require 'pycall/import'
+require_relative 'audio'
 
-module PyMP3
-  extend PyCall::Import
-  pyfrom 'mutagen.id3', import: %i[ID3 Encoding Frame Frames PictureType ID3FileType]
-  pyfrom 'mutagen.mp3', import: [:MP3]
-end
-
-class MP3
-  def initialize(filename)
-    @filename = filename
-    @mp3 = PyMP3::MP3.new(filename)
-  end
-
-  def tags
-    @tags ||= ID3.new(@filename)
-  end
-
-  def length
-    @mp3.info.length
-  end
-
-  def methods_missing(name, *args)
-    @mp3.method(name).call(*args)
-  end
-end
-
-class ID3
-  @@keys = {}
-  @@tags = {}
-
-  def self.register_key(key, tag, getter, setter, deleter = nil)
-    deleter ||= proc do |id3|
-      id3.delall(tag)
-    end
-    @@keys[key] = tag
-    @@tags[tag] = {
-      get: getter,
-      set: setter,
-      del: deleter,
-    }
-  end
-
-  def self.register_text_key(key, tag)
-    get = proc do |id3|
-      values = id3.getall(tag)
-      if values.length.zero?
+module ID3
+  include AudioTags
+  class << self
+    def to_text_frame(tag, value)
+      case value
+      when Mutagen::Frame
+        value.encoding ||= Mutagen::Encoding.UTF8
+        value
+      when String
+        Mutagen::Frames[tag].new(encoding: Mutagen::Encoding.UTF8, text: [value])
+      when nil
         nil
-      elsif values.length == 1
-        values[0].text[0].to_s
       else
-        raise
+        raise ArgumentError
       end
     end
-    set = proc do |id3, value|
-      if value.is_a?(PyMP3::Frame)
-        value.encoding = PyMP3::Encoding.UTF8
-        id3.setall(tag, [value])
-      else
-        id3.setall(tag, [PyMP3::Frames[tag].new(encoding: PyMP3::Encoding.UTF8, text: [value])])
+
+    def define_text_tags(**tags)
+      tags.each do |key, tag|
+        # get
+        define_method(key) do
+          self[tag].to_s
+        rescue PyCall::PyError
+          nil
+        end
+        # set/del
+        define_method(:"#{key}=") do |value|
+          frame = ID3.to_text_frame(tag, value)
+          if frame
+            setall(tag, [frame])
+          else
+            delall(tag)
+          end
+        end
       end
     end
-    del = proc do |id3|
-      id3.delall(tag)
+  end
+
+  def v2_version
+    version[0] == 2 ? version[1] : nil
+  end
+
+  def convert_to_utf8
+    each do |tag, frame|
+      next unless frame.respond_to?(:encoding)
+      next if frame.encoding == Mutagen::Encoding.UTF8
+
+      frame.encoding = Mutagen::Encoding.UTF8
+      self[tag] = frame
     end
-    @@keys[key] = tag
-    @@tags[tag] = {
-      get: get,
-      set: set,
-      del: del,
+  end
+
+  def delete(key)
+    delall(key)
+  end
+
+  def type
+    case version[0]
+    when 1
+      'ID3v1'
+    when 2
+      "ID3v2.#{version[1]}"
+    end
+  end
+
+  define_text_tags  title: 'TIT2',
+                    artist: 'TPE1',
+                    artist_sort: 'TSOP',
+                    album: 'TALB',
+                    album_artist: 'TPE2',
+                    album_artist_sort: 'TSO2', # iTunes extension
+                    track: 'TRCK',
+                    disc: 'TPOS',
+                    genre: 'TCON'
+
+  def year_frame_id
+    case v2_version
+    when 4 then 'TDRC'
+    when 3 then 'TYER'
+    else raise NotImplementedError
+    end
+  end
+
+  def year
+    begin
+      self[year_frame_id].to_s
+    rescue PyCall::PyError
+      another = year_frame_id == 'TDRC' ? 'TYER' : 'TDRC'
+      self[another].to_s
+    end
+  rescue PyCall::PyError
+    nil
+  end
+
+  def year=(value)
+    frame = ID3.to_text_frame(year_frame_id, value)
+    if frame
+      setall(year_frame_id, [frame])
+    else
+      delall(year_tag)
+    end
+  end
+
+  def guess_lang(text)
+    return 'jpn' if /[亜-熙ぁ-んァ-ヶ]/.match?(text)
+
+    'eng'
+  end
+
+  def lyrics
+    getall('USLT')[0].to_s
+  rescue PyCall::PyError
+    nil
+  end
+
+  def lyrics=(value)
+    if value.nil?
+      delall('USLT')
+      return
+    end
+
+    case value
+    when Mutagen::Frames::USLT
+      value.encoding ||= Mutagen::Encoding.UTF8
+      frame = value
+    when Hash
+      lang = value[:lang] || guess_lang(value[:text])
+      frame = Mutagen::Frames::USLT.new(encoding: Mutagen::Encoding.UTF8, lang: lang, text: value[:text])
+    when String
+      lang = guess_lang(value)
+      frame = Mutagen::Frames::USLT.new(encoding: Mutagen::Encoding.UTF8, lang: lang, text: value)
+    else
+      raise ArgumentError
+    end
+    setall('USLT', [frame])
+  end
+
+  def picture
+    pic = getall('APIC')[0]
+    pyblt = PyCall.builtins
+    if pyblt.type(pic.mime) == pyblt.bytes
+      pic.mime = pic.mime.decode('utf-8')
+    end
+    {
+      mime: pic.mime,
+      data: pic.data,
     }
+  rescue PyCall::PyError
+    nil
   end
 
-  def initialize(filename)
-    @id3 = PyMP3::ID3.new(filename)
-  end
-
-  def get_all(convert = false)
-    items = @id3.items.to_h
-    return items unless convert
-
-    items.transform_keys{ |k| k[0...4] }.map{ |k, v| @@tags[k] ? [k, @@tags[k][:get].call(@id3)] : [k, v] }.to_h
-  end
-
-  def each
-    get_all(true).to_enum.each{ |*args| yield(*args) } if block_given?
-    get_all(true).to_enum
-  end
-
-  def delete_tag(tag)
-    @id3.delall(tag)
-  end
-
-  def to_utf8
-    get_all.each do |key, value|
-      next if !value.respond_to?('encoding') || value.encoding == PyMP3::Encoding.UTF8
-
-      tag = key[0...4]
-      if @@tags[tag]
-        @@tags[tag][:set].call(@id3, value)
-      else
-        values = @id3.getall(tag)
-        values = values.map{ |v| v.encoding = PyMP3::Encoding.UTF8; v }
-        @id3.setall(tag, values)
-      end
-    rescue StandardError => e
-      p key, value
-      raise e
+  def picture=(value)
+    if value.nil?
+      delall('APIC')
+      return
     end
-    @id3
-  end
 
-  def [](key)
-    if @@tags[key]
-      @@tags[key][:get].call(@id3)
+    case value
+    when Mutagen::Frames::APIC
+      value.encoding ||= Mutagen::Encoding.UTF8
+      value.type ||= Mutagen::PictureType.COVER_FRONT
+      frame = value
+    when Hash
+      frame = Mutagen::Frames::APIC.new(
+        encoding: Mutagen::Encoding.UTF8,
+        mime: value[:mime],
+        type: Mutagen::PictureType.COVER_FRONT,
+        desc: 'Cover',
+        data: value[:data]
+      )
     else
-      method_missing(:[], key)
+      raise ArgumentError
     end
-  end
-
-  def []=(key, value)
-    if @@tags[key]
-      if value
-        @@tags[key][:set].call(@id3, value)
-      else
-        @@tags[key][:del].call(@id3)
-      end
-    elsif key.length == 4 && value.nil?
-      @id3.delall(key)
-    else
-      method_missing(:[]=, key, value)
-    end
-  end
-
-  def method_missing(name, *args)
-    mode = :get
-    key = name.to_sym
-    if name[-1] == '='
-      mode = :set
-      mode = :del unless args[0]
-      key = name[0...-1].to_sym
-    end
-    if (tag = @@keys[key])
-      @@tags[tag][mode].call(@id3, *args)
-    elsif @id3.respond_to?(name)
-      @id3.method(name).call(*args)
-    else
-      super
-    end
-  end
-
-  def respond_to_missing?(name)
-    key = name.to_sym
-    key = name[0...-1].to_sym if name[-1] == '='
-
-    return true unless @@keys[key].nil?
-    return true if @id3.respond_to?(name)
-
-    super
+    setall('APIC', [frame])
   end
 end
 
-{
-  title: 'TIT2',
-  album: 'TALB',
-  artist: 'TPE1',
-  album_artist: 'TPE2',
-  album_artist_sort: 'TSO2', # iTunes extension
-  track: 'TRCK',
-  disc: 'TPOS',
-  year: 'TDRC',
-}.each do |key, tag|
-  ID3.register_text_key(key, tag)
-end
+class MP3 < Audio
+  def initialize(path)
+    @path = path
+    @audio = Mutagen::MP3.new(path)
+    @tags = @audio.tags
+    return unless @tags
 
-def lyrics_set(id3, value)
-  if value.is_a?(PyMP3::Frame)
-    value.encoding = PyMP3::Encoding.UTF8
-    id3.setall('USLT', [value])
-  else
-    lang = nil
-    text = value
-    if value.is_a?(Hash)
-      lang = value[:lang]
-      text = value[:text]
+    @tags.extend ID3
+    raise NotImplementedError unless @tags.v2_version
+  end
+
+  def add_tags
+    @audio.add_tags(Mutagen::ID3)
+    @tags = @audio.tags
+    @tags.extend ID3
+  end
+
+  def codec_info
+    encode_info = info.bitrate_mode.to_s.split('.')[-1]
+    if info.bitrate_mode == Mutagen::BitrateMode.UNKNOWN
+      encode_info = 'CBR?'
     end
-    unless lang
-      lang = 'eng'
-      lang = 'jpn' if /[亜-熙ぁ-んァ-ヶ]/.match?(text)
-    end
-    id3.setall('USLT', [PyMP3::Frames['USLT'].new(encoding: PyMP3::Encoding.UTF8, lang: lang, text: text)])
+    # encode_info += ", #{info.encoder_info}" if info.encoder_info
+    # encode_info += ", #{info.encoder_settings}" if info.encoder_settings
+    "MPEG #{info.version} layer #{info.layer} / #{encode_info}"
   end
 end
-
-ID3.register_key(:lyrics, 'USLT', ->(id3){ id3.getall('USLT')[0].text }, method(:lyrics_set))
-
-def picture_get(id3)
-  id3.getall('APIC').map do |apic|
-    def apic.inspect
-      "APIC(encoding=#{encoding.__repr__}, mime='#{mime}', type=#{type.__repr__}, desc='#{desc}', data=<#{data.length} bytes>)"
-    end
-    apic
-  end
-end
-
-def picture_set(id3, value)
-  if value.is_a?(PyMP3::Frames['APIC'])
-    value.encoding = PyMP3::Encoding.UTF8
-    value.type = PyMP3::PictureType.COVER_FRONT
-    id3.setall('APIC', [value])
-  else
-    apic = PyMP3::Frames['APIC'].new(
-      encoding: PyMP3::Encoding.UTF8,
-      mime: value[:mime],
-      type: PyMP3::PictureType.COVER_FRONT,
-      data: value[:data]
-    )
-    id3.setall('APIC', [apic])
-  end
-end
-
-ID3.register_key(:picture, 'APIC', method(:picture_get), method(:picture_set))

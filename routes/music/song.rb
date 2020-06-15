@@ -1,44 +1,48 @@
 class MainApp
   namespace '/api/music/songs' do
     helpers do
-      def to_col(field)
-        case field
-        when 'title' then Sequel[:songs][:title]
-        when 'artist' then :artist_name
-        when 'album' then Sequel[:albums][:title]
-        when 'album_artist' then Sequel[:artists][:name]
-        else field.to_sym
-        end
+      def fetch_song(id)
+        song = Song[id.to_i]
+        halt 404, 'The requested resource is not found' if song.nil?
+        song
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def rule_to_query(rule)
-        case rule[:field]
-        when 'title', 'artist', 'album', 'album_artist'
-          col = to_col(rule[:field])
-          case rule[:operator]
-          when 'include'
-            Sequel.ilike(col, "%#{rule[:value].escape_like}%")
-          when 'prefix'
-            Sequel.ilike(col, "#{rule[:value].escape_like}%")
-          when 'postfix'
-            Sequel.ilike(col, "%#{rule[:value].escape_like}")
-          when 'match'
-            { col => rule[:value] }
+      def download_new_song
+        now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
+        path = youtube_dl(@json[:url], "#{CONF.storage.temp}/temp#{now}")
+        TagUtil.set_tags(path, @json[:metadata])
+        new_song = Song.create_from_file(path)
+        unless new_song
+          logger.warn "The downloaded song already exists: #{@json[:url]}"
+          return nil
+        end
+        return 200, song_to_hash(new_song) if new_song
+      end
+
+      def upload_new_song
+        metadata = params[:data]&.parse_json
+        files = params[:file].is_a?(Array) ? params[:file] : [params[:file]]
+
+        results = []
+        files.each do |f|
+          begin
+            TagUtil.set_tags(f[:tempfile].path, metadata) if metadata
+          rescue NotImplementedError
+            logger.error "The uploaded song format is unsupported or incorrect: #{f[:filename]}"
+            results.push(nil)
+            next
           end
-        when 'rate'
-          raise ArgumentError unless %w[= <= >=].include?(rule[:operator])
 
-          Sequel.lit("rate #{rule[:operator]} ?", rule[:value])
-        when 'created_at'
-          raise ArgumentError unless rule[:value].numeric?
-
-          Sequel.lit('DATE_ADD(songs.created_at, INTERVAL ? DAY) > NOW()', rule[:value])
-        else
-          raise ArgumentError
+          new_song = Song.create_from_file(f[:tempfile].path, f[:filename])
+          if new_song
+            results.push(song_to_hash(new_song))
+          else
+            logger.warn "The uploaded song already exists: #{f[:filename]}"
+            results.push(nil)
+          end
         end
+        [200, results]
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
     end
 
     get '' do
@@ -62,97 +66,98 @@ class MainApp
         query = query.order_prepend(order)
       end
       query = query.limit(params[:limit].to_i) if params[:limit]
-      query.map(&method(:to_song_data))
+      query.map(&method(:song_to_hash))
     rescue ArgumentError
       halt 400, 'Invalid arguments'
     end
 
     post '' do
       if @json # from media url
-        now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
-        path = "#{CONF.storage.temp}/temp#{now}"
-        output = "#{path}.%(ext)s"
-        path += '.mp3'
-        youtube_dl(@json[:url], output)
-        p path, @json[:metadata]
-        Song.set_tags(path, @json[:metadata])
-        res = Song.create_from_file(path)
-        logger.warn "The downloaded song already exists: #{@json[:url]}" unless res
-        return 200, to_song_data(res) if res
+        download_new_song
       else # upload file
-        metadata = params[:data] ? JSON.parse(params[:data], symbolize_names: true) : nil
-        case params[:file]
-        when Array
-          results = []
-          params[:file].each do |f|
-            break unless f[:filename].end_with?('.mp3')
-
-            Song.set_tags(f[:tempfile].path, metadata)
-            res = Song.create_from_file(f[:tempfile].path, f[:filename])
-            if res
-              results.push(to_song_data(res))
-            else
-              logger.warn "The uploaded song already exists: #{f[:filename]}"
-              results.push(nil)
-            end
-          end
-          return 200, results
-        else
-          f = params[:file]
-          Song.set_tags(f[:tempfile].path, metadata)
-          res = Song.create_from_file(f[:tempfile].path, f[:filename])
-          logger.warn "The uploaded song already exists: #{f[:filename]}" unless res
-          return 200, [to_song_data(res)] if res
-        end
+        upload_new_song
       end
-      status 204
     end
 
     get '/:id' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
-      to_song_data(song)
+      song = fetch_song(params[:id])
+      song_to_hash(song)
     end
 
     put '/:id' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
+      song = fetch_song(params[:id])
       song.update(@json)
       status 204
     end
 
     put '/:id/file' do
-      song = Song[params[:id].to_i]
-      path = "#{CONF.storage.temp}/#{song[:digest]}.mp3"
-      song.replace_file(path)
+      song = fetch_song(params[:id])
+      halt 400 unless session[:music_edit_path]
+      song.replace_file(session[:music_edit_path])
+      session[:music_edit_path] = nil
       status 204
     end
 
+    get '/:id/metadata' do
+      song = fetch_song(params[:id])
+      audio = Audio.load(song.path)
+      info = audio.info
+      tags = audio.tags
+      res_format = {
+        codec: audio.codec_info,
+        length: info.length,
+        bitrate: info.bitrate,
+        sample_rate: info.sample_rate,
+        channels: info.channels,
+        tag_type: tags.type,
+      }
+
+      res_tags = {
+        title: tags.title,
+        artist: tags.artist,
+        album: tags.album,
+        album_artist: tags.album_artist,
+        track: tags.track,
+        disc: tags.disc,
+        year: tags.year,
+        lyrics: tags.lyrics,
+      }
+      if (pic = tags.picture)
+        cover_ext = case pic[:mime]
+                    when /jpeg/ then 'jpg'
+                    when /png/ then 'png'
+                    end
+        res_tags[:cover_art_url] = "/static/music/#{song.digest}/cover.#{cover_ext}"
+      end
+      {
+        format: res_format,
+        tags: res_tags,
+      }
+    end
+
     put '/:id/tag' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
-      song.update_tag(@json.transform_keys(&:to_s))
+      song = fetch_song(params[:id])
+      TagUtil.set_tags(song.path, @json)
+      # TagUtil.delete_tags(song.path, @json[:other_tags_to_delete])
+      song.regenerate
       status 204
     end
 
     put '/:id/lyrics' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
+      song = fetch_song(params[:id])
       song.update_lyrics(@json[:lyrics])
       status 204
     end
 
     put '/:id/artwork' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
+      song = fetch_song(params[:id])
       response = get_response(@json[:artwork])
       song.update_artwork(response['Content-Type'], response.body)
       status 204
     end
 
     put '/:id/albumartwork' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
+      song = fetch_song(params[:id])
       response = get_response(@json[:artwork])
       if song.album.nil?
         song.update_artwork(response['Content-Type'], response.body)
@@ -161,14 +166,12 @@ class MainApp
         res = song.album.songs.each do |s|
           s.update_artwork(response['Content-Type'], response.body)
         end
-        res.map!{ |s| s[:id] }
-        return 200, res
+        return 200, res.map!{ |s| s[:id] }
       end
     end
 
     delete '/:id' do
-      song = Song[params[:id].to_i]
-      halt 404, 'The requested resource not found' if song.nil?
+      song = fetch_song(params[:id])
       song.delete
       status 204
     end

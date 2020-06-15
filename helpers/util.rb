@@ -4,6 +4,7 @@ require 'fileutils'
 require 'json'
 require 'net/http'
 require 'nokogiri'
+require 'tempfile'
 
 module UtilityHelpers
   def env
@@ -12,6 +13,28 @@ module UtilityHelpers
         mac: RUBY_PLATFORM =~ /(darwin|mac os)/,
       },
     }
+  end
+
+  def async_exec
+    raise ArgumentError unless block_given?
+
+    Thread.new{ yield }
+  end
+
+  def exec_command(cmd)
+    cmd = cmd.map(&:shellescape).join(' ') if cmd.is_a?(Array)
+    out = `#{cmd}`
+    unless $CHILD_STATUS.success?
+      logger.error "An error ocurred when execute `#{cmd}`"
+      logger.error out
+      raise "An error ocurred when execute `#{cmd}`"
+    end
+    out
+  end
+
+  def child_path?(parent, path)
+    parent = File.absolute_path(parent)
+    File.absolute_path(path).start_with?(parent)
   end
 
   def get_response(url, headers = nil, limit = 10)
@@ -47,27 +70,5 @@ module UtilityHelpers
 
   def get_json(url, headers = nil)
     JSON.parse(get_response(url, headers).body)
-  end
-
-  def async_exec
-    raise ArgumentError unless block_given?
-
-    Thread.new{ yield }
-  end
-
-  def exec_command(cmd)
-    cmd = cmd.map(&:shellescape).join(' ') if cmd.is_a?(Array)
-    out = `#{cmd}`
-    unless $CHILD_STATUS.success?
-      logger.error "An error ocurred when execute `#{cmd}`"
-      logger.error out
-      raise "An error ocurred when execute `#{cmd}`"
-    end
-    out
-  end
-
-  def child_path?(parent, path)
-    parent = File.absolute_path(parent)
-    File.absolute_path(path).start_with?(parent)
   end
 end

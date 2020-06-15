@@ -155,13 +155,13 @@ module Artwork
     results
   end
 
-  def search_genius(results, title, artist)
-    q = [title, artist].filter(&:itself).join(' ')
-    url = 'https://api.genius.com/search?' + URI.encode_www_form(q: q)
-    json = get_json(url, { 'Authorization': "Bearer #{CONF.app.genius_access_token}" })
-    images = json['response']['hits'].map{ |h| h['result']['header_image_thumbnail_url'] }
-    results.push(*images)
-  end
+  # def search_genius(results, title, artist)
+  #   q = [title, artist].filter(&:itself).join(' ')
+  #   url = 'https://api.genius.com/search?' + URI.encode_www_form(q: q)
+  #   json = get_json(url, { 'Authorization': "Bearer #{CONF.app.genius_access_token}" })
+  #   images = json['response']['hits'].map{ |h| h['result']['header_image_thumbnail_url'] }
+  #   results.push(*images)
+  # end
 
   # def search_google(results, title, artist)
   #   q = [title, artist].filter(&:itself).join(' ')

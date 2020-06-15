@@ -1,17 +1,17 @@
 require_relative '../init'
 
 class MusicTest < TestBase
-  def test_to_filename
+  def test_generate_filename
     song = Song.create(title: 'test song', filename: 'test song.mp3', digest: 'a62d12e', length: 420)
-    assert song.to_filename == 'Unknown Artist/Unknown Album/test song.mp3'
+    assert song.generate_filename == 'Unknown Artist/Unknown Album/test song.mp3'
 
     artist = Artist.create(name: 'test artist')
     album = Album.create(title: 'test*album', artist: artist)
     song.update(artist: artist, album: album)
-    assert song.to_filename == 'test artist/test album/test song.mp3'
+    assert song.generate_filename == 'test artist/test album/test song.mp3'
 
     song.update(track_num: 5)
-    assert song.to_filename == 'test artist/test album/05 test song.mp3'
+    assert song.generate_filename == 'test artist/test album/05 test song.mp3'
 
     p song.artist
   end

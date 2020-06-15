@@ -24,6 +24,27 @@ export interface Rule {
   value: string | number;
 }
 
+export interface Metadata {
+  format: {
+    codec: string;
+    length: number;
+    bitrate: string;
+    sample_rate: string;
+    channels: string;
+  };
+  tags: {
+    title: string | null;
+    artist: string | null;
+    album: string | null;
+    album_artist: string | null;
+    track: string | null;
+    disc: string | null;
+    year: string | null;
+    lyrics: string | null;
+    cover_art_url: string | null;
+  };
+}
+
 export interface Album {
   id: number;
   title: string;
@@ -65,6 +86,7 @@ const api = {
   fetchSongs: (params: Dictionary<any> = {}) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
+  fetchMetadata: (id: number) => axios.get<Metadata>(`/api/music/songs/${id}/metadata`),
 
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dictionary<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
@@ -102,8 +124,11 @@ export default class MusicModule extends VuexModule {
   public current: Song | null = null;
   public audioData: Blob | null = null;
   public audioSrc: string | null = null;
+  public audioMetadata: Metadata | null = null;
+  private prefetching = false;
   public nextSong: Song | null = null;
   public nextAudio: Blob | null = null;
+  public nextMetadata: Metadata | null = null;
   public queue: Song[] = [];
   public queueSet: Song[] = [];
   public history: Song[] = [];
@@ -216,7 +241,17 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private SET_NEXT(data: { song: Song, audio: Blob | null}) {
+  private SET_METADATA(data: Metadata | null) {
+    this.audioMetadata = data;
+  }
+
+  @Mutation
+  private SET_PREFETCHING(data: boolean) {
+    this.prefetching = data;
+  }
+
+  @Mutation
+  private SET_NEXT(data: { song: Song, audio: Blob, metadata: Metadata }) {
     this.nextSong = data.song;
     this.nextAudio = data.audio;
   }
@@ -466,35 +501,44 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public FetchAudio(song: Song) {
-    return api.fetchAudio(song);
+  public async FetchAudio(song: Song) {
+    const results = await Promise.all([
+      api.fetchAudio(song),
+      api.fetchMetadata(song.id),
+    ]);
+    return {
+      audio: results[0].data,
+      meta: results[1].data,
+    };
   }
 
   @Action
   public async FetchAudioForPlay(song: Song) {
     if (!song) return;
-    if (song === this.nextSong && this.nextAudio) {
+    if (song === this.nextSong) {
       this.SET_AUDIO(this.nextAudio);
+      this.SET_METADATA(this.nextMetadata);
       return;
     }
     this.SET_AUDIO(null);
-    const res = await api.fetchAudio(song).catch(this.playing ? this.PlayNext : null);
+    this.SET_METADATA(null);
+    const res = await this.FetchAudio(song).catch(this.playing ? this.PlayNext : null);
     if (res) {
-      this.SET_AUDIO(res.data);
+      this.SET_AUDIO(res.audio);
+      this.SET_METADATA(res.meta);
     }
   }
 
   @Action
   public async Prefetch() {
+    if (this.prefetching) return;
     if (this.repeat === REPEAT.ONE || this.queue.length === 0) return;
     const next = this.queue[0];
     if (next === this.nextSong) return;
-    const res = await api.fetchAudio(next).catch(() => {
-      this.SET_NEXT({ song: next, audio: null });
-    });
-    if (res) {
-      this.SET_NEXT({ song: next, audio: res.data });
-    }
+    this.SET_PREFETCHING(true);
+    const res = await this.FetchAudio(next);
+    this.SET_NEXT({ song: next, audio: res.audio, metadata: res.meta });
+    this.SET_PREFETCHING(false);
   }
 
   /* Player controls */
@@ -566,6 +610,7 @@ export default class MusicModule extends VuexModule {
     } else {
       this.SET_CURRENT(null);
       this.SET_AUDIO(null);
+      this.SET_METADATA(null);
     }
   }
 

@@ -8,8 +8,8 @@
     <div class="flex-grow-1 bg-white overflow-auto px-2">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
-          <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
-          <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
+          <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" class="shadow"/>
+          <img v-else src="@/assets/default_cover_art.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
         <div v-if="song">
           <rate :value="song.rate" :size="1.5" class="justify-content-center" @input="updateRate"/>
@@ -61,15 +61,15 @@
           <dt>Created date</dt>
           <dd>{{ song.created_at }}</dd>
           <dt>File size</dt>
-          <dd>{{ filesize ? filesize : '&nbsp;' }}</dd>
+          <dd>{{ filesize || '&nbsp;' }}</dd>
           <dt>Codec</dt>
-          <dd>{{ format.codec }} / {{ format.codecProfile }}</dd>
+          <dd>{{ format.codec }}</dd>
           <dt>Bitrate</dt>
           <dd>{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
           <dt>Sampling rate</dt>
-          <dd>{{ format.sampleRate ? `${format.sampleRate / 1000}kHz` : '&nbsp;' }}</dd>
+          <dd>{{ format.sample_rate ? `${format.sample_rate / 1000}kHz` : '&nbsp;' }}</dd>
           <dt>Tag types</dt>
-          <dd>{{ format.tagTypes ? format.tagTypes.join(', ') : '&nbsp;' }}</dd>
+          <dd>{{ format.tag_type || '&nbsp;' }}</dd>
         </dl>
         <div class="mt-1">
           <b-dropdown split variant="success" text="Edit" @click="editSong()">
@@ -88,7 +88,6 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
-import * as mm from 'music-metadata-browser';
 import { Dictionary, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
@@ -111,9 +110,6 @@ export default class PlayerInfo extends Vue {
       { key: 'queue', title: 'Queue' },
       { key: 'info', title: 'Info' },
   ];
-  private tag: mm.IAudioMetadata | null = null;
-
-  private artwork: string | null = null;
 
   private queue: Song[] = [];
   private dragging: { index: number, song: Song } | null = null;
@@ -126,26 +122,13 @@ export default class PlayerInfo extends Vue {
     return musicModule.audioData;
   }
 
+  get metadata() {
+    return musicModule.audioMetadata;
+  }
+
   // TODO: load on scroll
   get partQueue() {
     return this.queue.slice(0, 100);
-  }
-
-  get id3Version() {
-    if (this.tag) {
-      if (this.tag.native['ID3v2.4']) return 'ID3v2.4';
-      else if (this.tag.native['ID3v2.3']) return 'ID3v2.3';
-    }
-    return null;
-  }
-
-  get lyrics() {
-    if (this.tag && this.id3Version) {
-      const uslt = find(this.tag.native[this.id3Version], { id: 'USLT' });
-      if (uslt) {
-        return uslt.value.text;
-      }
-    }
   }
 
   get realQueue() {
@@ -153,15 +136,29 @@ export default class PlayerInfo extends Vue {
   }
 
   get format() {
-    if (this.tag) {
-      return this.tag.format;
+    if (this.metadata) {
+      return this.metadata.format;
     }
     return {};
   }
 
+  get coverArtUrl() {
+    if (this.metadata) {
+      return this.metadata.tags.cover_art_url;
+    }
+    return null;
+  }
+
+  get lyrics() {
+    if (this.metadata) {
+      return this.metadata.tags.lyrics;
+    }
+    return null;
+  }
+
   get duration() {
-    if (this.tag?.format.duration) {
-      const d = Math.floor(this.tag.format.duration);
+    if (this.metadata) {
+      const d = Math.floor(this.metadata.format.length);
       return formatTime(d);
     }
   }
@@ -174,44 +171,12 @@ export default class PlayerInfo extends Vue {
 
   @Ref() private songInfoDialog!: SongInfoDialog;
 
-  @Watch('audioData')
-  private onDataChanged() {
-    if (this.audioData) {
-      mm.parseBlob(this.audioData).then((metadata) => {
-        this.tag = metadata;
-      }).catch(() => {
-        musicModule.SET_CURRENT(null);
-      });
-    } else {
-      this.tag = null;
-    }
-  }
-
   @Watch('realQueue', { immediate: true })
   private onQueueChanged() {
     this.queue = clone(this.realQueue);
   }
 
-  @Watch('tag')
-  private onTagUpdated(tag: mm.IAudioMetadata | null) {
-    if (this.tag && this.id3Version) {
-      const art = find(this.tag.native[this.id3Version], { id: 'APIC' });
-      if (art) {
-        const type = art.value.format.includes('image/jpeg') ? 'image/jpeg' : 'image/png';
-        const blob = new Blob([art.value.data], { type });
-        const oURL = URL.createObjectURL(blob);
-        this.artwork = oURL;
-        return;
-      }
-    }
-    this.artwork = null;
-  }
-
   // Song
-  private onLoadArtworkError() {
-    this.artwork = null;
-  }
-
   private async updateRate(val: number) {
     if (!this.song) return;
     const id = this.song.id;

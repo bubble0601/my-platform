@@ -12,7 +12,7 @@ class MainApp
       if request.content_type
         ctype = request.content_type.split(';')[0].downcase
         if %w[json javascript].any?{ |x| ctype.include?(x) }
-          @json = JSON.parse(request.body.read, symbolize_names: true)
+          @json = request.body.read.parse_json
         end
       end
     end
@@ -23,8 +23,12 @@ class MainApp
 
   # Sinatra will check if a static file exists in public folder and serve it before checking for a matching route.
   not_found do
-    if @is_api || request.path.start_with?('/static')
+    if @is_api
+      return if @response
+
       halt 404, 'Not found'
+    elsif request.path.start_with?('/static')
+      halt 404
     else
       send_file './static/index.html'
     end

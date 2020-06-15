@@ -171,7 +171,7 @@
                     <b-icon icon="play"/>
                     <span v-if="$pc">Play</span>
                   </b-button>
-                  <b-button size="sm" variant="success" class="ml-2" @click="edit(u.songs[0])">
+                  <b-button size="sm" variant="success" class="ml-2" @click="edit(u, 0)">
                     <b-icon icon="pencil"/>
                     <span v-if="$pc">Edit</span>
                   </b-button>
@@ -376,8 +376,6 @@ export default class NewSong extends Vue {
       url: status.url,
       metadata: status.metadata,
     }).then((res) => {
-      musicModule.ReloadSongs();
-      musicModule.FetchArtists();
       if (res.data) {
         status.status = Status.Success;
         status.song = res.data;

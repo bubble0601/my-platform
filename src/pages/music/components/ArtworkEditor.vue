@@ -3,8 +3,8 @@
     <h5>Artwork</h5>
     <div id="artwork-search">
       <div class="py-3">
-        <b-img v-if="artwork" :src="artwork" width="128" class="shadow" @error="onLoadArtworkError"/>
-        <img v-else src="@/assets/default_artwork.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
+        <b-img v-if="metadata.tags.cover_art_url" :src="metadata.tags.cover_art_url" width="128" class="shadow"/>
+        <img v-else src="@/assets/default_cover_art.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
       </div>
       <div class="d-md-flex">
         <b-input v-model.trim="title" placeholder="Title"/>
@@ -51,7 +51,6 @@ export default class ArtworkEditor extends Vue {
   @Prop({ type: Object, default: null })
   private metadata!: IAudioMetadata | null;
 
-  private artwork: string | null = null;
   private title = '';
   private album = '';
   private artist = '';
@@ -79,33 +78,11 @@ export default class ArtworkEditor extends Vue {
     else this.setQueries();
   }
 
-  @Watch('metadata', { immediate: true })
-  private onMetadataChanged() {
-    this.setArtwork();
-  }
-
-  private setArtwork() {
-    if (this.metadata && this.id3Version) {
-      const apic = find(this.metadata.native[this.id3Version], { id: 'APIC' });
-      if (apic) {
-        const blob = new Blob([apic.value.data], { type: apic.value.format });
-        const oURL = URL.createObjectURL(blob);
-        this.artwork = oURL;
-      } else {
-        this.artwork = null;
-      }
-    }
-  }
-
   private setQueries() {
     if (this.song.album.id) this.album = this.song.album.title;
     else this.album = '';
     this.title = this.song.title;
     this.artist = this.song.album.artist || this.song.artist.name;
-  }
-
-  private onLoadArtworkError() {
-    this.artwork = null;
   }
 
   private async searchArtwork() {
@@ -133,7 +110,6 @@ export default class ArtworkEditor extends Vue {
     this.selected = null;
     this.searchCount = 0;
     this.searchResults = [];
-    this.setArtwork();
     this.setQueries();
   }
 

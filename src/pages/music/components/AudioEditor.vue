@@ -83,7 +83,6 @@ export default class AudioEditor extends Vue {
   private originalSrc!: string;
   private audioSrc!: string;
   private audioData!: Blob;
-  private metadata!: mm.IAudioMetadata;
   private duration: number = 0;
   private cutRange = [0, 0];
   private isDownload = true;
@@ -127,8 +126,8 @@ export default class AudioEditor extends Vue {
       this.audioData = this.data;
       this.audioSrc = this.originalSrc;
     }
-    this.metadata = await mm.parseBlob(this.audioData);
-    const d = floor(this.metadata.format.duration || 0, 1);
+    const metadata = await mm.parseBlob(this.audioData);
+    const d = floor(metadata.format.duration || 0, 1);
     if (d > this.duration) {
       this.duration = d;
       this.$nextTick(() => {
