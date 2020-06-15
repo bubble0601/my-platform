@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-container class="p-2">
+      <!-- rsync -->
       <b-row v-if="isLocal" class="mb-2">
         <b-col cols="3" md="2">
           <h5 class="mb-0">Sync</h5>
@@ -28,6 +29,7 @@
           </b-form-group>
         </b-col>
       </b-row>
+      <!-- scan -->
       <b-row v-if="isLocal" class="mb-2">
         <b-col cols="3" md="2">
           <h5 class="mb-0">Scan</h5>
@@ -39,7 +41,8 @@
           </b-button>
         </b-col>
       </b-row>
-      <b-row>
+      <!-- orgaanize -->
+      <b-row class="mb-2">
         <b-col cols="3" md="2">
           <h5 class="mb-0">Organize</h5>
         </b-col>
@@ -47,6 +50,18 @@
           <b-button variant="info" :disabled="organizing" @click="organize">
             <b-spinner v-if="organizing" small type="grow" class="mr-1"/>
             <span>Organize music directory</span>
+          </b-button>
+        </b-col>
+      </b-row>
+      <!-- normalize -->
+      <b-row>
+        <b-col cols="3" md="2">
+          <h5 class="mb-0">Normalize</h5>
+        </b-col>
+        <b-col>
+          <b-button variant="info" :disabled="normalizing" @click="normalize">
+            <b-spinner v-if="normalizing" small type="grow" class="mr-1"/>
+            <span>Normalize audio filename</span>
           </b-button>
         </b-col>
       </b-row>
@@ -89,6 +104,8 @@ export default class Settings extends Vue {
   private scanning = false;
 
   private organizing = false;
+
+  private normalizing = false;
 
   get isLocal() {
     return settingModule.isLocal;
@@ -220,6 +237,28 @@ export default class Settings extends Vue {
     };
     this.selectEndHandler = () => this.organizing = false;
     this.selectDialog.show();
+  }
+
+  private async normalize() {
+    this.normalizing = true;
+    const res1 = await axios.get<Array<{ current: string, to: string }>>('/api/music/tools/normalize').catch(() => {
+      this.normalizing = false;
+    });
+    if (!res1) return;
+
+    const message = res1.data.map((r) => `${r.current} => ${r.to}`).join('\n');
+    this.$confirm('Normalize filenames', message, { pre: true, variant: 'success', scrollable: true, okText: 'Run' }).then(async () => {
+      const res2 = await axios.post<Array<{ current: string, to: string }>>('/api/music/tools/normalize');
+      this.normalizing = false;
+      const h = this.$createElement;
+      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res2.data.map((r) => `${r.current} => ${r.to}`).join('\n')])], {
+        title: 'Completed',
+        variant: 'success',
+        solid: true,
+      });
+    }).catch(() => {
+      this.normalizing = false;
+    });
   }
 }
 </script>

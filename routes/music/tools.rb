@@ -195,6 +195,35 @@ class MainApp
       { results: results }
     end
 
+    get '/normalize' do
+      results = []
+      Song.each do |song|
+        old_path = song.path
+        new_filename = song.generate_filename
+        new_path = "#{CONF.storage.music}/#{new_filename}"
+        next if old_path == new_path
+
+        results.push({ current: old_path, to: new_path })
+      end
+      results
+    end
+
+    post '/normalize' do
+      results = []
+      Song.each do |song|
+        old_path = song.path
+        new_filename = song.generate_filename
+        new_path = "#{CONF.storage.music}/#{new_filename}"
+        next if old_path == new_path
+
+        FileUtils.mkdir_and_move(old_path, new_path)
+        song.filename = new_filename
+        song.save
+        results.push({ current: old_path, to: new_path })
+      end
+      results
+    end
+
     get '/organize' do
       files = {}
       deletes = []
