@@ -190,7 +190,7 @@ export default class Settings extends Vue {
 
   private async organize() {
     this.organizing = true;
-    const res1 = await axios.get<{ target_files: string[], target_dirs: string[] }>('/api/music/tools/organize').catch(() => {
+    const res1 = await axios.get<{ target_files: string[], target_dirs: string[], missing_files: string[] }>('/api/music/tools/organize').catch(() => {
       this.organizing = false;
     });
     if (!res1) return;
@@ -201,6 +201,12 @@ export default class Settings extends Vue {
       this.organizing = false;
       return;
     }
+
+    const h = this.$createElement;
+    this.$bvToast.toast(
+      [h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res1.data.missing_files.join('\n')])],
+      { title: 'Missing files', variant: 'warning', solid: true },
+    );
     this.selectItems = [
       { key: 'target_files', label: 'Delete file', options: d.target_files, selected: d.target_files  },
       { key: 'target_dirs', label: 'Delete directory', options: d.target_dirs, selected: d.target_dirs },
@@ -211,7 +217,6 @@ export default class Settings extends Vue {
         return;
       }
       const res2 = await axios.post<{ deleted_files: string[], deleted_dirs: string[] }>('/api/music/tools/organize', selected);
-      const h = this.$createElement;
       const vnode = h(
         'div',
         { style: 'max-height: 80vh; overflow-y: auto;' },
@@ -251,11 +256,10 @@ export default class Settings extends Vue {
       const res2 = await axios.post<Array<{ current: string, to: string }>>('/api/music/tools/normalize');
       this.normalizing = false;
       const h = this.$createElement;
-      this.$bvToast.toast([h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res2.data.map((r) => `${r.current} => ${r.to}`).join('\n')])], {
-        title: 'Completed',
-        variant: 'success',
-        solid: true,
-      });
+      this.$bvToast.toast(
+        [h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res2.data.map((r) => `${r.current} => ${r.to}`).join('\n')])],
+        { title: 'Completed', variant: 'success', solid: true },
+      );
     }).catch(() => {
       this.normalizing = false;
     });

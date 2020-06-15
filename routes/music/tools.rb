@@ -165,7 +165,7 @@ class MainApp
         files[f] = false
       end
       Song.each do |s|
-        path = s.to_fullpath
+        path = s.path
         files[path] = true unless files[path].nil?
       end
       targets = files.filter{ |_, v| v == false }.map{ |k, _| k }
@@ -197,7 +197,7 @@ class MainApp
 
     get '/normalize' do
       results = []
-      Song.each do |song|
+      Song.eager(:album, :artist).all.each do |song|
         old_path = song.path
         new_filename = song.generate_filename
         new_path = "#{CONF.storage.music}/#{new_filename}"
@@ -210,7 +210,7 @@ class MainApp
 
     post '/normalize' do
       results = []
-      Song.each do |song|
+      Song.eager(:album, :artist).all.each do |song|
         old_path = song.path
         new_filename = song.generate_filename
         new_path = "#{CONF.storage.music}/#{new_filename}"
@@ -236,7 +236,7 @@ class MainApp
         end
       end
       Song.each do |s|
-        path = s.to_fullpath
+        path = s.path
         if files[path].nil?
           missing_files.push(path)
         else
@@ -250,7 +250,7 @@ class MainApp
       {
         target_files: deletes,
         target_dirs: empty_dirs,
-        # missing_files: missing_files,
+        missing_files: missing_files,
       }
     end
 
