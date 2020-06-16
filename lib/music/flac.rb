@@ -1,4 +1,4 @@
-# flac is not supported on browser
+# flac is not supported on browser and filesize is too large
 
 require_relative 'audio'
 
