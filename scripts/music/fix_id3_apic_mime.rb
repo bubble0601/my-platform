@@ -31,10 +31,10 @@ Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
   if ARGV[0] == 'run'
     t.setall('APIC', [pic])
     t.save(f)
+    puts 'completed'
   end
 rescue => e
   p e
   next
 end
 
-puts 'completed'

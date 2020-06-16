@@ -123,11 +123,7 @@ class MainApp
         lyrics: tags.lyrics,
       }
       if (pic = tags.picture)
-        cover_ext = case pic[:mime]
-                    when /jpeg/ then 'jpg'
-                    when /png/ then 'png'
-                    end
-        res_tags[:cover_art_url] = "/static/music/#{song.digest}/cover.#{cover_ext}"
+        res_tags[:cover_art_url] = "/static/music/#{song.digest}/cover"
       end
       {
         format: res_format,
