@@ -137,10 +137,12 @@ class MainApp
 
     put '/:id/tag' do
       song = fetch_song(params[:id])
-      TagUtil.set_tags(song.path, @json)
+      errors = TagUtil.set_tags(song.path, @json)
       # TagUtil.delete_tags(song.path, @json[:other_tags_to_delete])
       song.regenerate
-      status 204
+      return 204 if errors.empty?
+
+      return 200, errors
     end
 
     put '/:id/lyrics' do

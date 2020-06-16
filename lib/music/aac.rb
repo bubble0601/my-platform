@@ -1,5 +1,7 @@
 require_relative 'audio'
 
+# aac has promblems with duration detection in browser(both audio element and music-metadata-browser)
+
 class AAC < Audio
   include AudioTags
   def initialize(path)

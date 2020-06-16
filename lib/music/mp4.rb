@@ -48,6 +48,10 @@ module MP4Tags
   end
 
   def track=(value)
+    if value.nil? || value.empty?
+      self['trkn'] = []
+      return
+    end
     r = value.split('/').map(&:to_i)
     raise ArgumentError unless r.length == 2
 
@@ -61,6 +65,10 @@ module MP4Tags
   end
 
   def disc=(value)
+    if value.nil? || value.empty?
+      self['disk'] = []
+      return
+    end
     r = value.split('/').map(&:to_i)
     raise ArgumentError unless r.length == 2
 
@@ -77,11 +85,15 @@ module MP4Tags
       mime: mime,
       data: PyCall::List.new(pic).to_a.pack('C*'),
     }
-  rescue PyCall::PyError => e
+  rescue PyCall::PyError
     nil
   end
 
   def picture=(value)
+    if value.nil?
+      self['covr'] = []
+      return
+    end
     case value[:mime]
     when 'image/jpeg'
       type = Mutagen::MP4Cover.FORMAT_JPEG

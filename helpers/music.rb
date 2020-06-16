@@ -27,8 +27,8 @@ module MusicHelpers
     case field
     when 'title' then Sequel[:songs][:title]
     when 'artist' then :artist_name
-    when 'album' then Sequel[:albums][:title]
-    when 'album_artist' then Sequel[:artists][:name]
+    when 'album' then Sequel[:album][:title]
+    when 'album_artist' then Sequel[:artist][:name]
     else field.to_sym
     end
   end
@@ -68,10 +68,13 @@ module MusicHelpers
       '-f', 'bestaudio',
       '--extract-audio',
       '--audio-format', fmt,
+    ]
+    cmd.push('--postprocessor-args "-acodec libfdk_aac"'.no_shellescape) if %w[m4a aac].include?(fmt)
+    cmd.push(
       '-o', "#{basepath}.%(ext)s",
       url,
-      '1>/dev/null 2>&1'.no_shellescape,
-    ]
+      '1>/dev/null 2>&1'.no_shellescape
+    )
     begin
       exec_command(cmd)
       return File.absolute_path("#{basepath}.#{fmt}") if File.exist?("#{basepath}.#{fmt}")

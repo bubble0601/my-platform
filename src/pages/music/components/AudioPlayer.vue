@@ -218,6 +218,9 @@ export default class AudioPlayer extends Vue {
 
   private onUpdate() {
     if (this.duration <= 0) return;
+    if (this.audio.duration > this.duration) {
+      this.duration = Math.floor(this.audio.duration);
+    }
     this.currentTime = Math.floor(this.audio.currentTime);
     this.progress = Math.floor(this.currentTime / this.duration * PROGRESS_MAX);
     if (this.duration - this.currentTime < 30) {
@@ -254,6 +257,7 @@ export default class AudioPlayer extends Vue {
     this.loading = true;
     this.audio.pause();
     musicModule.PlayNext()?.then(() => {
+      musicModule.SET_PLAYING(true);
       this.audio.play();
       this.loading = false;
     });

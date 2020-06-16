@@ -99,7 +99,7 @@ module ID3
     if frame
       setall(year_frame_id, [frame])
     else
-      delall(year_tag)
+      delall(year_frame_id)
     end
   end
 
@@ -165,7 +165,7 @@ module ID3
     when Hash
       frame = Mutagen::Frames::APIC.new(
         encoding: Mutagen::Encoding.UTF8,
-        mime: value[:mime],
+        mime: '' + value[:mime],  # なぜかこうしないとbytes型に変換されてしまう
         type: Mutagen::PictureType.COVER_FRONT,
         desc: 'Cover',
         data: value[:data]

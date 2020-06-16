@@ -1,3 +1,5 @@
+# flac is not supported on browser
+
 require_relative 'audio'
 
 module VorbisComment
@@ -31,17 +33,17 @@ module VorbisComment
     self[key] = []
   end
 
-  define_text_tags  title: 'TITLE',
-                    artist: 'ARTIST',
-                    artist_sort: 'ARTISTSORT',
-                    album: 'ALBUM',
-                    album_artist: 'ALBUMARTIST',
-                    album_artist_sort: 'ALBUMARTISTSORT',
-                    year: 'DATE',
-                    genre: 'GENRE',
-                    track: 'TRACKNUMBER',
-                    disc: 'DISCNUMBER',
-                    lyrics: 'LYRICS'
+  define_text_tags  title: 'titile',
+                    artist: 'artist',
+                    artist_sort: 'artistsort',
+                    album: 'album',
+                    album_artist: 'albumartist',
+                    album_artist_sort: 'albumartistsort',
+                    year: 'date',
+                    genre: 'genre',
+                    track: 'tracknumber',
+                    disc: 'discnumber',
+                    lyrics: 'lyrics'
 end
 
 class FLAC < Audio
@@ -62,30 +64,34 @@ class FLAC < Audio
     define_picture_methods
   end
 
+  def save_tags
+    @audio.save
+  end
+
   def define_picture_methods
-    @tags.define_singleton_method(:picture, method(:picture))
-    @tags.define_singleton_method(:picture=, method(:picture=))
-  end
+    audio = @audio
 
-  def picture
-    pic = pictures[0]
-    {
-      mime: pic.mime,
-      data: pic.data,
-    }
-  rescue PyCall::PyError
-    nil
-  end
+    @tags.define_singleton_method(:picture) do
+      pic = audio.pictures[0]
+      {
+        mime: pic.mime,
+        data: pic.data,
+      }
+    rescue PyCall::PyError
+      nil
+    end
 
-  def picture=(value)
-    clear_pictures
-    picture = Mutagen::Picture.new({
-      type: Mutagen::PictureType.COVER_FRONT,
-      mime: value[:mime],
-      desc: 'Cover',
-      data: value[:data],
-    })
-    add_picture(picture)
+    @tags.define_singleton_method(:picture=) do |value|
+      audio.clear_pictures
+      return unless value
+
+      picture = Mutagen::Picture.new
+      picture.type = Mutagen::PictureType.COVER_FRONT
+      picture.mime = '' + value[:mime] # なぜかこうしないとbytes型に変換されてしまう
+      picture.desc = 'Cover'
+      picture.data = value[:data]
+      audio.add_picture(picture)
+    end
   end
 
   def codec_info

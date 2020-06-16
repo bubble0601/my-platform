@@ -35,7 +35,7 @@
             <dd class="col-sm-9">{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Sampling rate</dt>
             <dd class="col-sm-9">{{ format.sampleRate ? `${format.sampleRate / 1000}kHz` : '&nbsp;' }}</dd>
-            <dt class="col-sm-3">Tag types</dt>
+            <dt class="col-sm-3">Tag type</dt>
             <dd class="col-sm-9">{{ format.tagType || '&nbsp;' }}</dd>
           </dl>
         </div>

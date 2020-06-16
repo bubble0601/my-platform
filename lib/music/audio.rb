@@ -59,6 +59,7 @@ class Audio
   end
 
   def save_tags
+    p @tags
     @tags.save(@path)
   end
 
@@ -104,10 +105,6 @@ end
 
 require_relative 'mp3'
 require_relative 'mp4'
-require_relative 'aac'
-require_relative 'flac'
 
 Audio.register_formats(%w[mp3], MP3)
-Audio.register_formats(%w[m4a alac], MP4)
-Audio.register_formats(%w[aac], AAC)
-Audio.register_formats(%w[flac], FLAC)
+Audio.register_formats(%w[m4a], MP4)

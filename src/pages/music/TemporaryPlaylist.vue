@@ -3,7 +3,7 @@
     <div class="d-flex my-2 px-2">
       <span v-t="'music.temporaryPlaylist'" class="text-muted"/>
       <b-button v-t="'reset'" variant="outline-danger" size="sm" class="ml-auto" @click="reset"/>
-      <b-button v-t="'save'" variant="success" size="sm" class="ml-2"/>
+      <b-button v-t="'save'" variant="success" size="sm" class="ml-2" @click="saveAsPlaylist"/>
     </div>
     <song-list context='temp' @back="list = null"/>
   </div>
@@ -213,6 +213,14 @@ export default class TemporaryPlaylist extends Vue {
     }
     const { data } = await musicModule.FetchSongs(params);
     this.list = data;
+  }
+
+  private async saveAsPlaylist() {
+    if (!this.list) return;
+    this.$prompt('Playlist name').then(async (res) => {
+      const id = await musicModule.CreatePlaylist({ name: res, songs: this.list! });
+      this.$router.push(`/music/playlist/${id}`);
+    });
   }
 }
 </script>

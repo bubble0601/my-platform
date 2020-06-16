@@ -34,10 +34,9 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { IAudioMetadata } from 'music-metadata-browser';
 import { find, Dictionary } from 'lodash';
 import { IconButton } from '@/components';
-import { Song } from '@/store/music';
+import { Song, Metadata } from '@/store/music';
 
 @Component({
   components: {
@@ -49,7 +48,7 @@ export default class ArtworkEditor extends Vue {
   private song!: Song;
 
   @Prop({ type: Object, default: null })
-  private metadata!: IAudioMetadata | null;
+  private metadata!: Metadata | null;
 
   private title = '';
   private album = '';
@@ -63,14 +62,6 @@ export default class ArtworkEditor extends Vue {
     'max-width': '150px',
     'height': 'auto',
   };
-
-  get id3Version() {
-    if (this.metadata) {
-      if (this.metadata.native['ID3v2.4']) return 'ID3v2.4';
-      else if (this.metadata.native['ID3v2.3']) return 'ID3v2.3';
-    }
-    return null;
-  }
 
   @Watch('song', { immediate: true })
   private onSongChanged(newSong: Song, oldSong: Song | null) {

@@ -8,6 +8,7 @@ module TagUtil
     audio.add_tags unless audio.tags
     tags = audio.tags
 
+    errors = []
     data.each do |k, v|
       case k
       when :artwork
@@ -15,8 +16,12 @@ module TagUtil
       else
         tags.method(:"#{k}=").call(v)
       end
+    rescue ArgumentError => e
+      errors.push({ err: e.to_s, key: k, val: v })
+      next
     end
     audio.save_tags
+    errors
   end
 
   def copy_tags(src, dist)

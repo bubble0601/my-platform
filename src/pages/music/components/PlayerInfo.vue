@@ -68,7 +68,7 @@
           <dd>{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
           <dt>Sampling rate</dt>
           <dd>{{ format.sample_rate ? `${format.sample_rate / 1000}kHz` : '&nbsp;' }}</dd>
-          <dt>Tag types</dt>
+          <dt>Tag type</dt>
           <dd>{{ format.tag_type || '&nbsp;' }}</dd>
         </dl>
         <div class="mt-1">

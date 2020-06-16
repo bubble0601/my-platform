@@ -23,12 +23,6 @@
         <v-field>
           <v-input v-model="dYear" placeholder="Year"/>
         </v-field>
-        <v-field>
-          <v-input v-model="dTrack" placeholder="Track Number"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="dDisc" placeholder="Disc Number"/>
-        </v-field>
         <div class="d-flex align-items-center">
           <b-button class="ml-auto" variant="success" @click="download">
             Download
@@ -100,12 +94,6 @@
         </v-field>
         <v-field>
           <v-input v-model="uYear" placeholder="Year"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="uTrack" placeholder="Track Number"/>
-        </v-field>
-        <v-field>
-          <v-input v-model="uDisc" placeholder="Disc Number"/>
         </v-field>
         <div class="d-flex align-items-center">
           <b-button class="ml-auto" variant="success" @click="upload">
@@ -249,8 +237,6 @@ export default class NewSong extends Vue {
   private dAlbumArtist = '';
   private dAlbum = '';
   private dYear = '';
-  private dTrack = '';
-  private dDisc = '';
   private titleCandidates: string[] = [];
   private artistCandidates: string[] = [];
 
@@ -263,8 +249,6 @@ export default class NewSong extends Vue {
   private uAlbumArtist = '';
   private uAlbum = '';
   private uYear = '';
-  private uTrack = '';
-  private uDisc = '';
 
   @Ref() private downloadForm!: VForm;
   @Ref() private urlInput!: VInput;
@@ -284,24 +268,10 @@ export default class NewSong extends Vue {
     }
   }
 
-  @Watch('dAlbum')
-  private onDAlbumChanged(val: string) {
-    if (this.dDisc === '') {
-      this.dDisc = '1/1';
-    }
-  }
-
   @Watch('uArtist')
   private onUArtistChanged(val: string, oldVal: string) {
     if (this.uAlbumArtist === oldVal) {
       this.uAlbumArtist = this.uArtist;
-    }
-  }
-
-  @Watch('uAlbum')
-  private onUAlbumChanged(val: string) {
-    if (this.uDisc === '') {
-      this.uDisc = '1/1';
     }
   }
 
@@ -357,8 +327,6 @@ export default class NewSong extends Vue {
       album_artist: this.dAlbumArtist,
       album: this.dAlbum,
       year: this.dYear,
-      track: this.dTrack,
-      disc: this.dDisc,
     }, isEmpty);
     const status: DownloadStatus = {
       url: this.url,
@@ -404,8 +372,6 @@ export default class NewSong extends Vue {
       album: this.uAlbum,
       title: this.uTitle,
       year: this.uYear,
-      track: this.uTrack,
-      disc: this.uDisc,
     }, isEmpty);
     if (!isEmpty(metadata)) data.append('data', JSON.stringify(metadata));
 
@@ -492,8 +458,6 @@ export default class NewSong extends Vue {
     this.dAlbum = '';
     this.dTitle = '';
     this.dYear = '';
-    this.dTrack = '';
-    this.dDisc = '';
     this.titleCandidates = [];
     this.artistCandidates = [];
   }
@@ -505,8 +469,6 @@ export default class NewSong extends Vue {
     this.uAlbum = '';
     this.uTitle = '';
     this.uYear = '';
-    this.uTrack = '';
-    this.uDisc = '';
   }
 }
 </script>

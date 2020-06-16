@@ -60,7 +60,7 @@ class Song < Sequel::Model(:songs)
 
   # generates unique digest (Used when create or update file)
   def generate_digest
-    Digest::MD5.file(path).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0, 8]
+    Digest::MD5.file(path).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0, 10]
   end
 
   # generates path after CONF.storage.music
@@ -110,10 +110,10 @@ class Song < Sequel::Model(:songs)
 
     Song.associate_relations(song, album, artist)
 
-    song.filename = generate_filename
+    song.filename = song.generate_filename(filename)
     FileUtils.mkdir_and_move(self.path, song.path)
 
-    song.digest = generate_digest
+    song.digest = song.generate_digest
     self.update(song.to_hash)
   end
 

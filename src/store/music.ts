@@ -254,6 +254,7 @@ export default class MusicModule extends VuexModule {
   private SET_NEXT(data: { song: Song, audio: Blob, metadata: Metadata }) {
     this.nextSong = data.song;
     this.nextAudio = data.audio;
+    this.nextMetadata = data.metadata;
   }
 
   @Mutation
@@ -605,7 +606,6 @@ export default class MusicModule extends VuexModule {
       this.SET_CURRENT(next);
       this.SHIFT_QUEUE();
       this.updateQueue();
-      promise.then(() => this.SET_PLAYING(true));
       return promise;
     } else {
       this.SET_CURRENT(null);
@@ -643,7 +643,7 @@ export default class MusicModule extends VuexModule {
   @Action
   public async UpdateSongTag(payload: { id: number, data: Dictionary<string | null> }) {
     const { id, data } = payload;
-    await api.updateSongTag(id, data);
+    return await api.updateSongTag(id, data);
   }
 
   @Action
@@ -655,8 +655,9 @@ export default class MusicModule extends VuexModule {
   @Action
   public async CreatePlaylist(data: { name: string, songs: Song[]}) {
     const res = await api.createPlaylist(data.name);
-    if (this.songs.length === 0) return;
+    if (data.songs.length === 0) return res.data.id;
     await api.addPlaylistSong(res.data.id, data.songs.map((s) => s.id));
+    return res.data.id;
   }
 
   @Action

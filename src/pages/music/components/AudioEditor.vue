@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column">
-    <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @play="onPlay" @keydown.stop/>
+    <audio ref="audio" :src="audioSrc" controls class="w-100 mb-3" @loadeddata="onLoad" @play="onPlay" @keydown.stop/>
     <!-- <b-card class="mb-2">
       <template #header>
         <h5 class="mb-0">エフェクト</h5>
@@ -118,16 +118,8 @@ export default class AudioEditor extends Vue {
     this.audio.pause();
   }
 
-  private async setData(data?: Blob) {
-    if (data) {
-      this.audioData = data;
-      this.audioSrc = URL.createObjectURL(this.audioData);
-    } else {
-      this.audioData = this.data;
-      this.audioSrc = this.originalSrc;
-    }
-    const metadata = await mm.parseBlob(this.audioData);
-    const d = floor(metadata.format.duration || 0, 1);
+  private async setDuration(duration: number) {
+    const d = floor(duration, 1);
     if (d > this.duration) {
       this.duration = d;
       this.$nextTick(() => {
@@ -138,6 +130,24 @@ export default class AudioEditor extends Vue {
       this.$nextTick(() => {
         this.duration = d;
       });
+    }
+  }
+
+  private async setData(data?: Blob) {
+    if (data) {
+      this.audioData = data;
+      this.audioSrc = URL.createObjectURL(this.audioData);
+    } else {
+      this.audioData = this.data;
+      this.audioSrc = this.originalSrc;
+    }
+    const metadata = await mm.parseBlob(this.audioData);
+    this.setDuration(metadata.format.duration || 0);
+  }
+
+  private onLoad() {
+    if (this.duration === 0) {
+      this.setDuration(this.audio.duration);
     }
   }
 

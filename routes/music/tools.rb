@@ -1,13 +1,13 @@
 class MainApp
   namespace '/api/music/tools' do
     helpers do
-      def get_title(url, limit = 5)
+      def get_youtube_title(url, limit = 5)
         return '' if limit == 0
 
         title = get_doc(url).title
         return title if title != 'YouTube'
 
-        get_title(url, limit - 1)
+        get_youtube_title(url, limit - 1)
       end
 
       def rsync(testrun, local, delete)
@@ -49,7 +49,7 @@ class MainApp
     get '/candidates' do
       url = params[:url]
       if url.start_with?('https://www.youtube.com')
-        title = get_title(params[:url])
+        title = get_youtube_title(params[:url])
         title = title.gsub(/ - YouTube$/, '')
         title.gsub!(/[(（\[【]?(Official Music Video|Official Video|Music Video|Official)[)）\]】]?/i, '')
         title.gsub!(/[(（\[【]?(MV|PV)[)）\]】]?/, '')

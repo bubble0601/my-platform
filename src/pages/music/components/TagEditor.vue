@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { omitBy, Dictionary } from 'lodash';
+import { map, omitBy, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, Metadata } from '@/store/music';
 import { VFormGroup } from '@/components';
@@ -144,7 +144,11 @@ export default class TagEditor extends Vue {
   }
 
   private async save() {
-    await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
+    const res = await musicModule.UpdateSongTag({ id: this.song.id, data: this.edit });
+    if (res.data && res.data.length) {
+      const errorMessaages = map(res.data, (e) => `${e.err} ocurred when set ${e.key} to ${e.val}`).join('\n');
+      this.$message.warn(`Following errors ocurred:\n${errorMessaages}`);
+    }
     this.$emit('updated');
   }
 }
