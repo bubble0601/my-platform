@@ -80,7 +80,7 @@ class Song < Sequel::Model(:songs)
 
     if track_num
       if self.album && self.album.num_discs > 1
-        format("#{artist}/#{album}/%d-%02d #{title}", self.album.num_discs, track_num)
+        format("#{artist}/#{album}/%d-%02d #{title}", disc_num, track_num)
       else
         format("#{artist}/#{album}/%02d #{title}", track_num)
       end
