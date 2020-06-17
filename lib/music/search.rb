@@ -56,7 +56,6 @@ module Lyrics
   def search_musix(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
     url = 'https://www.musixmatch.com/search/' + CGI.escape(q).gsub('+', '%20')
-    puts url
 
     doc = get_doc(url)
     link = doc.css('a.title')[0]

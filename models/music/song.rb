@@ -47,6 +47,8 @@ class Song < Sequel::Model(:songs)
       song.artist = Artist.find_or_create(name: artist.name)
       song.artist_name = artist.name unless song.artist_name
       album.artist_id = song.artist.id
+    else
+      song.artist = nil
     end
     if album.artist_id && album.title
       song.album = Album.find_or_create(album.to_hash.slice(:artist_id, :title))
@@ -54,6 +56,8 @@ class Song < Sequel::Model(:songs)
         song.album[k] = album[k] if album[k]
       end
       song.album.save
+    else
+      song.album = nil
     end
   end
 

@@ -123,7 +123,6 @@ class MainApp
         lyrics: tags.lyrics,
       }
       if (pic = tags.picture)
-        p pic[:data].class
         res_tags[:cover_art] = {
           mime: pic[:mime],
           data: pic[:data].unpack('A*').pack('m*'),
