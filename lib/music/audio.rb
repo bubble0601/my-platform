@@ -59,7 +59,6 @@ class Audio
   end
 
   def save_tags
-    p @tags
     @tags.save(@path)
   end
 
