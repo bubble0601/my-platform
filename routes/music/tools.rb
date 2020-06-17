@@ -147,6 +147,7 @@ class MainApp
     get '/scan' do
       files = {}
       Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+        f.unicode_normalize!
         next unless audio?(f)
 
         files[f] = false
@@ -215,6 +216,7 @@ class MainApp
       deletes = []
       missing_files = []
       Dir["#{CONF.storage.music}/**/*"].each do |f|
+        f.unicode_normalize!
         if audio?(f)
           files[f] = false
         elsif File.file?(f)
