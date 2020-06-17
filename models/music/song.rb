@@ -53,6 +53,7 @@ class Song < Sequel::Model(:songs)
       %i[year num_tracks num_discs].each do |k|
         song.album[k] = album[k] if album[k]
       end
+      song.album.save
     end
   end
 
