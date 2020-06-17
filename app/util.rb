@@ -40,11 +40,33 @@ class String
 end
 
 module FileUtils
+  def self.find_empty_dir_r(results, path)
+    is_empty = {}
+    Dir.each_child(path) do |c|
+      cpath = File.join(path, c)
+      is_empty[cpath] = File.directory?(cpath) ? find_empty_dir_r(results, cpath) : false
+    end
+
+    return true if is_empty.all?{ |_, v| v }
+
+    is_empty.each{ |k, v| results.push(k) if v }
+    false
+  end
+  private_class_method :find_empty_dir_r
+
   module_function
 
   def mkdir_and_move(src, dist)
     dir = File.dirname(dist)
     FileUtils.makedirs(dir) unless Dir.exist?(dir)
     File.rename(src, dist)
+    src_dir = File.dirname(src)
+    FileUtils.remove_dir(src_dir) if Dir.empty?(src_dir)
+  end
+
+  def find_empty_dir(path)
+    results = []
+    self.find_empty_dir_r(results, path)
+    results
   end
 end

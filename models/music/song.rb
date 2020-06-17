@@ -36,7 +36,13 @@ class Song < Sequel::Model(:songs)
 
     song.length = audio.info.length
     song.filename = song.generate_filename(filename)
-    return nil if File.exist?(song.path) && !Song.first(artist_name: song.artist_name, title: song.title).nil?
+    if File.exist?(song.path)
+      s = Song.where(title: song.title)
+              .where(artist: song.artist)
+              .where(album: song.album)
+              .first
+      return nil unless s.nil?
+    end
 
     FileUtils.mkdir_and_move(path, song.path)
 
@@ -72,8 +78,13 @@ class Song < Sequel::Model(:songs)
     artist = self.artist&.name&.escape_filename || 'Unknown Artist'
     album = self.album&.title&.escape_filename || 'Unknown Album'
     title = "#{self.title&.escape_filename}#{ext}" || original_name || "Unknown Song#{ext}"
+
     if track_num
-      format("#{artist}/#{album}/%02d #{title}", track_num)
+      if self.album && self.album.num_discs > 1
+        format("#{artist}/#{album}/%d-%02d #{title}", self.album.num_discs, track_num)
+      else
+        format("#{artist}/#{album}/%02d #{title}", track_num)
+      end
     else
       "#{artist}/#{album}/#{title}"
     end

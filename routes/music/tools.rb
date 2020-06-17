@@ -28,19 +28,6 @@ class MainApp
         exec_command(cmd)
       end
 
-      def find_empty_dir(results, path)
-        is_empty = {}
-        Dir.each_child(path) do |c|
-          cpath = File.join(path, c)
-          is_empty[cpath] = File.directory?(cpath) ? find_empty_dir(results, cpath) : false
-        end
-
-        return true if is_empty.all?{ |_, v| v }
-
-        is_empty.each{ |k, v| results.push(k) if v }
-        false
-      end
-
       def audio?(path)
         Audio.supported_formats.include?(File.extname(path)[1..])
       end
@@ -160,7 +147,6 @@ class MainApp
     get '/scan' do
       files = {}
       Dir["#{CONF.storage.music}/**/*.*"].each do |f|
-        f.unicode_normalize!(:nfc)
         next unless audio?(f)
 
         files[f] = false
@@ -230,7 +216,6 @@ class MainApp
       deletes = []
       missing_files = []
       Dir["#{CONF.storage.music}/**/*"].each do |f|
-        f.unicode_normalize!(:nfc)
         if audio?(f)
           files[f] = false
         elsif File.file?(f)
@@ -247,8 +232,7 @@ class MainApp
       end
       deletes.concat(files.filter{ |_, v| v == false }.map{ |k, _| k })
 
-      empty_dirs = []
-      find_empty_dir(empty_dirs, CONF.storage.music)
+      empty_dirs = FileUtils.find_empty_dir(CONF.storage.music)
       {
         target_files: deletes,
         target_dirs: empty_dirs,

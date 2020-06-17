@@ -398,9 +398,13 @@ export default class NewSong extends Vue {
     }).then((res) => {
       musicModule.ReloadSongs();
       musicModule.FetchArtists();
-      if (res.data && res.data.length) {
-        status.status = Status.Success;
-        status.songs = res.data;
+      if (res.data) {
+        if (res.data.length === 1 && res.data[0] == null) {
+          status.status = Status.Warning;
+        } else {
+          status.status = Status.Success;
+          status.songs = res.data;
+        }
       } else {
         status.status = Status.Warning;
       }
