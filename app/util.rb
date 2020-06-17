@@ -25,7 +25,7 @@ class String
     if reserved_words_windows.include?(File.basename(self, '.*').upcase)
       escaped = "#{escape_char}#{self}"
     else
-      escaped = gsub(%r{[/\\?%*:|"<>]}, escape_char)
+      escaped = gsub(/^\./, escape_char).gsub(%r{[/\\?%*:|"<>]}, escape_char)
     end
     escaped.unicode_normalize(:nfc)
   end
