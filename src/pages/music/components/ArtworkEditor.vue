@@ -3,8 +3,8 @@
     <h5>Artwork</h5>
     <div id="artwork-search">
       <div class="py-3">
-        <b-img v-if="metadata.tags.cover_art_url" :src="metadata.tags.cover_art_url" width="128" class="shadow"/>
-        <img v-else src="@/assets/default_cover_art.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
+        <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" alt="Cover art" class="shadow"/>
+        <img v-else src="@/assets/default_cover_art.svg" width="128" height="128" alt="default" class="shadow p-2" style="background-color: #e8e8e8;"/>
       </div>
       <div class="d-md-flex">
         <b-input v-model.trim="title" placeholder="Title"/>
@@ -50,6 +50,7 @@ export default class ArtworkEditor extends Vue {
   @Prop({ type: Object, default: null })
   private metadata!: Metadata | null;
 
+  private coverArtUrl: string = '';
   private title = '';
   private album = '';
   private artist = '';
@@ -67,6 +68,14 @@ export default class ArtworkEditor extends Vue {
   private onSongChanged(newSong: Song, oldSong: Song | null) {
     if (oldSong && newSong.id !== oldSong.id) this.reset();
     else this.setQueries();
+  }
+
+  @Watch('metadata')
+  private onMetadataChanged() {
+    this.coverArtUrl = '';
+    if (!this.metadata || !this.metadata.tags.cover_art) return;
+    const picture = this.metadata.tags.cover_art;
+    this.coverArtUrl = `data:${picture.mime};base64,${picture.data}`;
   }
 
   private setQueries() {

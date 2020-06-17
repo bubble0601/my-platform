@@ -195,18 +195,20 @@ export default class Settings extends Vue {
     });
     if (!res1) return;
 
+    const h = this.$createElement;
     const d = res1.data;
+    if (d.missing_files.length) {
+      this.$bvToast.toast(
+        [h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res1.data.missing_files.join('\n')])],
+        { title: 'Missing files', variant: 'warning', solid: true },
+      );
+    }
     if (!d.target_files.length && !d.target_dirs.length) {
       this.$bvToast.toast('Not found', { variant: 'info' });
       this.organizing = false;
       return;
     }
 
-    const h = this.$createElement;
-    this.$bvToast.toast(
-      [h('pre', { style: 'max-height: 80vh; overflow-y: auto;' }, [res1.data.missing_files.join('\n')])],
-      { title: 'Missing files', variant: 'warning', solid: true },
-    );
     this.selectItems = [
       { key: 'target_files', label: 'Delete file', options: d.target_files, selected: d.target_files  },
       { key: 'target_dirs', label: 'Delete directory', options: d.target_dirs, selected: d.target_dirs },

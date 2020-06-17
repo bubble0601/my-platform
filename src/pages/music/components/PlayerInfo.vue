@@ -8,8 +8,8 @@
     <div class="flex-grow-1 bg-white overflow-auto px-2">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
-          <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" class="shadow"/>
-          <img v-else src="@/assets/default_cover_art.svg" width="128" class="shadow p-2" style="background-color: #e8e8e8;"/>
+          <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" alt="Cover art" class="shadow"/>
+          <img v-else src="@/assets/default_cover_art.svg" width="128" height="128" alt="default" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
         <div v-if="song">
           <rate :value="song.rate" :size="1.5" class="justify-content-center" @input="updateRate"/>
@@ -111,6 +111,7 @@ export default class PlayerInfo extends Vue {
       { key: 'info', title: 'Info' },
   ];
 
+  private coverArtUrl: string = '';
   private queue: Song[] = [];
   private dragging: { index: number, song: Song } | null = null;
 
@@ -142,13 +143,6 @@ export default class PlayerInfo extends Vue {
     return {};
   }
 
-  get coverArtUrl() {
-    if (this.metadata) {
-      return this.metadata.tags.cover_art_url;
-    }
-    return null;
-  }
-
   get lyrics() {
     if (this.metadata) {
       return this.metadata.tags.lyrics;
@@ -170,6 +164,14 @@ export default class PlayerInfo extends Vue {
   }
 
   @Ref() private songInfoDialog!: SongInfoDialog;
+
+  @Watch('metadata')
+  private onMetadataChanged() {
+    this.coverArtUrl = '';
+    if (!this.metadata || !this.metadata.tags.cover_art) return;
+    const picture = this.metadata.tags.cover_art;
+    this.coverArtUrl = `data:${picture.mime};base64,${picture.data}`;
+  }
 
   @Watch('realQueue', { immediate: true })
   private onQueueChanged() {

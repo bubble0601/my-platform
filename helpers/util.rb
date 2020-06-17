@@ -53,11 +53,11 @@ module UtilityHelpers
         warn "redirected to #{location}"
         get_response(location, limit - 1)
       else
-        logger.warn('http'){ [uri.to_s, response.value].join("\n") }
+        warn [uri.to_s, response.value].join("\n")
         raise Net::HTTPFatalError
       end
     rescue StandardError => e
-      logger.warn('http'){ [uri.to_s, e.class, e].join("\n") }
+      warn [uri.to_s, e.class, e].join("\n")
       raise e
     end
   end

@@ -10,13 +10,6 @@ class MainApp
       end
     end
 
-    get '/:digest/cover' do
-      song = Song.first(digest: params[:digest])
-      halt 404 if song.nil?
-      pic = Audio.load(song.path).tags.picture
-      [200, { 'Content-Type' => pic[:mime] }, pic[:data]]
-    end
-
     get '/:digest/:name' do
       path = get_real_path(params[:digest], params[:name])
       halt 404 if path.nil?

@@ -15,7 +15,11 @@ module Lyrics
     ]
     results = []
     threads = search_methods.map{ |s| async_exec{ method(s).call(results, title, artist) } }
-    threads.each{ |t| t&.join(10) }
+    threads.each do |t|
+      t&.join(10)
+    rescue StandardError => e
+      p e
+    end
     results.sort_by{ |r| r[:text] == 'mojim.com' ? 1 : 0 }
   end
 

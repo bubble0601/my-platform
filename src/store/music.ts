@@ -41,7 +41,10 @@ export interface Metadata {
     disc: string | null;
     year: string | null;
     lyrics: string | null;
-    cover_art_url: string | null;
+    cover_art?: {
+      mime: string;
+      data: string; // base64
+    }
   };
 }
 
