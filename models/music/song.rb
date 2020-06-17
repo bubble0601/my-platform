@@ -119,6 +119,7 @@ class Song < Sequel::Model(:songs)
 
   def replace_file(new_path)
     TagUtil.copy_tags(path, new_path)
+    self.filename = generate_filename(new_path)
     FileUtils.move(new_path, path)
     self.length = Audio.load(path).info.length
     self.digest = generate_digest

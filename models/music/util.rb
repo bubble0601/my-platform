@@ -33,8 +33,18 @@ module TagUtil
     dist_audio.add_tags unless dist_audio.tags
     dist_tags = dist_audio.tags
 
-    src_tags.each do |key, frame|
-      dist_tags[key] = frame
+    if src_tags.type == dist_tags.type
+      src_tags.each do |key, value|
+        dist_tags[key] = value
+      end
+    else
+      %i[title artist album_artist album_artist_sort album year track disc genre lyrics picture].each do |key|
+        value = src_tags.method(key).call
+        dist_tags.method(:"#{key}=").call(value) if value
+      rescue ArgumentError, PyCall::PyError => e
+        logger.error('copy_tags'){ e.message }
+        next
+      end
     end
 
     dist_audio.save_tags
