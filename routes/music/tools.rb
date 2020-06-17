@@ -166,7 +166,6 @@ class MainApp
           results.push("Invalid path: #{f}")
           next
         end
-        s = nil
         begin
           s = Song.create_from_file(f)
         rescue RuntimeError

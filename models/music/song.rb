@@ -33,19 +33,11 @@ class Song < Sequel::Model(:songs)
     end
 
     associate_relations(song, album, artist)
+    return nil if Song.exists?(song)
 
     song.length = audio.info.length
     song.filename = song.generate_filename(filename)
-    if File.exist?(song.path)
-      s = Song.where(title: song.title)
-              .where(artist: song.artist)
-              .where(album: song.album)
-              .first
-      return nil unless s.nil?
-    end
-
     FileUtils.mkdir_and_move(path, song.path)
-
     song.digest = song.generate_digest
     song.save
   end
@@ -62,6 +54,13 @@ class Song < Sequel::Model(:songs)
         song.album[k] = album[k] if album[k]
       end
     end
+  end
+
+  def self.exists?(song)
+    q = Song.where(title: song.title)
+    q = q.where(artist_id: song.artist.id) if song.artist
+    q = q.where(album_id: song.album.id) if song.album
+    !q.first.nil?
   end
 
   # generates unique digest (Used when create or update file)
