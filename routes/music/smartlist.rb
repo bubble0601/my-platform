@@ -11,7 +11,7 @@ class MainApp
         { id: 7, name: 'Good' },
         { id: 8, name: 'Unrated' },
         { id: 9, name: 'No lyrics' },
-        { id: 10, name: 'No artwork' },
+        { id: 10, name: 'No cover art' },
       ]
     end
 
@@ -32,19 +32,19 @@ class MainApp
       when '3'
         query = query.order_prepend(:created_at).reverse.limit(100)
       when '4'
-        query = query.where(rate: 5)
+        query = query.where(rating: 5)
       when '5'
-        query = query.where{ rate >= 4 }
+        query = query.where{ rating >= 4 }
       when '6'
-        query = query.where{ rate >= 3 }
+        query = query.where{ rating >= 3 }
       when '7'
-        query = query.where{ rate >= 2 }
+        query = query.where{ rating >= 2 }
       when '8'
-        query = query.where(rate: 0)
+        query = query.where(rating: 0)
       when '9'
-        query = query.where(has_lyric: false)
+        query = query.where(has_lyrics false)
       when '10'
-        query = query.where(has_artwork: false)
+        query = query.where(has_cover_art: false)
       end
       query.map(&method(:song_to_hash))
     end

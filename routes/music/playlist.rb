@@ -16,11 +16,7 @@ class MainApp
 
       Song.eager_graph(:album, :artist)
           .where(Sequel[:songs][:id] => w_items.keys)
-          .order{ artist[:ruby] }
-          .order_append{ artist[:name] }
-          .order_append{ album[:year] }
-          .order_append{ album[:title] }
-          .order_append(:track_num, :title)
+          .default_order
           .map(&method(:song_to_hash))
           .map{ |s| s[:weight] = w_items[s[:id]]; s }
     end

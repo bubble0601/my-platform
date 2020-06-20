@@ -7,7 +7,7 @@
     </div>
     <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchLyrics">
       <b-spinner v-if="searching" type="grow" small class="mr-2"/>
-      <span>Search Lyrics</span>
+      <span>Search lyrics</span>
     </b-button>
     <b-form-radio-group v-if="searchResults.length" v-model="selected" buttons button-variant="outline-primary" :options="searchResults"/>
     <b-form-radio-group v-else buttons button-variant="outline-primary" :options="[{ text: 'No results', value: 'none', disabled: true }]"/>

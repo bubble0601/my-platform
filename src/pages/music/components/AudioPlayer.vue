@@ -94,6 +94,7 @@ export default class AudioPlayer extends Vue {
   private progress = 0; // 0 to PROGRESS_MAX
   private currentTime = 0;  // 0 to duration(second)
   private duration = 0; // (second)
+  private checkPoints: boolean[] = [];
 
   private formatTime = formatTime;
 
@@ -212,6 +213,7 @@ export default class AudioPlayer extends Vue {
     if (this.audio.readyState >= this.audio.HAVE_CURRENT_DATA) {
       this.duration = Math.floor(this.audio.duration);
       this.progress = 0;
+      this.checkPoints = [];
       if (this.playing) this.audio.play();
     }
   }
@@ -222,7 +224,19 @@ export default class AudioPlayer extends Vue {
       this.duration = Math.floor(this.audio.duration);
     }
     this.currentTime = Math.floor(this.audio.currentTime);
-    this.progress = Math.floor(this.currentTime / this.duration * PROGRESS_MAX);
+    const ratio = this.audio.currentTime / this.audio.duration;
+    this.progress = Math.floor(ratio * PROGRESS_MAX);
+
+    const point = Math.floor(ratio * 4);
+    this.checkPoints[Math.floor(ratio * 4)] = true;
+    if (this.checkPoints[3] && this.checkPoints[0] && this.checkPoints[1] && this.checkPoints[2] && this.song) {
+      const id = this.song.id;
+      musicModule.IncrementPlayedCount(id).then(() => {
+        musicModule.ReloadSong(id);
+      });
+      this.checkPoints = [];
+    }
+
     if (this.duration - this.currentTime < 30) {
       this.prefetch();
     }

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h5>Artwork</h5>
-    <div id="artwork-search">
+    <h5>Cover art</h5>
+    <div id="cover_art-search">
       <div class="py-3">
         <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" alt="Cover art" class="shadow"/>
         <img v-else src="@/assets/default_cover_art.svg" width="128" height="128" alt="default" class="shadow p-2" style="background-color: #e8e8e8;"/>
@@ -11,16 +11,16 @@
         <b-input v-model.trim="album" placeholder="Album" class="mt-2 mt-md-0 ml-md-2"/>
         <b-input v-model.trim="artist" placeholder="Artist" class="mt-2 mt-md-0 ml-md-2"/>
       </div>
-      <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchArtwork">
+      <b-button variant="info" class="d-block mt-2 mb-3" :disabled="searching" @click="searchCoverArt">
         <b-spinner v-if="searching" type="grow" small class="mr-2"/>
-        <span>Search Artwork</span>
+        <span>Search cover art</span>
       </b-button>
       <div class="d-flex flex-wrap mt-1">
         <div v-for="(src, i) in searchResults" :key="i" class="m-2">
           <b-img-lazy :src="src" class="shadow cursor-pointer" :class="{ 'border border-primary': selected === src }" :style="imgStyle" @click.native="selected = src"/>
         </div>
         <div class="m-2">
-          <b-button v-if="searchCount > 0" variant="outline-secondary" class="h-100" @click="searchArtwork">More</b-button>
+          <b-button v-if="searchCount > 0" variant="outline-secondary" class="h-100" @click="searchCoverArt">More</b-button>
         </div>
       </div>
     </div>
@@ -43,7 +43,7 @@ import { Song, Metadata } from '@/store/music';
     IconButton,
   },
 })
-export default class ArtworkEditor extends Vue {
+export default class CoverArtEditor extends Vue {
   @Prop({ type: Object, required: true })
   private song!: Song;
 
@@ -70,7 +70,7 @@ export default class ArtworkEditor extends Vue {
     else this.setQueries();
   }
 
-  @Watch('metadata')
+  @Watch('metadata', { immediate: true })
   private onMetadataChanged() {
     this.coverArtUrl = '';
     if (!this.metadata || !this.metadata.tags.cover_art) return;
@@ -85,7 +85,7 @@ export default class ArtworkEditor extends Vue {
     this.artist = this.song.album.artist || this.song.artist.name;
   }
 
-  private async searchArtwork() {
+  private async searchCoverArt() {
     if (!this.title && !this.album) {
       this.$message.error('Please input title or album title');
       return;
@@ -97,7 +97,7 @@ export default class ArtworkEditor extends Vue {
     };
     if (this.artist) params.artist = this.artist;
     if (this.searchCount) params.page = this.searchCount.toString();
-    axios.get('/api/music/tools/searchartwork', { params }).then((res) => {
+    axios.get('/api/music/tools/searchcoverart', { params }).then((res) => {
       if (this.searchCount > 0) this.searchResults.push(...res.data);
       else this.searchResults = res.data;
       this.searchCount++;
@@ -118,7 +118,7 @@ export default class ArtworkEditor extends Vue {
       this.$message.error('Prease select image');
       return;
     }
-    axios.put(`/api/music/songs/${this.song.id}/artwork`, { artwork: this.selected }).then(() => {
+    axios.put(`/api/music/songs/${this.song.id}/coverart`, { cover_art: this.selected }).then(() => {
       this.$message.success('Saved');
       this.$emit('updated');
     });
@@ -129,7 +129,7 @@ export default class ArtworkEditor extends Vue {
       this.$message.error('Prease select image');
       return;
     }
-    axios.put<number[]>(`/api/music/songs/${this.song.id}/albumartwork`, { artwork: this.selected }).then((res) => {
+    axios.put<number[]>(`/api/music/songs/${this.song.id}/albumcoverart`, { cover_art: this.selected }).then((res) => {
       this.$message.success('Saved');
       this.$emit('updated', res.data);
     });
@@ -137,7 +137,7 @@ export default class ArtworkEditor extends Vue {
 }
 </script>
 <style lang="scss" scoped>
-#artwork-search {
+#cover_art-search {
   max-height: 60vh;
   overflow-x: auto;
 }

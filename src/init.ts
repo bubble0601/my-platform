@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import VueSlider from 'vue-slider-component';
 import { viewModule } from './store';
 import { initDialogs } from './utils';
@@ -21,10 +21,14 @@ Vue.component('VHelp', VHelp);
 Vue.component('VInput', VInput);
 initDialogs();
 
-axios.interceptors.response.use(undefined, (err) => {
-  const { data } = err.response;
-  if (!data || data.error_message) {
-    Vue.prototype.$message.error(data.error_message || '通信に失敗しました');
+axios.interceptors.response.use(undefined, (err: AxiosError) => {
+  const res = err.response;
+  if (res?.data.error_message) {
+    Vue.prototype.$message.error(res.data.error_message);
+  } else if (res?.status === 500) {
+    Vue.prototype.$message.error('Server error');
+  } else {
+    Vue.prototype.$message.error('通信に失敗しました');
   }
   throw err;
 });

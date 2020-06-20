@@ -143,7 +143,7 @@ module Lyrics
   end
 end
 
-module Artwork
+module CoverArt
   extend UtilityHelpers
 
   module_function

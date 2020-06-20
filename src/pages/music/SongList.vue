@@ -42,8 +42,8 @@
       <template #cell(checkbox)="{ rowSelected, selectRow, unselectRow }">
         <b-form-checkbox :checked="rowSelected" @change="$event ? selectRow() : unselectRow()"/>
       </template>
-      <template #cell(rate)="{ item, value }">
-        <rate :value="value" @input="updateRate(item.id, $event)"/>
+      <template #cell(rating)="{ item, value }">
+        <rating :value="value" @input="updateRating(item.id, $event)"/>
       </template>
       <template #cell(weight)="{ item, value }">
         <icon-button icon="dash" class="p-0" @click="updateWeight(item.id, value - 1)"/>
@@ -62,14 +62,14 @@ import { sample } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, REPEAT, getFilepath } from '@/store/music';
 import { formatTime, download } from '@/utils';
-import { ContextMenu, IconButton, Rate } from '@/components';
+import { ContextMenu, IconButton, Rating } from '@/components';
 import { ContextMenuItem } from '@/types';
 import { SongInfoDialog } from './components';
 
 @Component({
   components: {
     IconButton,
-    Rate,
+    Rating,
     SongInfoDialog,
   },
 })
@@ -93,10 +93,11 @@ export default class SongList extends Vue {
     if (this.$pc) {
       fields.push({ key: 'album', label: this.$t('music.fields.album') as string, formatter: (value) => value.title, sortable: true, sortByFormatted: true });
     }
-    fields.push({ key: 'rate', label: this.$t('music.fields.rate') as string, sortable: true });
+    fields.push({ key: 'rating', label: this.$t('music.fields.rating') as string, sortable: true });
     if (this.$pc) {
       fields.push({ key: 'time', label: this.$t('music.fields.time') as string, sortable: true, formatter: formatTime });
       fields.push({ key: 'year', label: this.$t('music.fields.year') as string, sortable: true });
+      fields.push({ key: 'played_count', label: this.$t('music.fields.played_count') as string, sortable: true });
       // fields.push({ key: 'created_at', label: this.$t('music.fields.created_at') as string, sortable: true });
     }
     if (this.context === 'playlist') {
@@ -191,8 +192,8 @@ export default class SongList extends Vue {
     musicModule.ReloadSongs();
   }
 
-  private async updateRate(id: number, val: number) {
-    await musicModule.UpdateSong({ id, data: { rate: val } });
+  private async updateRating(id: number, val: number) {
+    await musicModule.UpdateSong({ id, data: { rating: val } });
     await musicModule.ReloadSong(id);
   }
 
@@ -288,7 +289,6 @@ export default class SongList extends Vue {
         this.songInfoDialog.open(this.displayedSongs, n);
       },
     });
-    menuItems.push({ key: 'download', text: 'ダウンロード', action: () => { download(getFilepath(item)); } });
 
     new ContextMenu().show({
       items: menuItems,

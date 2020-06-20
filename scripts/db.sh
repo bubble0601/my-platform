@@ -5,8 +5,9 @@ USAGE:
   $(basename $0) COMMAND [<options>]
 
 COMMANDS:
-  migrate           execute migration
-  schema            dump schema
+  migrate [-M version]    execute migration
+  schema                  dump schema
+  pp <table name>         pp schema and copy to clipboard
 EOF
   exit 1
 }
@@ -27,6 +28,10 @@ migrate)
 schema) #dump schema
   shift
   bundle exec sequel -e db $ROOT_PATH/conf.yml -d "$@"
+  ;;
+pp)
+  shift
+  ruby $ROOT_PATH/scripts/pp_schema.rb "$@" | ghead -c -1 | pbcopy
   ;;
 *)
   usage

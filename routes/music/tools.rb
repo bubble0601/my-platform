@@ -126,8 +126,8 @@ class MainApp
       Lyrics.search(params[:title], params[:artist])
     end
 
-    get '/searchartwork' do
-      Artwork.search(params[:title], params[:album], params[:artist], params[:page].to_i)
+    get '/searchcoverart' do
+      CoverArt.search(params[:title], params[:album], params[:artist], params[:page].to_i)
     end
 
     get '/sync' do

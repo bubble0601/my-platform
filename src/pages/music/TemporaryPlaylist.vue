@@ -41,8 +41,8 @@
                   <b-form-select-option value="in">日以内</b-form-select-option>
                 </b-form-select>
               </template>
-              <template v-else-if="fields[rule.field].type === 'rate'">
-                <rate v-model="rule.value" class="mr-sm-1"/>
+              <template v-else-if="fields[rule.field].type === 'rating'">
+                <rating v-model="rule.value" class="mr-sm-1"/>
                 <b-form-select v-model="rule.operator">
                   <b-form-select-option value="=">に等しい</b-form-select-option>
                   <b-form-select-option value=">=">以上</b-form-select-option>
@@ -98,7 +98,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
-import { Rate } from '@/components';
+import { Rating } from '@/components';
 import { musicModule } from '@/store';
 import { Song, Rule } from '@/store/music';
 import SongList from './SongList.vue';
@@ -106,7 +106,7 @@ import { Dictionary } from 'vue-router/types/router';
 
 @Component({
   components: {
-    Rate,
+    Rating,
     SongList,
   },
 })
@@ -116,7 +116,7 @@ export default class TemporaryPlaylist extends Vue {
     artist: { type: 'string', default_op: 'include', default_val: '' },
     album: { type: 'string', default_op: 'include', default_val: '' },
     album_artist: { type: 'string', default_op: 'include', default_val: '' },
-    rate: { type: 'rate', default_op: '>=', default_val: 5 },
+    rating: { type: 'rating', default_op: '>=', default_val: 5 },
     created_at: { type: 'date', default_op: 'in', default_val: '30' },
   };
   private ruleGroups: Rule[][] = [];
@@ -124,10 +124,10 @@ export default class TemporaryPlaylist extends Vue {
 
   private hasLimit = false;
   private limit = 100;
-  private sortBy: string = 'rate__desc';
+  private sortBy: string = 'rating__desc';
 
   get options() {
-    return ['title', 'artist', 'album', 'rate', 'created_at'].map((k) => ({
+    return ['title', 'artist', 'album', 'rating', 'created_at'].map((k) => ({
       text: this.$t(`music.fields.${k}`),
       value: k,
     }));
@@ -135,8 +135,8 @@ export default class TemporaryPlaylist extends Vue {
 
   get sortOptions() {
     return [
-      { text: 'レートが高い', value: 'rate__desc' },
-      { text: 'レートが低い', value: 'rate__asc' },
+      { text: 'レートが高い', value: 'rating__desc' },
+      { text: 'レートが低い', value: 'rating__asc' },
       { text: '追加日が新しい', value: 'created_at__desc' },
       { text: '追加日が古い', value: 'created_at__asc' },
     ];
@@ -195,7 +195,7 @@ export default class TemporaryPlaylist extends Vue {
     this.ruleCount = 0;
     this.hasLimit = false;
     this.limit = 100;
-    this.sortBy = 'rate__desc';
+    this.sortBy = 'rating__desc';
     this.addRule();
   }
 

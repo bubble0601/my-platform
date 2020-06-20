@@ -1,6 +1,10 @@
 class MainApp
   namespace '/api/music/songs' do
     helpers do
+      def filtered_json
+        @json.slice(:rating)
+      end
+
       def fetch_song(id)
         song = Song[id.to_i]
         halt 404, 'The requested resource is not found' if song.nil?
@@ -47,11 +51,7 @@ class MainApp
 
     get '' do
       query = Song.eager_graph(:album, :artist)
-                  .order{ artist[:ruby] }
-                  .order_append{ artist[:name] }
-                  .order_append{ album[:year] }
-                  .order_append{ album[:title] }
-                  .order_append(:track_num, :title)
+                  .default_order
       if params[:rules]
         rule_groups = params[:rules].map(&:parse_json)
         rule_groups.each do |or_group|
@@ -86,7 +86,7 @@ class MainApp
 
     put '/:id' do
       song = fetch_song(params[:id])
-      song.update(@json)
+      song.update(filtered_json)
       status 204
     end
 
@@ -134,6 +134,12 @@ class MainApp
       }
     end
 
+    put '/:id/increment' do
+      song = fetch_song(params[:id])
+      song.update(played_count: song[:played_count] + 1)
+      status 204
+    end
+
     put '/:id/tag' do
       song = fetch_song(params[:id])
       errors = TagUtil.set_tags(song.path, @json)
@@ -150,22 +156,22 @@ class MainApp
       status 204
     end
 
-    put '/:id/artwork' do
+    put '/:id/coverart' do
       song = fetch_song(params[:id])
-      response = get_response(@json[:artwork])
-      song.update_artwork(response['Content-Type'], response.body)
+      response = get_response(@json[:cover_art])
+      song.update_cover_art(response['Content-Type'], response.body)
       status 204
     end
 
-    put '/:id/albumartwork' do
+    put '/:id/albumcoverart' do
       song = fetch_song(params[:id])
-      response = get_response(@json[:artwork])
+      response = get_response(@json[:cover_art])
       if song.album.nil?
-        song.update_artwork(response['Content-Type'], response.body)
+        song.update_cover_art(response['Content-Type'], response.body)
         return 200, [song[:id]]
       else
         res = song.album.songs.each do |s|
-          s.update_artwork(response['Content-Type'], response.body)
+          s.update_cover_art(response['Content-Type'], response.body)
         end
         return 200, res.map!{ |s| s[:id] }
       end

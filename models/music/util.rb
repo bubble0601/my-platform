@@ -11,8 +11,8 @@ module TagUtil
     errors = []
     data.each do |k, v|
       case k
-      when :artwork
-        tags.picture = data[:artwork]
+      when :cover_art
+        tags.picture = data[:cover_art]
       else
         tags.method(:"#{k}=").call(v)
       end
@@ -68,8 +68,8 @@ module TagUtil
     disc_num, = tags.disc&.split('/')&.map(&:to_i)
     song.disc_num = disc_num if disc_num&.positive?
 
-    song.has_lyric = true if tags.lyrics
-    song.has_artwork = true if tags.picture
+    song.has_lyrics= true if tags.lyrics
+    song.has_cover_art = true if tags.picture
 
     song
   end
@@ -82,10 +82,10 @@ module TagUtil
     album.year = year if year&.positive?
 
     _, track_count = tags.track&.split('/')&.map(&:to_i)
-    album.num_tracks = track_count if track_count&.positive?
+    album.track_count = track_count if track_count&.positive?
 
     _, disc_count = tags.disc&.split('/')&.map(&:to_i)
-    album.num_discs = disc_count if disc_count&.positive?
+    album.disc_count = disc_count if disc_count&.positive?
 
     album
   end

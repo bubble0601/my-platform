@@ -15,9 +15,9 @@
             <dd class="col-sm-9" :class="{ 'text-muted': !song.album.artist }">{{ song.album.artist }}</dd>
             <dt class="col-sm-3">Year</dt>
             <dd class="col-sm-9">{{ song.year || '&nbsp;' }}</dd>
-            <dt class="col-sm-3">Rate</dt>
+            <dt class="col-sm-3">Rating</dt>
             <dd class="col-sm-9">
-              <rate :value="song.rate" @input="updateRate"/>
+              <rating :value="song.rating" @input="updateRating"/>
             </dd>
             <dt class="col-sm-3">Play time</dt>
             <dd class="col-sm-9">{{ formatTime(song.time) }}</dd>
@@ -34,9 +34,9 @@
             <dt class="col-sm-3">Bitrate</dt>
             <dd class="col-sm-9">{{ format.bitrate ? `${(format.bitrate / 1000).toFixed(1)}kbps` : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Sampling rate</dt>
-            <dd class="col-sm-9">{{ format.sampleRate ? `${format.sampleRate / 1000}kHz` : '&nbsp;' }}</dd>
+            <dd class="col-sm-9">{{ format.sample_rate ? `${format.sample_rate / 1000}kHz` : '&nbsp;' }}</dd>
             <dt class="col-sm-3">Tag type</dt>
-            <dd class="col-sm-9">{{ format.tagType || '&nbsp;' }}</dd>
+            <dd class="col-sm-9">{{ format.tag_type || '&nbsp;' }}</dd>
           </dl>
         </div>
         <!-- tag -->
@@ -45,8 +45,8 @@
         <audio-editor v-else-if="nav === 'edit'" :song="song" :data="audioData" @updated="reload"/>
         <!-- lyrics -->
         <lyrics-editor v-else-if="nav === 'lyrics'" :song="song" :metadata="metadata" @updated="reload"/>
-        <!-- artwork -->
-        <artwork-editor v-else-if="nav === 'artwork'" :song="song" :metadata="metadata" @updated="reload"/>
+        <!-- cover art -->
+        <cover-art-editor v-else-if="nav === 'coverart'" :song="song" :metadata="metadata" @updated="reload"/>
       </keep-alive>
       <template #modal-footer="{ close }">
         <b-button-group class="mr-auto">
@@ -65,20 +65,20 @@ import { Dictionary, find, findIndex, isArray, isEmpty, omitBy } from 'lodash';
 import { musicModule } from '@/store';
 import { Song, Metadata, getFilepath } from '@/store/music';
 import { formatTime, formatBytes, waitUntil } from '@/utils';
-import { VNav, Rate } from '@/components';
+import { VNav, Rating } from '@/components';
 import TagEditor from './TagEditor.vue';
 import AudioEditor from './AudioEditor.vue';
 import LyricsEditor from './LyricsEditor.vue';
-import ArtworkEditor from './ArtworkEditor.vue';
+import CoverArtEditor from './CoverArtEditor.vue';
 
 @Component({
   components: {
     VNav,
-    Rate,
+    Rating,
     TagEditor,
     AudioEditor,
     LyricsEditor,
-    ArtworkEditor,
+    CoverArtEditor,
   },
   i18n: {
     messages: {
@@ -87,7 +87,7 @@ import ArtworkEditor from './ArtworkEditor.vue';
         tag: 'タグ',
         edit: '加工',
         lyrics: '歌詞',
-        artwork: 'アートワーク',
+        coverart: 'アートワーク',
       },
     },
   },
@@ -111,7 +111,7 @@ export default class SongInfoDialog extends Vue {
       { key: 'tag', title: this.$t('tag') },
       { key: 'edit', title: this.$t('edit') },
       { key: 'lyrics', title: this.$t('lyrics') },
-      { key: 'artwork', title: this.$t('artwork') },
+      { key: 'coverart', title: this.$t('coverart') },
     ];
   }
 
@@ -196,9 +196,9 @@ export default class SongInfoDialog extends Vue {
     this.$emit('updated', res1);
   }
 
-  private async updateRate(val: number) {
+  private async updateRating(val: number) {
     const id = this.song.id;
-    await musicModule.UpdateSong({ id, data: { rate: val } });
+    await musicModule.UpdateSong({ id, data: { rating: val } });
     const song = await musicModule.ReloadSong(id);
     this.song = song;
   }

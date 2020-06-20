@@ -12,7 +12,7 @@
           <img v-else src="@/assets/default_cover_art.svg" width="128" height="128" alt="default" class="shadow p-2" style="background-color: #e8e8e8;"/>
         </div>
         <div v-if="song">
-          <rate :value="song.rate" :size="1.5" class="justify-content-center" @input="updateRate"/>
+          <rating :value="song.rating" :size="1.5" class="justify-content-center" @input="updateRating"/>
         </div>
         <div v-if="song" class="text-center">
           <h4 class="mb-1">{{ song.title }}</h4>
@@ -75,7 +75,7 @@
           <b-dropdown split variant="success" text="Edit" @click="editSong()">
             <b-dropdown-item @click="editSong('tag')">Tag</b-dropdown-item>
             <b-dropdown-item @click="editSong('lyrics')">Lyrics</b-dropdown-item>
-            <b-dropdown-item @click="editSong('artwork')">Artwork</b-dropdown-item>
+            <b-dropdown-item @click="editSong('coverart')">CoverArt</b-dropdown-item>
           </b-dropdown>
         </div>
         <div class="my-2">
@@ -91,29 +91,32 @@ import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
 import { Dictionary, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
 import { musicModule } from '@/store';
 import { Song } from '@/store/music';
-import { VNav, Rate } from '@/components';
+import { VNav, Rating } from '@/components';
 import { formatTime, formatBytes } from '@/utils';
 import SongInfoDialog from './SongInfoDialog.vue';
 
 @Component({
   components: {
     VNav,
-    Rate,
+    Rating,
     SongInfoDialog,
   },
 })
 export default class PlayerInfo extends Vue {
   private readonly formatTime = formatTime;
   private tab = 'song';
-  private readonly tabs = [
-      { key: 'song', title: 'Song' },
-      { key: 'queue', title: 'Queue' },
-      { key: 'info', title: 'Info' },
-  ];
 
   private coverArtUrl: string = '';
   private queue: Song[] = [];
   private dragging: { index: number, song: Song } | null = null;
+
+  get tabs() {
+    return [
+      { key: 'song', title: this.$t('music.song') },
+      { key: 'queue', title: this.$t('music.queue') },
+      { key: 'info', title: this.$t('music.info') },
+  ];
+  }
 
   get song() {
     return musicModule.current;
@@ -179,10 +182,10 @@ export default class PlayerInfo extends Vue {
   }
 
   // Song
-  private async updateRate(val: number) {
+  private async updateRating(val: number) {
     if (!this.song) return;
     const id = this.song.id;
-    await musicModule.UpdateSong({ id, data: { rate: val } });
+    await musicModule.UpdateSong({ id, data: { rating: val } });
     musicModule.ReloadSong(id);
   }
 

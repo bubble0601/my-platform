@@ -1,16 +1,16 @@
 <template>
-  <div class="d-flex rate" @click.stop>
+  <div class="d-flex rating" @click.stop>
     <b-icon v-for="i in 5" :key="i"
             :icon="(i <= value || i <= hover) ? 'star-fill' : 'star'"
             :font-scale="size" :class="{ enabled: i <= value, hovered: i <= hover }"
-            @click="setRate(i)" @mouseenter="hover = i" @mouseleave="hover = -1"/>
+            @click="setRating(i)" @mouseenter="hover = i" @mouseleave="hover = -1"/>
   </div>
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Emit } from 'vue-property-decorator';
 
 @Component
-export default class Rate extends Vue {
+export default class Rating extends Vue {
   @Prop({ type: Number, default: 0 })
   private value!: number;
 
@@ -20,14 +20,14 @@ export default class Rate extends Vue {
   private hover: number = -1;
 
   @Emit('input')
-  private setRate(i: number) {
+  private setRating(i: number) {
     if (this.value === i) return 0;
     return i;
   }
 }
 </script>
 <style lang="scss" scoped>
-.rate {
+.rating {
   color: lightslategray;
   .enabled {
     color: #efc20f;

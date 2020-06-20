@@ -33,6 +33,7 @@ Metrics/BlockLength:
   Max: 30
   Exclude:
     - 'routes/**/*'
+    - 'db/migrate/*'
 
 Naming/MethodParameterName:
   MinNameLength: 2
@@ -42,6 +43,10 @@ Style/AsciiComments:
 Style/ConditionalAssignment:
   Enabled: false
 Style/Documentation:
+  Enabled: false
+Style/FormatString:
+  Enabled: false
+Style/FormatStringToken:
   Enabled: false
 Style/FrozenStringLiteralComment:
   Enabled: false
@@ -56,6 +61,8 @@ Style/NumericLiterals:
 Style/NumericPredicate:
   Enabled: false
 Style/RedundantSelf:
+  Enabled: false
+Style/RescueModifier:
   Enabled: false
 Style/Semicolon:
   AllowAsExpressionSeparator: true

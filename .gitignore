@@ -2,6 +2,7 @@
 node_modules
 /static
 /storage
+/db/migrator.rb
 
 # local env files
 .env.local

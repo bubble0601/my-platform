@@ -13,13 +13,14 @@ export interface Song {
   created_at: string;
   time: number;
   year: number | null;
-  rate: number;
+  rating: number;
+  played_count: number;
   weight?: number;
 }
 
 export interface Rule {
   key: string;
-  field: 'title' | 'artist' | 'album' | 'album_artist' | 'rate' | 'created_at';
+  field: 'title' | 'artist' | 'album' | 'album_artist' | 'rating' | 'created_at';
   operator: string;
   value: string | number;
 }
@@ -93,6 +94,7 @@ const api = {
 
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
   updateSongTag: (id: number, data: Dictionary<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
+  incrementPlayedCount: (id: number) => axios.put(`/api/music/songs/${id}/increment`),
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
 
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
@@ -641,6 +643,11 @@ export default class MusicModule extends VuexModule {
   public async UpdateSong(payload: { id: number, data: Partial<Song> }) {
     const { id, data } = payload;
     await api.updateSong(id, data);
+  }
+
+  @Action
+  public async IncrementPlayedCount(id: number) {
+    return await api.incrementPlayedCount(id);
   }
 
   @Action

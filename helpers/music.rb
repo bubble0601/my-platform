@@ -1,8 +1,8 @@
 module MusicHelpers
   def song_to_hash(song)
-    # rubocop:disable Style/RescueModifier
     {
       id: song[:id],
+      created_at: song[:created_at].strftime('%Y/%m/%d %H:%M'),
       title: song[:title],
       artist: {
         id: song[:artist_id],
@@ -16,19 +16,18 @@ module MusicHelpers
       time: song[:length],
       digest: song[:digest],
       filename: File.basename(song[:filename]),
-      year: (song.album&.year rescue song[:year]),
-      rate: song[:rate],
-      created_at: song[:created_at].strftime('%Y/%m/%d %H:%M'),
+      year: song[:year] || (song.album&.year rescue song[:album_year]),
+      rating: song[:rating],
+      played_count: song[:played_count],
     }
-    # rubocop:enable Style/RescueModifier
   end
 
   def to_col(field)
     case field
     when 'title' then Sequel[:songs][:title]
     when 'artist' then :artist_name
-    when 'album' then Sequel[:album][:title]
-    when 'album_artist' then Sequel[:artist][:name]
+    when 'album' then Sequel[:albums][:title]
+    when 'album_artist' then Sequel[:artists][:name]
     else field.to_sym
     end
   end
@@ -47,10 +46,10 @@ module MusicHelpers
       when 'match'
         { col => rule[:value] }
       end
-    when 'rate'
+    when 'rating'
       raise ArgumentError unless %w[= <= >=].include?(rule[:operator])
 
-      Sequel.lit("rate #{rule[:operator]} ?", rule[:value])
+      Sequel.lit("rating #{rule[:operator]} ?", rule[:value])
     when 'created_at'
       raise ArgumentError unless rule[:value].numeric?
 

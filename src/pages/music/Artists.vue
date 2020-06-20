@@ -11,7 +11,8 @@
         <b-list-group-item v-for="artist in artists" :key="artist.id"
                           :to="`/music/artist/${artist.id}`" variant="secondary"
                           class="border-0 px-3 py-1" active-class="active"
-                          @dblclick.native="shuffleAndPlay">
+                          @dblclick.native="shuffleAndPlay"
+                          @click.native.right.prevent="showContextMenu($event, artist.id)">
           <small>{{ artist.name }}</small>
         </b-list-group-item>
       </b-list-group>
@@ -32,7 +33,8 @@
       <b-list-group-item v-for="artist in artists" :key="artist.id"
                          :to="`/music/artist/${artist.id}`" variant="light"
                          class="px-3 py-2" active-class="active"
-                         @dblclick.native="shuffleAndPlay">
+                         @dblclick.native="shuffleAndPlay"
+                         @click.native.right.prevent="showContextMenu($event, artist.id)">
         <small>{{ artist.name }}</small>
       </b-list-group-item>
     </b-list-group>
@@ -40,8 +42,10 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
-import { NavigationGuard } from 'vue-router';
+import axios from 'axios';
 import { musicModule, viewModule } from '@/store';
+import { ContextMenu } from '@/components';
+// import { ContextMenuItem } from '@/types';
 import SongList from './SongList.vue';
 
 @Component({
@@ -83,6 +87,27 @@ export default class Artists extends Vue {
 
   private shuffleAndPlay() {
     this.songList.shuffleAndPlay();
+  }
+
+  private showContextMenu(e: MouseEvent, id: number) {
+    new ContextMenu().show({
+      items: [
+        {
+          key: 'editRuby',
+          text: 'ふりがなを編集',
+          action: () => {
+            this.$prompt({ title: 'ふりがなを入力' }).then(async (res) => {
+              await axios.put(`/api/music/artists/${id}`, { ruby: res });
+              musicModule.FetchArtists();
+            });
+          },
+        },
+      ],
+      position: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+    });
   }
 }
 </script>
