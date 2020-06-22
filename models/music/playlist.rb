@@ -3,7 +3,9 @@
 #   created_at: datetime
 #   updated_at: datetime
 #   name:       varchar(255), NOT NULL
+#   user_id:    bigint, NOT NULL
 class Playlist < Sequel::Model(:playlists)
+  many_to_one :user
   many_to_many :songs
 end
 

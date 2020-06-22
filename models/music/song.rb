@@ -26,6 +26,7 @@ using Sequel::SymbolAref
 #   played_count:         int, NOT NULL
 #   played_at:            datetime
 class Song < Sequel::Model(:songs)
+  many_to_one :user
   many_to_one :album
   many_to_one :artist
   many_to_many :playlists
@@ -42,59 +43,12 @@ class Song < Sequel::Model(:songs)
     end
   end
 
-  def self.create_from_file(path, filename = nil)
-    filename ||= File.basename(path)
-    audio = Audio.load(path)
-
-    song, album, artist = TagUtil.load_metadata_from_file(audio)
-
-    unless song.title
-      ext = File.extname(filename)
-      song.title = File.basename(filename, ext)
-    end
-
-    associate_relations(song, album, artist)
-    return nil if Song.exists?(song)
-
-    song.length = audio.info.length
-    song.filename = song.generate_filename(filename)
-    FileUtils.mkdir_and_move(path, song.path)
-    song.digest = song.generate_digest
-    song.save
-  end
-
-  def self.associate_relations(song, album, artist)
-    if artist.name
-      song.artist = Artist.find_or_create(name: artist.name)
-      song.artist_name = artist.name unless song.artist_name
-      album.artist_id = song.artist.id
-    else
-      song.artist = nil
-    end
-    if album.artist_id && album.title
-      song.album = Album.find_or_create(album.to_hash.slice(:artist_id, :title))
-      %i[year track_count disc_count].each do |k|
-        song.album[k] = album[k] if album[k]
-      end
-      song.album.save
-    else
-      song.album = nil
-    end
-  end
-
-  def self.exists?(song)
-    q = Song.where(title: song.title)
-    q = q.where(artist_id: song.artist.id) if song.artist
-    q = q.where(album_id: song.album.id) if song.album
-    !q.empty?
-  end
-
   # generates unique digest (Used when create or update file)
   def generate_digest
     Digest::MD5.file(path).update(DateTime.now.strftime('%Y%m%d_%H%M%S%L')).hexdigest[0, 10]
   end
 
-  # generates path after CONF.storage.music
+  # generates path after music_dir
   def generate_filename(original_name = nil)
     filename = original_name || self.filename
     raise unless filename
@@ -117,7 +71,11 @@ class Song < Sequel::Model(:songs)
 
   # returns path includes CONF.storage.music (Either absolute or relative)
   def path
-    "#{CONF.storage.music}/#{filename}"
+    if CONF.local.enabled
+      "#{CONF.storage.music}/#{filename}"
+    else
+      "#{CONF.storage.music}/#{user_id}/#{filename}"
+    end
   end
 
   def update_lyrics(lyrics)
@@ -137,25 +95,6 @@ class Song < Sequel::Model(:songs)
     self.has_cover_art = true
     self.digest = generate_digest
     self.save
-  end
-
-  def regenerate
-    filename = File.basename(path)
-    audio = Audio.load(path)
-    song, album, artist = TagUtil.load_metadata_from_file(audio)
-
-    unless song.title
-      ext = File.extname(filename)
-      song.title = File.basename(filename, ext)
-    end
-
-    Song.associate_relations(song, album, artist)
-
-    song.filename = song.generate_filename(filename)
-    FileUtils.mkdir_and_move(self.path, song.path)
-
-    song.digest = song.generate_digest
-    self.update(song.to_hash)
   end
 
   def replace_file(new_path)

@@ -1,3 +1,5 @@
+using Sequel::SymbolAref
+
 class MainApp
   namespace '/api/music/songs' do
     helpers do
@@ -8,14 +10,15 @@ class MainApp
       def fetch_song(id)
         song = Song[id.to_i]
         halt 404, 'The requested resource is not found' if song.nil?
+        halt 403 if song.user_id != @user.id
         song
       end
 
       def download_new_song
         now = DateTime.now.strftime('%Y%m%d_%H%M%S%L')
-        path = youtube_dl(@json[:url], "#{CONF.storage.temp}/temp#{now}")
+        path = youtube_dl(@json[:url], "#{CONF.storage.temp}/#{@user.id}_#{now}")
         TagUtil.set_tags(path, @json[:metadata])
-        new_song = Song.create_from_file(path)
+        new_song = create_song_from_file(path)
         unless new_song
           logger.warn "The downloaded song already exists: #{@json[:url]}"
           return nil
@@ -37,7 +40,7 @@ class MainApp
             next
           end
 
-          new_song = Song.create_from_file(f[:tempfile].path, f[:filename])
+          new_song = create_song_from_file(f[:tempfile].path, f[:filename])
           if new_song
             results.push(song_to_hash(new_song))
           else
@@ -50,7 +53,8 @@ class MainApp
     end
 
     get '' do
-      query = Song.eager_graph(:album, :artist)
+      query = Song.where(:songs[:user_id] => @user.id)
+                  .eager_graph(:album, :artist)
                   .default_order
       if params[:rules]
         rule_groups = params[:rules].map(&:parse_json)
@@ -144,7 +148,7 @@ class MainApp
       song = fetch_song(params[:id])
       errors = TagUtil.set_tags(song.path, @json)
       # TagUtil.delete_tags(song.path, @json[:other_tags_to_delete])
-      song.regenerate
+      regenerate_song(song)
       return 204 if errors.empty?
 
       return 200, errors
@@ -170,7 +174,7 @@ class MainApp
         song.update_cover_art(response['Content-Type'], response.body)
         return 200, [song[:id]]
       else
-        res = song.album.songs.each do |s|
+        res = Song.where(user_id: user_id, album_id: song.album_id).each do |s|
           s.update_cover_art(response['Content-Type'], response.body)
         end
         return 200, res.map!{ |s| s[:id] }

@@ -16,7 +16,7 @@ class MusicTest < TestBase
     p song.artist
   end
 
-  def test_create_from_file
-    p Song.create_from_file('./storage/temp/07 Never Let Go.mp3')
-  end
+  # def test_create_from_file
+  #   p Song.create_from_file('./storage/temp/07 Never Let Go.mp3')
+  # end
 end

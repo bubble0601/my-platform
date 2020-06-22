@@ -10,9 +10,9 @@
       <b-list-group flush>
         <b-list-group-item v-for="artist in artists" :key="artist.id"
                           :to="`/music/artist/${artist.id}`" variant="secondary"
-                          class="border-0 px-3 py-1" active-class="active"
+                          class="border-0 px-3 py-1 user-select-none" active-class="active"
                           @dblclick.native="shuffleAndPlay"
-                          @click.native.right.prevent="showContextMenu($event, artist.id)">
+                          @click.native.right.prevent="showContextMenu($event, artist)">
           <small>{{ artist.name }}</small>
         </b-list-group-item>
       </b-list-group>
@@ -32,9 +32,9 @@
     <b-list-group flush>
       <b-list-group-item v-for="artist in artists" :key="artist.id"
                          :to="`/music/artist/${artist.id}`" variant="light"
-                         class="px-3 py-2" active-class="active"
+                         class="px-3 py-2 user-select-none" active-class="active"
                          @dblclick.native="shuffleAndPlay"
-                         @click.native.right.prevent="showContextMenu($event, artist.id)">
+                         @click.native.right.prevent="showContextMenu($event, artist)">
         <small>{{ artist.name }}</small>
       </b-list-group-item>
     </b-list-group>
@@ -44,6 +44,7 @@
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import axios from 'axios';
 import { musicModule, viewModule } from '@/store';
+import { Artist } from '@/store/music';
 import { ContextMenu } from '@/components';
 // import { ContextMenuItem } from '@/types';
 import SongList from './SongList.vue';
@@ -89,15 +90,15 @@ export default class Artists extends Vue {
     this.songList.shuffleAndPlay();
   }
 
-  private showContextMenu(e: MouseEvent, id: number) {
+  private showContextMenu(e: MouseEvent, artist: Artist) {
     new ContextMenu().show({
       items: [
         {
           key: 'editRuby',
           text: 'ふりがなを編集',
           action: () => {
-            this.$prompt({ title: 'ふりがなを入力' }).then(async (res) => {
-              await axios.put(`/api/music/artists/${id}`, { ruby: res });
+            this.$prompt({ title: 'ふりがなを入力', value: artist.ruby }).then(async (res) => {
+              await axios.put(`/api/music/artists/${artist.id}`, { ruby: res });
               musicModule.FetchArtists();
             });
           },

@@ -63,8 +63,8 @@ export default class MessageBox extends Mixins(DialogMixin) {
     this.scrollable = options.scrollable || false;
     this.message = options.message || '';
     this.pre = options.pre !== false;
-    this.inputValue = options.inputValue || '';
-    this.inputLabel = options.inputLabel || '';
+    this.inputValue = options.value || '';
+    this.inputLabel = options.label || '';
     this.placeholder = options.placeholder || '';
     this.required = options.required !== false;
     this.okText = options.okText || 'OK';

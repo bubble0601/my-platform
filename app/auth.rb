@@ -3,7 +3,7 @@ class MainApp
     condition do
       case role
       when :user
-        return true unless @user.nil?
+        return true if @user
       end
       if @is_api
         halt 403, 'Unauthorized'

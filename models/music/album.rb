@@ -7,7 +7,9 @@
 #   year:         int
 #   track_count:  int
 #   disc_count:   int, DEFAULT 1
+#   user_id:    bigint, NOT NULL
 class Album < Sequel::Model(:albums)
+  many_to_one :user
   one_to_many :songs
   many_to_one :artist
 end

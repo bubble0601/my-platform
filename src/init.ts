@@ -25,8 +25,8 @@ axios.interceptors.response.use(undefined, (err: AxiosError) => {
   const res = err.response;
   if (res?.data.error_message) {
     Vue.prototype.$message.error(res.data.error_message);
-  } else if (res?.status === 500) {
-    Vue.prototype.$message.error('Server error');
+  } else if (res) {
+    Vue.prototype.$message.error(`${res.status} ${res.statusText}`);
   } else {
     Vue.prototype.$message.error('通信に失敗しました');
   }

@@ -4,6 +4,7 @@ class MainApp
       def get_real_path(digest, name)
         song = Song.first(digest: digest)
         halt 404 if song.nil?
+        halt 403 if song.user_id != @user.id
         halt 400 if File.basename(song.filename) != name
 
         song.path
@@ -20,7 +21,7 @@ class MainApp
       cache_control :no_store
       reset = params[:reset] == 'true'
       ext = File.extname(params[:name])[1..]
-      basepath = "#{CONF.storage.temp}/#{params[:digest]}"
+      basepath = "#{CONF.storage.temp}/#{@user.id}_#{params[:digest]}"
       if reset
         input_path = get_real_path(params[:digest], params[:name]) if reset
         output_path = "#{basepath}.#{ext}"
@@ -66,7 +67,7 @@ class MainApp
     post '/temp/:digest/:name' do
       f = params[:file]
       ext = File.extname(f[:tempfile].path)
-      path = "#{CONF.storage.temp}/#{params[:digest]}#{ext}"
+      path = "#{CONF.storage.temp}/#{@user.id}_#{params[:digest]}#{ext}"
       FileUtils.move(f[:tempfile].path, path)
       session[:music_edit_path] = path
       send_file path

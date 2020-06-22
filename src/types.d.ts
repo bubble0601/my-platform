@@ -18,8 +18,8 @@ export interface MsgBoxOptions {
   scrollable?: boolean;
   message?: string;
   pre?: boolean;
-  inputLabel?: string;
-  inputValue?: string;
+  label?: string;
+  value?: string;
   placeholder?: string;
   required?: boolean;
   okText?: string;

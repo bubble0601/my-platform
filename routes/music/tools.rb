@@ -12,7 +12,7 @@ class MainApp
 
       def rsync(testrun, local, delete)
         local_dir = "#{CONF.storage.music}/"
-        remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{CONF.local.remote.storage.music}/"
+        remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{@user.id}/#{CONF.local.remote.storage.music}/"
         cmd = ['rsync', '-avhuz']
         cmd.push('-n') if testrun
         cmd.push('--iconv=UTF-8-MAC,UTF-8'.no_shellescape, "--exclude='.DS_Store'".no_shellescape) if env[:os][:mac]
@@ -89,7 +89,6 @@ class MainApp
         end
         next unless rec['releases']
 
-        # rubocop:disable Style/RescueModifier
         rec['releases'].each do |album|
           results.push({
             title: rec['title'],
@@ -103,7 +102,6 @@ class MainApp
             disc_count: (album['count'] rescue nil),
           })
         end
-        # rubocop:enable Style/RescueModifier
       end
       results.sort_by! do |x|
         [
@@ -146,13 +144,13 @@ class MainApp
 
     get '/scan' do
       files = {}
-      Dir["#{CONF.storage.music}/**/*.*"].each do |f|
+      Dir["#{music_dir}/**/*.*"].each do |f|
         f.unicode_normalize!
         next unless audio?(f)
 
         files[f] = false
       end
-      Song.each do |s|
+      Song.where(user_id: @user.id).all.each do |s|
         path = s.path
         files[path] = true unless files[path].nil?
       end
@@ -163,12 +161,12 @@ class MainApp
     post '/scan' do
       results = []
       @json.each do |f|
-        unless child_path?(CONF.storage.music, f)
+        unless child_path?(music_dir, f)
           results.push("Invalid path: #{f}")
           next
         end
         begin
-          s = Song.create_from_file(f)
+          s = create_song_from_file(f)
         rescue RuntimeError
           results.push("Error: #{e.message} at #{f}")
           next
@@ -184,10 +182,10 @@ class MainApp
 
     get '/normalize' do
       results = []
-      Song.eager(:album, :artist).all.each do |song|
+      Song.where(user_id: @user.id).eager(:album, :artist).all.each do |song|
         old_path = song.path
         new_filename = song.generate_filename
-        new_path = "#{CONF.storage.music}/#{new_filename}"
+        new_path = "#{music_dir}/#{new_filename}"
         next if old_path == new_path
 
         results.push({ current: old_path, to: new_path })
@@ -197,10 +195,10 @@ class MainApp
 
     post '/normalize' do
       results = []
-      Song.eager(:album, :artist).all.each do |song|
+      Song.where(user_id: @user.id).eager(:album, :artist).all.each do |song|
         old_path = song.path
         new_filename = song.generate_filename
-        new_path = "#{CONF.storage.music}/#{new_filename}"
+        new_path = "#{music_dir}/#{new_filename}"
         next if old_path == new_path
 
         FileUtils.mkdir_and_move(old_path, new_path)
@@ -215,7 +213,7 @@ class MainApp
       files = {}
       deletes = []
       missing_files = []
-      Dir["#{CONF.storage.music}/**/*"].each do |f|
+      Dir["#{music_dir}/**/*"].each do |f|
         f.unicode_normalize!
         if audio?(f)
           files[f] = false
@@ -223,7 +221,7 @@ class MainApp
           deletes.push(f)
         end
       end
-      Song.each do |s|
+      Song.where(user_id: @user.id).all.each do |s|
         path = s.path
         if files[path].nil?
           missing_files.push(path)
@@ -233,7 +231,7 @@ class MainApp
       end
       deletes.concat(files.filter{ |_, v| v == false }.map{ |k, _| k })
 
-      empty_dirs = FileUtils.find_empty_dir(CONF.storage.music)
+      empty_dirs = FileUtils.find_empty_dir(music_dir)
       {
         target_files: deletes,
         target_dirs: empty_dirs,
@@ -245,7 +243,7 @@ class MainApp
       deleted_files = []
       deleted_dirs = []
       @json[:target_files].each do |f|
-        raise ArgumentError, 'Invalid path' unless child_path?(CONF.storage.music, f)
+        halt 400, 'Invalid path' unless child_path?(music_dir, f)
 
         FileUtils.rm(f)
         deleted_files.push(f)
@@ -253,7 +251,7 @@ class MainApp
         logger.error('organize'){ e.message }
       end
       @json[:target_dirs].each do |f|
-        raise ArgumentError, 'Invalid path' unless child_path?(CONF.storage.music, f)
+        halt 400, 'Invalid path' unless child_path?(music_dir, f)
 
         FileUtils.rm_r(f)
         deleted_dirs.push(f)

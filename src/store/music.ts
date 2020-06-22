@@ -58,6 +58,7 @@ export interface Album {
 export interface Artist {
   id: number;
   name: string;
+  ruby: string;
 }
 
 export interface Playlist {

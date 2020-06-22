@@ -1,3 +1,5 @@
+using Sequel::SymbolAref
+
 class MainApp
   namespace '/api/music/artists' do
     helpers do
@@ -7,13 +9,13 @@ class MainApp
     end
 
     get '' do
-      artists = Song.eager_graph(:artist)
-                    .exclude(artist_id: nil)
-                    .group_and_count(:artist_id, :name)
-                    .having{ count.function.* > 0 }
-                    .order(:ruby, :name)
-                    .map{ |s| { id: s[:artist_id], name: s[:name] } }
-      artists.push({ id: 0, name: 'Unknown Artist' }) if Song.first(artist_id: nil)
+      artists = Artist.eager_graph(:songs)
+                      .where(:songs[:user_id] => @user.id)
+                      .group(:artists[:id])
+                      .select(:artists[:id], :name, :ruby)
+                      .order(:ruby, :name)
+                      .map{ |artist| { id: artist[:id], name: artist[:name], ruby: artist[:ruby] } }
+      artists.push({ id: 0, name: 'Unknown Artist' }) unless Song.where(user_id: @user.id, artist_id: nil).empty?
       artists
     end
 
@@ -21,7 +23,8 @@ class MainApp
       aid = params[:id]
       aid = nil if params[:id] == '0'
       Song.eager_graph(:album, :artist)
-          .where(Sequel[:songs][:artist_id] => aid)
+          .where(:songs[:user_id] => @user.id)
+          .where(:songs[:artist_id] => aid)
           .default_order
           .map(&method(:song_to_hash))
     end
@@ -30,6 +33,7 @@ class MainApp
       aid = params[:id].to_i
       artist = Artist[aid]
       halt 404 unless artist
+      halt 403 if artist.user_id != @user.id
       halt 400 if @json.nil?
       artist.update(filtered_json)
       status 204

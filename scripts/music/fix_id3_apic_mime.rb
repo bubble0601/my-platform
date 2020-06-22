@@ -9,12 +9,13 @@ pyfrom 'mutagen.id3', import: :ID3
 Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
   t = ID3.new(f)
   pics = t.getall('APIC')
-  next if pics.length == 0
+  next if pics.length.empty?
+
   puts "multiple coverart: #{f}" if pics.length > 1
 
   pic = pics[0]
   if pic.mime.start_with?('image')
-    if pic.mime != 'image/png' and pic.mime != 'image/jpeg'
+    if pic.mime != 'image/png' && pic.mime != 'image/jpeg'
       puts("#{f} #{pic.mime}")
     end
     next
@@ -33,8 +34,7 @@ Dir["#{CONF.storage.music}/**/*.mp3"].each do |f|
     t.save(f)
     puts 'completed'
   end
-rescue => e
+rescue StandardError => e
   p e
   next
 end
-

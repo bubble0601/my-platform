@@ -4,9 +4,7 @@ AllCops:
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 Layout/LineLength:
-  IgnoredPatterns:
-    # 文字列
-    - !ruby/regexp /^\s*(['"]|%[qQ]?[(\[{])(.*)['")\]}]$/
+  Max: 150
 Layout/SpaceBeforeBlockBraces:
   EnforcedStyle: no_space
 
