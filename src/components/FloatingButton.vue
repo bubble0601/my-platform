@@ -10,7 +10,6 @@
       <div class="small text-nowrap text-left" v-html="tip"/>
     </b-tooltip>
     <template  v-for="(button, i) in buttons">
-      <!-- eslint-disable-next-line -->
       <transition name="slide" @after-enter="showPop = true" @before-leave="showPop = false">
         <div v-if="isActive" :key="button.icon" class="fab-sub position-absolute" :style="`bottom: ${3.2 + 2.5 * i + (i + 1) * 0.5}rem;`">
           <circle-button :id="`fab-${button.icon}`" variant="success" size="sm"

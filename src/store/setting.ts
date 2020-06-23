@@ -19,7 +19,7 @@ export default class SettingModule extends VuexModule {
   }
 
   @Action
-  public async init() {
+  public async Init() {
     const res = await api.init();
     this.SET_IS_LOCAL(res.data.is_local);
   }

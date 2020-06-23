@@ -76,8 +76,6 @@ export default class Music extends Mixins(SizeMixin) {
     'padding-bottom': '6rem',
   };
 
-  private baseTitle = '';
-
   private mOpened = false;
   private mScrollPos: number = 0;
   private mTouchPath: Touch[] = [];
@@ -125,19 +123,6 @@ export default class Music extends Mixins(SizeMixin) {
     ];
   }
 
-  @Watch('currentSong')
-  private onSongChanged() {
-    if (this.currentSong) {
-      if (this.currentSong.artist.name) {
-        document.title = `♪「${this.currentSong.title}」 by ${this.currentSong.artist.name} | ${this.baseTitle}`;
-      } else {
-        document.title = `♪「${this.currentSong.title}」 | ${this.baseTitle}`;
-      }
-    } else {
-      document.title = this.baseTitle;
-    }
-  }
-
   @Watch('footerHeight')
   private onfooterHeightChanged() {
     this.callSizingCallbacks();
@@ -150,7 +135,6 @@ export default class Music extends Mixins(SizeMixin) {
   }
 
   protected created() {
-    this.baseTitle = document.title;
     this.addSizingCallback(() => {
       if (this.$el instanceof HTMLElement) {
         this.mainStyle.height = `${window.innerHeight - this.$el.offsetTop - this.footerHeight}px`;

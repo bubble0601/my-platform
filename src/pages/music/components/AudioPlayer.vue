@@ -175,6 +175,14 @@ export default class AudioPlayer extends Vue {
     }
   }
 
+  @Watch('song')
+  private onSongChanged() {
+    if (this.song && musicModule.notifySong && Notification.permission === 'granted') {
+      // tslint:disable-next-line:no-unused-expression
+      new Notification(`♪「${this.song.title}」 by ${this.song.artist.name}`);
+    }
+  }
+
   private mounted() {
     document.addEventListener('keydown', this.setKeyEvents);
     this.setVolume();

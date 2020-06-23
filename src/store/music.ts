@@ -145,6 +145,8 @@ export default class MusicModule extends VuexModule {
   public mute = false;
   public volume = 100;
 
+  public notifySong = false;
+
   @Mutation
   public SET_SONGS(songs: Song[]) {
     this.songs = songs;
@@ -353,6 +355,12 @@ export default class MusicModule extends VuexModule {
   @Mutation
   public SET_VOLUME(val: number) {
     this.volume = val;
+  }
+
+  // Settings
+  @Mutation
+  private SET_NOTIFY_SONG(val: boolean) {
+    this.notifySong = val;
   }
 
   // Queueにセットする
@@ -699,6 +707,26 @@ export default class MusicModule extends VuexModule {
     });
     await Promise.all(promises);
   }
+
+  /* Settings */
+
+  @Action
+  public EnableSongNotification() {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission((status) => {
+        if (status === 'granted') {
+          this.SET_NOTIFY_SONG(true);
+        }
+      });
+    } else {
+      this.SET_NOTIFY_SONG(true);
+    }
+  }
+
+  @Action
+  public DisableSongNotification() {
+    this.SET_NOTIFY_SONG(false);
+  }
 }
 
 // 永続化する値
@@ -714,5 +742,6 @@ const keys = [
   // 'artistId',
   // 'playlistId',
   // 'smartlistId',
+  'notifySong',
 ];
 export const paths = keys.map((k) => `music.${k}`);

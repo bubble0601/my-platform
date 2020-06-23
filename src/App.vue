@@ -20,7 +20,7 @@ import { settingModule } from './store';
 })
 export default class App extends Vue {
   protected created() {
-    settingModule.init();
+    settingModule.Init();
   }
 }
 </script>

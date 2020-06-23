@@ -1,6 +1,16 @@
 <template>
   <div>
     <b-container class="p-2">
+      <!-- notification -->
+      <b-row class="mb-2">
+        <b-col cols="3" md="2">
+          曲を通知
+        </b-col>
+        <b-col>
+          <b-button v-if="notificationDisabled || !notifySong" variant="primary" :disabled="notificationDisabled" @click="notifySong = true">有効にする</b-button>
+          <b-button v-else variant="outline-danger" @click="notifySong = false">無効にする</b-button>
+        </b-col>
+      </b-row>
       <!-- rsync -->
       <b-row v-if="isLocal" class="mb-2">
         <b-col cols="3" md="2">
@@ -76,7 +86,7 @@
 import axios from 'axios';
 import { Vue, Component, Ref } from 'vue-property-decorator';
 import { Dictionary } from 'lodash';
-import { settingModule } from '@/store';
+import { settingModule, musicModule } from '@/store';
 import { SelectItemDialog } from '@/components';
 import { env } from '@/utils';
 
@@ -109,6 +119,22 @@ export default class Settings extends Vue {
 
   get isLocal() {
     return settingModule.isLocal;
+  }
+
+  get notificationDisabled() {
+    return Notification.permission === 'denied';
+  }
+
+  get notifySong() {
+    return musicModule.notifySong;
+  }
+
+  set notifySong(val) {
+    if (val) {
+      musicModule.EnableSongNotification();
+    } else {
+      musicModule.DisableSongNotification();
+    }
   }
 
   get isMacOS() {
