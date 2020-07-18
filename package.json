@@ -16,7 +16,7 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.15.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "music-metadata-browser": "^2.0.5",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
