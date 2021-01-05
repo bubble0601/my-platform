@@ -13,7 +13,7 @@
     "@chenfengyuan/vue-number-input": "^1.2.1",
     "@johmun/vue-tags-input": "^2.1.0",
     "@types/lodash": "^4.14.155",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.15.0",
     "lodash": "^4.17.15",
