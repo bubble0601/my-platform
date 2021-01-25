@@ -24,14 +24,9 @@ Metrics/ClassLength:
 Metrics/ModuleLength:
   Enabled: false
 Metrics/MethodLength:
-  Max: 30
-  Exclude:
-    - 'tests/**/*'
+  Enabled: false
 Metrics/BlockLength:
-  Max: 30
-  Exclude:
-    - 'routes/**/*'
-    - 'db/migrate/*'
+  Enabled: false
 
 Naming/MethodParameterName:
   MinNameLength: 2
