@@ -14,6 +14,6 @@ end
 #   song_id:      bigint, PRIMARY KEY, NOT NULL
 #   weight:       int, NOT NULL, DEFAULT 1
 class PlaylistSong < Sequel::Model(:playlists_songs)
-  many_to_one :playlists
-  many_to_one :songs
+  many_to_one :playlist
+  many_to_one :song
 end

@@ -24,14 +24,14 @@ class MainApp
 
     get '/:id/songs' do
       items = PlaylistSong.eager_graph(:playlist)
-                          .where(user_id: user_id)
+                          .where(user_id: @user.id)
                           .select(:song_id, :weight)
                           .where(playlist_id: params[:id].to_i)
                           .all
       w_items = {}
       items.each{ |e| w_items[e.song_id] = e.weight }
 
-      Song.where(user_id: user_id)
+      Song.where(:songs[:user_id] => @user.id)
           .eager_graph(:album, :artist)
           .where(Sequel[:songs][:id] => w_items.keys)
           .default_order
