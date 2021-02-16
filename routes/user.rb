@@ -22,7 +22,7 @@ class MainApp
       # check if cookie is enabled
       halt 401, 'Please enable cookies' unless request.cookies.key?(CONF.session.name)
       @user = User.authenticate(@json[:username], @json[:password])
-      halt 403, 'Invalid username or password' if @user.nil?
+      halt 401, 'Invalid username or password' if @user.nil?
       regenerate_session
       session[:uid] = @user.id
       { user: @user.slice(:name) }
@@ -36,15 +36,23 @@ class MainApp
   end
 
   namespace '/api/users' do
+    head '' do
+      conditions = {}
+      conditions[:name] = params[:username] if params[:username]
+      user = User.select('id').where(conditions).first
+      halt 404 if user.nil?
+      status 200
+    end
+
     post '' do
-      # register
-      validates @json, :username, :password
-      begin
-        @user = User.create_user(@json[:username], @json[:password])
-      rescue RuntimeError
-        halt 401, 'Invalid username or password'
+      validates_presence @json, :username, :password
+      user = User.new(@json[:username], @json[:password])
+      if user.valid?
+        user.save
+      else
+        halt 400, { errors: user.errors }
       end
-      status 204
+      status 201
     end
   end
 end

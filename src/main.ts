@@ -7,15 +7,6 @@ import './init';
 
 Vue.config.productionTip = false;
 
-// i18n merging
-router.beforeEach((to, from, next) => {
-  if (to.meta.i18n) {
-    const messages = to.meta.i18n.default;
-    Object.keys(messages).forEach((locale) => i18n.mergeLocaleMessage(locale, messages[locale]));
-  }
-  next();
-});
-
 new Vue({
   router,
   store,

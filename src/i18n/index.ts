@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import messages from './common';
 import { proper } from '@/utils';
+import common from './common';
+import music from './music';
 
 Vue.use(VueI18n);
 
@@ -16,5 +17,8 @@ export default new VueI18n({
       return path;
     }
   },
-  messages,
+  messages: {
+    ...common,
+    ...music,
+  },
 });

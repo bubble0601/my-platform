@@ -11,8 +11,9 @@
   </b-modal>
   <b-modal ref="modal" v-else :title="title" @shown="$refs.input.focus(); $refs.input.select()" @hidden="settle">
     <p v-if="message">{{ message }}</p>
-    <v-field :label="inputLabel" feedback="入力が必要です">
+    <v-field :label="inputLabel">
       <v-input ref="input" v-model="inputValue" :requried="required" :state="inputState" :placeholder="placeholder" @keydown.shift.enter.native="onOK"/>
+      <b-form-invalid-feedback>入力が必要です</b-form-invalid-feedback>
     </v-field>
     <template #modal-footer>
       <div class="d-flex justify-content-end">

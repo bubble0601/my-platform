@@ -1,8 +1,9 @@
 import Vue from 'vue';
-import Router, { RouteConfig } from 'vue-router';
+import Router from 'vue-router';
 import { authModule } from '@/store';
 import Home from '@/pages/Home.vue';
 import music from './music';
+import user from './user';
 
 Vue.use(Router);
 
@@ -13,20 +14,9 @@ const routes = [
     component: Home,
     meta: { title: 'Home', public: true },
   },
+  ...user,
   ...music,
 ];
-
-const inheritMeta = (route: RouteConfig) => {
-  if (route.meta && route.children) {
-    route.children.forEach((r) => {
-      if (!r.meta) r.meta = route.meta;
-      else r.meta = { ...route.meta, ...r.meta };
-      inheritMeta(r);
-    });
-  }
-};
-
-routes.forEach(inheritMeta);
 
 const router = new Router({
   mode: 'history',
@@ -41,35 +31,27 @@ const router = new Router({
 });
 
 // Authentication check
-router.beforeEach((to, from, next) => {
-  if (authModule.isInitialized) {
-    if (to.meta.public || authModule.isAuthenticated) {
-      next();
-    } else {
-      // next('/login?redirect=' + to.path);
-      Vue.prototype.$message.error('Sign in required');
-      next(false);
-    }
+router.beforeEach(async (to, from, next) => {
+  if (!authModule.isInitialized) await authModule.Init();
+  if (to.matched.some((record) => record.meta.public) || authModule.isAuthenticated) {
+    next();
   } else {
-    if (to.meta.public) {
-      next();
-      authModule.Init();
-    } else {
-      authModule.Init().then(() => {
-        if (authModule.isAuthenticated) {
-          next();
-        } else {
-          Vue.prototype.$message.error('Sign in required');
-          next('/');
-        }
-      });
-    }
+    next({
+      path: '/user/signin',
+      query: {
+        redirect: to.path,
+      },
+    });
   }
 });
 
 router.afterEach((to) => {
-  if (to.meta && to.meta.title) {
-    document.title = `${to.meta.title} | iBubble`;
+  let title: string | null = null;
+  to.matched.forEach((record) => {
+    if (record.meta.title) title = record.meta.title;
+  });
+  if (title) {
+    document.title = `${title} | iBubble`;
   } else {
     document.title = 'iBubble';
   }

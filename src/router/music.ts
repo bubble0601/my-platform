@@ -6,7 +6,7 @@ export default [
     component: () => import(/* webpackChunkName: "music" */ '../pages/music/Music.vue'),
     meta: {
       title: 'Music',
-      i18n: require('@/i18n/music'),
+      // i18n: require('@/i18n/music'),
     },
     children: [
       {

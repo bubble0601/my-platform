@@ -1,5 +1,4 @@
-import { Vue, Component, Watch } from 'vue-property-decorator';
-import { viewModule } from '@/store';
+import { Vue, Component } from 'vue-property-decorator';
 
 @Component
 export default class extends Vue {

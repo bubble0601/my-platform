@@ -1,11 +1,10 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
 import axios from 'axios';
+import { User } from '@/api/user';
+
+config.rawError = true;
 
 type Status = '' | 'loading' | 'success' | 'fail' | 'signout';
-
-export interface User {
-  name: string;
-}
 
 const api = {
   init: () => axios.get<{ user: User, token: string }>('/api/auth/init'),

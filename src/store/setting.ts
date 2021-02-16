@@ -1,5 +1,7 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
 import axios from 'axios';
+
+config.rawError = true;
 
 interface InitResponse {
   is_local: boolean;

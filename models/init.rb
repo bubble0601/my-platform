@@ -17,6 +17,7 @@ module Sequel
 end
 
 Sequel::Model.plugin :timestamps, update_on_create: true
+Sequel::Model.plugin :validation_helpers
 Sequel.extension :symbol_aref_refinement, :core_refinements
 
 Dir.glob('*/init.rb', base: __dir__).sort.each{ |f| require_relative f }

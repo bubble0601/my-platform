@@ -1,7 +1,9 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
 import axios from 'axios';
 import { Dictionary, clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
 import { message } from '@/utils/Dialogs';
+
+config.rawError = true;
 
 export interface Song {
   id: number;

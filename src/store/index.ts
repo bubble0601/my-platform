@@ -1,10 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
-import { getModule, config } from 'vuex-module-decorators';
-
-config.rawError = true;
-
+import { getModule } from 'vuex-module-decorators';
 import auth from './auth';
 import view from './view';
 import music, { paths as musicPaths } from './music';
@@ -23,9 +20,7 @@ const store = new Vuex.Store({
     setting,
   },
   plugins: [
-    createPersistedState({
-      paths,
-    }),
+    createPersistedState({ paths }),
   ],
 });
 
