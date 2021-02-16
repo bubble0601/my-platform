@@ -25,7 +25,7 @@ module Lyrics
 
   def search_az(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = 'https://search.azlyrics.com/search.php?' + URI.encode_www_form(q: q)
+    url = "https://search.azlyrics.com/search.php?#{URI.encode_www_form(q: q)}"
 
     doc = get_doc(url)
     links = doc.css('td a:not(.btn)')
@@ -55,7 +55,7 @@ module Lyrics
 
   def search_musix(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = 'https://www.musixmatch.com/search/' + CGI.escape(q).gsub('+', '%20')
+    url = "https://www.musixmatch.com/search/#{CGI.escape(q).gsub('+', '%20')}"
 
     doc = get_doc(url)
     link = doc.css('a.title')[0]
@@ -65,18 +65,16 @@ module Lyrics
     body = doc.css('.mxm-lyrics .mxm-lyrics')[0]
     return unless body
 
-    # rubocop:disable Style/RescueModifier
     lyrics = body.children.map{ |e| e.css('.mxm-lyrics__content span').map(&:text).join("\n") rescue nil }
                  .delete_if(&:nil?).join.strip.gsub("\r", '')
-    # rubocop:enable Style/RescueModifier
     results.push({ text: 'musixmatch.com', value: lyrics }) unless lyrics.empty?
   end
 
   def search_jlyric(results, title, artist)
     url = if artist
-            'http://search.j-lyric.net/index.php?' + URI.encode_www_form(kt: title, ct: 2, ka: artist, ca: 2)
+            "https://search2.j-lyric.net/index.php?#{URI.encode_www_form(kt: title, ct: 2, ka: artist, ca: 2)}"
           else
-            'http://search.j-lyric.net/index.php?' + URI.encode_www_form(kt: title, ct: 2)
+            "https://search2.j-lyric.net/index.php?#{URI.encode_www_form(kt: title, ct: 2)}"
           end
 
     doc = get_doc(url)
@@ -95,15 +93,15 @@ module Lyrics
 
   def search_utaten(results, title, artist)
     url = if artist
-            'https://utaten.com/search?' + URI.encode_www_form(artist_name: artist, title: title)
+            "https://utaten.com/search?#{URI.encode_www_form(artist_name: artist, title: title)}"
           else
-            'https://utaten.com/search?' + URI.encode_www_form(title: title)
+            "https://utaten.com/search?#{URI.encode_www_form(title: title)}"
           end
     doc = get_doc(url)
     link = doc.css('table .searchResult__title a')[0]
     return unless link
 
-    doc = get_doc('https://utaten.com/' + link['href'])
+    doc = get_doc("https://utaten.com/#{link['href']}")
     body = doc.css('.lyricBody .hiragana')[0]
     return unless body
 
@@ -123,7 +121,7 @@ module Lyrics
 
   def search_mojim(results, title, artist)
     q = [title, artist].filter(&:itself).join(' ')
-    url = 'http://mojim.com/' + CGI.escape(q) + '.html?j4'
+    url = "http://mojim.com/#{CGI.escape(q)}.html?j4"
 
     doc = get_doc(url)
     link = doc.css('table.iB .mxsh_ss3 a')[0]
@@ -176,10 +174,10 @@ module CoverArt
   def search_yahoo(results, title, artist, page = 0)
     q = [title, artist].filter(&:itself).join(' ')
     b = page * 20 + 1
-    url = 'https://search.yahoo.co.jp/image/search?' + URI.encode_www_form(p: q, b: b)
+    url = "https://search.yahoo.co.jp/image/search?#{URI.encode_www_form(p: q, b: b)}"
 
     doc = get_doc(url)
-    images = doc.css('div#gridlist img').to_a.map{ |e| e['src'] }
+    images = doc.to_s.scan(%r{"imageSrc":"(https://msp.c.yimg.jp/images/v2/[0-9a-zA-Z_\-=./]*)"}).map{ |m| m[0] }
     results.push(*images)
   end
 end

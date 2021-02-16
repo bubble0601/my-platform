@@ -4,7 +4,7 @@ require 'fileutils'
 
 class String
   def numeric?
-    self =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/
+    /\A[-+]?[0-9]*\.?[0-9]+\Z/.match?(self)
   end
 
   def no_shellescape

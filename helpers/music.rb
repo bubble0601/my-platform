@@ -148,8 +148,7 @@ module MusicHelpers
     cmd.push('--postprocessor-args "-acodec libfdk_aac"'.no_shellescape) if %w[m4a aac].include?(fmt)
     cmd.push(
       '-o', "#{basepath}.%(ext)s",
-      url,
-      '1>/dev/null 2>&1'.no_shellescape
+      url
     )
     begin
       exec_command(cmd)

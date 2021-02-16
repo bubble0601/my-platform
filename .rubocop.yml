@@ -12,9 +12,7 @@ Lint/UnderscorePrefixedVariableName:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 30
-  Exclude:
-    - 'tests/**/*'
+  Enabled: false
 Metrics/CyclomaticComplexity:
   Max: 15
 Metrics/PerceivedComplexity:

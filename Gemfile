@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 # Http Server
 gem 'unicorn'

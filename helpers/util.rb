@@ -15,19 +15,19 @@ module UtilityHelpers
     }
   end
 
-  def async_exec
+  def async_exec(&block)
     raise ArgumentError unless block_given?
 
-    Thread.new{ yield }
+    Thread.new(&block)
   end
 
   def exec_command(cmd)
     cmd = cmd.map(&:shellescape).join(' ') if cmd.is_a?(Array)
     out = `#{cmd}`
     unless $CHILD_STATUS.success?
-      logger.error "An error ocurred when execute `#{cmd}`"
+      logger.error "An error ocurred when executing `#{cmd}`"
       logger.error out
-      raise "An error ocurred when execute `#{cmd}`"
+      raise "An error ocurred when executing `#{cmd}`"
     end
     out
   end
@@ -64,8 +64,7 @@ module UtilityHelpers
 
   def get_doc(url, headers = nil)
     html = get_response(url, headers).body
-    doc = Nokogiri::HTML.parse(html, nil, 'utf-8')
-    doc
+    Nokogiri::HTML.parse(html, nil, 'utf-8')
   end
 
   def get_json(url, headers = nil)
