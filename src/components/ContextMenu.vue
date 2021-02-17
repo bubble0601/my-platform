@@ -16,7 +16,7 @@
   </b-list-group>
 </template>
 <script lang="ts">
-import { Vue, Component, Mixins, Prop } from 'vue-property-decorator';
+import { Component, Mixins, Prop } from 'vue-property-decorator';
 import { Dictionary, isArray } from 'lodash';
 import { DialogMixin } from '@/utils';
 import { ContextMenuItem } from '@/types';
@@ -94,13 +94,17 @@ export default class ContextMenu extends Mixins(DialogMixin) {
   position: absolute;
   z-index: 1000;
 }
-
 </style>
 <style lang="scss">
-.dropdown-toggle.menu-parent {
-  color: inherit !important;
-  background-color: transparent !important;
-  padding: 0.75rem 1.25rem !important;
+.dropdown-toggle {
+  &.menu-parent {
+    color: inherit !important;
+    background-color: transparent !important;
+    padding: 0.75rem 1.25rem !important;
+  }
+  &::after {
+    margin-left: .75rem !important;
+  }
 }
 
 .context-menu .child-link {
