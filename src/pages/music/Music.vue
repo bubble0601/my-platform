@@ -8,10 +8,10 @@
         </div>
         <template v-for="t in tabs">
           <template v-if="t.children">
-            <div class="menu-item cursor-pointer px-3" :class="{ active: $route.path.startsWith(`/music/${t.key}`) }" @click="t.expanded = !t.expanded">
+            <div :key="t.key" class="menu-item cursor-pointer px-3" :class="{ active: $route.path.startsWith(`/music/${t.key}`) }" @click="t.expanded = !t.expanded">
               {{ t.name }}
             </div>
-            <b-collapse v-model="t.expanded">
+            <b-collapse v-model="t.expanded" :key="`${t.key}-collapse`">
               <router-link v-for="tc in t.children" :key="tc.key" :to="`/music/${tc.key}`" tag="div" class="menu-item pl-4 pr-2" active-class="active">
                 {{ tc.name }}
               </router-link>
@@ -20,8 +20,8 @@
           <router-link v-else-if="t.name" :key="t.key" :to="`/music/${t.key}`" tag="div" class="menu-item px-3" active-class="active">
             {{ t.name }}
           </router-link>
-          <div v-else-if="t.key === 'space'" class="mt-auto"/>
-          <hr v-else class="mt-2 mb-1">
+          <div v-else-if="t.key === 'space'" :key="t.key" class="mt-auto"/>
+          <hr v-else :key="t.key" class="mt-2 mb-1">
         </template>
       </div>
       <!-- center content -->
@@ -54,7 +54,6 @@ import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav, ContextMenu } from '@/components';
 import { ContextMenuItem } from '@/types';
 import { AudioPlayer, PlayerInfo } from './components';
-import music from '../../i18n/music';
 
 @Component({
   components: {

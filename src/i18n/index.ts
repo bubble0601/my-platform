@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { proper } from '@/utils';
-import common from './common';
-import music from './music';
+import en from './en';
+import ja from './ja';
 
 Vue.use(VueI18n);
 
@@ -18,7 +18,7 @@ export default new VueI18n({
     }
   },
   messages: {
-    ...common,
-    ...music,
+    en,
+    ja,
   },
 });

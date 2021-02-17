@@ -50,10 +50,10 @@ export default class Auth extends VuexModule {
   public async Init() {
     this.REQUEST();
     const res = await api.init();
-    axios.interceptors.request.use((config) => {
-      if (config.method && ['get', 'head', 'options'].includes(config.method.toLowerCase())) return config;
-      config.headers['X-CSRF-TOKEN'] = res.data.token;
-      return config;
+    axios.interceptors.request.use((axiosRequestConfig) => {
+      if (axiosRequestConfig.method && ['get', 'head', 'options'].includes(axiosRequestConfig.method.toLowerCase())) return axiosRequestConfig;
+      axiosRequestConfig.headers['X-CSRF-TOKEN'] = res.data.token;
+      return axiosRequestConfig;
     });
     if (res.data.user) this.SUCCESS(res.data.user);
     else this.SIGNOUT();
