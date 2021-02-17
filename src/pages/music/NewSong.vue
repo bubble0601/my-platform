@@ -180,39 +180,13 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Mixins, Watch, Ref } from 'vue-property-decorator';
-import { BModal } from 'bootstrap-vue';
-import axios from 'axios';
-import { Dictionary, findIndex, isArray, isEmpty, isNumber, omitBy } from 'lodash';
+import { Vue, Component, Watch, Ref } from 'vue-property-decorator';
+import { findIndex, isArray, isEmpty, isNumber, omitBy } from 'lodash';
 import { musicModule } from '@/store';
-import { Song } from '@/store/music';
+import { MusicApi } from '@/api';
+import { Song, NetworkStatus, DownloadStatus, UploadStatus } from '@/api/music';
 import { VNav, VForm, VInput } from '@/components';
 import SongInfoDialog from './components/SongInfoDialog.vue';
-
-enum Status {
-  Processing,
-  Success,
-  Warning,
-  Error,
-}
-
-interface DownloadStatus {
-  status: Status;
-  url: string;
-  metadata: Dictionary<string>;
-  song?: Song;
-}
-
-interface UploadStatus {
-  status: Status;
-  data: FormData;
-  metadata: Dictionary<string>;
-  filename: string;
-  progress: number;
-  songs?: Song[];
-  expanded: boolean;
-  files: File[];
-}
 
 @Component({
   components: {
@@ -228,7 +202,8 @@ export default class NewSong extends Vue {
     { key: 'upload', title: 'Upload' },
   ];
 
-  private Status = Status;
+  // tslint:disable-next-line
+  private Status = NetworkStatus;
 
   private downloadQueue: DownloadStatus[] = [];
   private url = '';
@@ -304,7 +279,7 @@ export default class NewSong extends Vue {
         this.url = this.url.replace(matched[0], '');
       }
     }
-    axios.get<{ title: string[], artist: string[] }>('/api/music/tools/candidates', { params: { url: this.url } }).then((res) => {
+    MusicApi.getCandidates(this.url).then((res) => {
       const el = document.activeElement;
       if (el instanceof HTMLInputElement) {
         el.blur();
@@ -331,7 +306,7 @@ export default class NewSong extends Vue {
     const status: DownloadStatus = {
       url: this.url,
       metadata,
-      status: Status.Processing,
+      status: NetworkStatus.Processing,
     };
     this.downloadQueue.push(status);
     this.dReset();
@@ -339,20 +314,17 @@ export default class NewSong extends Vue {
   }
 
   private execDownload(status: DownloadStatus) {
-    status.status = Status.Processing;
-    axios.post<Song | null>('/api/music/songs', {
-      url: status.url,
-      metadata: status.metadata,
-    }).then((res) => {
+    status.status = NetworkStatus.Processing;
+    MusicApi.downloadSong(status).then((res) => {
       if (res.data) {
-        status.status = Status.Success;
+        status.status = NetworkStatus.Success;
         status.song = res.data;
       } else {
-        status.status = Status.Warning;
+        status.status = NetworkStatus.Warning;
       }
     }).catch(() => {
       this.$message.error('Failed to download');
-      status.status = Status.Error;
+      status.status = NetworkStatus.Error;
     });
   }
 
@@ -380,7 +352,7 @@ export default class NewSong extends Vue {
       metadata,
       filename: this.filename,
       progress: 0,
-      status: Status.Processing,
+      status: NetworkStatus.Processing,
       expanded: false,
       files: this.files,
     };
@@ -390,27 +362,23 @@ export default class NewSong extends Vue {
   }
 
   private execUpload(status: UploadStatus) {
-    status.status = Status.Processing;
-    axios.post<Song[] | null>('/api/music/songs', status.data, {
-      onUploadProgress: (e: ProgressEvent) => {
-        status.progress = Math.round((e.loaded * 100) / e.total);
-      },
-    }).then((res) => {
+    status.status = NetworkStatus.Processing;
+    MusicApi.uploadSong(status).then((res) => {
       musicModule.ReloadSongs();
       musicModule.FetchArtists();
       if (res.data) {
         if (res.data.length === 1 && res.data[0] == null) {
-          status.status = Status.Warning;
+          status.status = NetworkStatus.Warning;
         } else {
-          status.status = Status.Success;
+          status.status = NetworkStatus.Success;
           status.songs = res.data;
         }
       } else {
-        status.status = Status.Warning;
+        status.status = NetworkStatus.Warning;
       }
     }).catch(() => {
       this.$message.error('Failed to upload');
-      status.status = Status.Error;
+      status.status = NetworkStatus.Error;
     });
   }
 

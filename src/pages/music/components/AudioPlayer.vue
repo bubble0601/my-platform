@@ -75,7 +75,7 @@
 import { Vue, Component, Ref, Prop, Watch } from 'vue-property-decorator';
 import { throttle } from 'lodash';
 import { musicModule, viewModule } from '@/store';
-import { Song, REPEAT } from '@/store/music';
+import { REPEAT } from '@/store/music';
 import { formatTime } from '@/utils';
 import { ContextMenu } from '@/components';
 import { ContextMenuItem } from '@/types';

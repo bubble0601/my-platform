@@ -29,10 +29,7 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
-import { NavigationGuard } from 'vue-router';
-import { isString } from 'lodash';
 import { musicModule, viewModule } from '@/store';
-import { Playlist, Smartlist } from '@/store/music';
 import SongList from './SongList.vue';
 
 @Component({

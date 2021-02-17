@@ -1,4 +1,4 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
+import { VuexModule, Module, Mutation } from 'vuex-module-decorators';
 import { VueConstructor } from 'vue/types/umd';
 import { Dictionary } from 'lodash';
 

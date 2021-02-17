@@ -48,7 +48,7 @@
   </main>
 </template>
 <script lang="ts">
-import { Vue, Component, Mixins, Prop, Ref, Watch } from 'vue-property-decorator';
+import { Vue, Component, Mixins, Watch } from 'vue-property-decorator';
 import { musicModule, viewModule } from '@/store';
 import { SizeMixin } from '@/utils';
 import { FloatingButton, VNav, ContextMenu } from '@/components';

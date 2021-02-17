@@ -58,13 +58,12 @@
     </b-modal>
 </template>
 <script lang="ts">
-import { Vue, Component, Mixins, Prop, Watch, Ref } from 'vue-property-decorator';
+import { Vue, Component, Ref } from 'vue-property-decorator';
 import { BModal } from 'bootstrap-vue';
-import axios from 'axios';
-import { Dictionary, find, findIndex, isArray, isEmpty, omitBy } from 'lodash';
+import { findIndex } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, Metadata, getFilepath } from '@/store/music';
-import { formatTime, formatBytes, waitUntil } from '@/utils';
+import { Song, Metadata, getFilepath } from '@/api/music';
+import { formatTime, formatBytes } from '@/utils';
 import { VNav, Rating } from '@/components';
 import TagEditor from './TagEditor.vue';
 import AudioEditor from './AudioEditor.vue';

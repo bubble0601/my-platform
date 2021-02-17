@@ -65,7 +65,7 @@ import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import * as mm from 'music-metadata-browser';
 import { floor, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
-import { Song } from '@/store/music';
+import { Song } from '@/api/music';
 import { formatTime } from '@/utils';
 import axios from 'axios';
 

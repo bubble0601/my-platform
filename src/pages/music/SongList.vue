@@ -58,10 +58,10 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import { BTable, BvTableFieldArray } from 'bootstrap-vue';
-import { sample } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, REPEAT, getFilepath } from '@/store/music';
-import { formatTime, download } from '@/utils';
+import { REPEAT } from '@/store/music';
+import { Song } from '@/api/music';
+import { formatTime } from '@/utils';
 import { ContextMenu, IconButton, Rating } from '@/components';
 import { ContextMenuItem } from '@/types';
 import { SongInfoDialog } from './components';

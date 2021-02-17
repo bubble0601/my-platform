@@ -34,9 +34,9 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { find, Dictionary } from 'lodash';
+import { Dictionary } from 'lodash';
 import { IconButton } from '@/components';
-import { Song, Metadata } from '@/store/music';
+import { Song, Metadata } from '@/api/music';
 
 @Component({
   components: {

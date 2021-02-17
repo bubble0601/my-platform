@@ -23,9 +23,9 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { map, omitBy, Dictionary } from 'lodash';
+import { map, Dictionary } from 'lodash';
 import { musicModule } from '@/store';
-import { Song, Metadata } from '@/store/music';
+import { Song, Metadata } from '@/api/music';
 import { VFormGroup } from '@/components';
 import SearchInfoDialog from './SearchInfoDialog.vue';
 

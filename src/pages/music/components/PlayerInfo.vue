@@ -88,9 +88,9 @@
 </template>
 <script lang="ts">
 import { Vue, Component, Ref, Watch } from 'vue-property-decorator';
-import { Dictionary, clone, find, isEmpty, omitBy, pick, toInteger } from 'lodash';
+import { clone } from 'lodash';
 import { musicModule } from '@/store';
-import { Song } from '@/store/music';
+import { Song } from '@/api/music';
 import { VNav, Rating } from '@/components';
 import { formatTime, formatBytes } from '@/utils';
 import SongInfoDialog from './SongInfoDialog.vue';

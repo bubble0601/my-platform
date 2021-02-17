@@ -44,7 +44,7 @@
 import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
 import axios from 'axios';
 import { musicModule, viewModule } from '@/store';
-import { Artist } from '@/store/music';
+import { Artist } from '@/api/music';
 import { ContextMenu } from '@/components';
 // import { ContextMenuItem } from '@/types';
 import SongList from './SongList.vue';

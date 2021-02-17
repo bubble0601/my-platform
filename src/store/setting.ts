@@ -1,15 +1,11 @@
 import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
-import axios from 'axios';
+import { UserApi } from '@/api';
 
 config.rawError = true;
 
 interface InitResponse {
   is_local: boolean;
 }
-
-const api = {
-  init: () => axios.get<InitResponse>('/api/setting/init'),
-};
 
 @Module({ name: 'setting' })
 export default class SettingModule extends VuexModule {
@@ -22,7 +18,7 @@ export default class SettingModule extends VuexModule {
 
   @Action
   public async Init() {
-    const res = await api.init();
+    const res = await UserApi.initSettings();
     this.SET_IS_LOCAL(res.data.is_local);
   }
 }

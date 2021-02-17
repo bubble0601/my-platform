@@ -19,7 +19,7 @@
   </b-modal>
 </template>
 <script lang="ts">
-import { Mixins, Vue, Component, Prop } from 'vue-property-decorator';
+import { Mixins, Component, Prop } from 'vue-property-decorator';
 import { Dictionary } from 'lodash';
 import { DialogMixin } from '@/utils';
 

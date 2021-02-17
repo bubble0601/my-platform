@@ -100,9 +100,9 @@
 import { Vue, Component } from 'vue-property-decorator';
 import { Rating } from '@/components';
 import { musicModule } from '@/store';
-import { Song, Rule } from '@/store/music';
+import { Rule } from '@/store/music';
+import { Song } from '@/api/music';
 import SongList from './SongList.vue';
-import { Dictionary } from 'vue-router/types/router';
 
 @Component({
   components: {
