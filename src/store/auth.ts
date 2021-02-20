@@ -1,13 +1,11 @@
-import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
 import { AuthApi } from '@/api';
 import { User } from '@/api/user';
 
-config.rawError = true;
-
 type Status = '' | 'loading' | 'success' | 'fail' | 'signout';
 
-@Module({ name: 'auth' })
+@Module({ namespaced: true, name: 'auth' })
 export default class Auth extends VuexModule {
   public status: Status = '';
   public user: User | null = null;
@@ -43,15 +41,21 @@ export default class Auth extends VuexModule {
 
   @Action
   public async Init() {
+    if (this.status === 'loading') return;
     this.REQUEST();
-    const res = await AuthApi.init();
-    axios.interceptors.request.use((axiosRequestConfig) => {
-      if (axiosRequestConfig.method && ['get', 'head', 'options'].includes(axiosRequestConfig.method.toLowerCase())) return axiosRequestConfig;
-      axiosRequestConfig.headers['X-CSRF-TOKEN'] = res.data.token;
-      return axiosRequestConfig;
+    const res = await AuthApi.init().catch((err) => {
+      this.FAIL();
+      throw err;
     });
-    if (res.data.user) this.SUCCESS(res.data.user);
-    else this.SIGNOUT();
+    if (res) {
+      axios.interceptors.request.use((axiosRequestConfig) => {
+        if (axiosRequestConfig.method && ['get', 'head', 'options'].includes(axiosRequestConfig.method.toLowerCase())) return axiosRequestConfig;
+        axiosRequestConfig.headers['X-CSRF-TOKEN'] = res.data.token;
+        return axiosRequestConfig;
+      });
+      if (res.data.user) this.SUCCESS(res.data.user);
+      else this.SIGNOUT();
+    }
     return res;
   }
 

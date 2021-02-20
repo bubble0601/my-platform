@@ -1,10 +1,8 @@
-import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import { Dictionary, clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
 import { MusicApi } from '@/api';
 import { Song, Artist, Playlist, Smartlist, Metadata } from '@/api/music';
 import { message } from '@/utils/Dialogs';
-
-config.rawError = true;
 
 export interface Rule {
   key: string;
@@ -19,7 +17,7 @@ export enum REPEAT {
   ONE,
 }
 
-@Module({ name: 'music' })
+@Module({ namespaced: true, name: 'music' })
 export default class MusicModule extends VuexModule {
   public songs: Song[] = [];
   public displayedSongs: Song[] = [];

@@ -1,25 +1,25 @@
 <template>
   <div id="app">
-    <Navbar/>
+    <navbar/>
     <section>
       <router-view/>
     </section>
-    <Footer/>
+    <footer-component/>
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import { Navbar, Footer } from './layout';
-import { settingModule } from './store';
+import { Vue, Component } from 'vue-property-decorator';
+import { Navbar, Footer as FooterComponent } from '@/layout';
+import { settingModule } from '@/store';
 
 @Component({
   components: {
     Navbar,
-    Footer,
+    FooterComponent,
   },
 })
 export default class App extends Vue {
-  protected created() {
+  protected beforeCreate() {
     settingModule.Init();
   }
 }

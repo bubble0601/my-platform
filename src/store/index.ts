@@ -1,7 +1,11 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+
+import { config, getModule } from 'vuex-module-decorators';
+config.rawError = true;
+
 import createPersistedState from 'vuex-persistedstate';
-import { getModule } from 'vuex-module-decorators';
+
 import auth from './auth';
 import view from './view';
 import music, { paths as musicPaths } from './music';

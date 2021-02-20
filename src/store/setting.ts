@@ -1,15 +1,12 @@
-import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
 import { UserApi } from '@/api';
 
-config.rawError = true;
+export type Theme = 'light' | 'dark';
 
-interface InitResponse {
-  is_local: boolean;
-}
-
-@Module({ name: 'setting' })
+@Module({ namespaced: true, name: 'setting' })
 export default class SettingModule extends VuexModule {
   public isLocal = false;
+  public theme: Theme = 'light';
 
   @Mutation
   private SET_IS_LOCAL(isLocal: boolean) {
@@ -25,5 +22,6 @@ export default class SettingModule extends VuexModule {
 
 // 永続化
 const keys: string[] = [
+  'theme',
 ];
 export const paths = keys.map((k) => `setting.${k}`);
