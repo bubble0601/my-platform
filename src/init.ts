@@ -4,8 +4,7 @@ import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue';
 import Vuelidate from 'vuelidate';
 import VueSlider from 'vue-slider-component';
 import axios, { AxiosError } from 'axios';
-import { viewModule } from './store';
-import { initDialogs } from './utils';
+import { initDialogs, ResponsivePlugin } from './utils';
 import { VField, VHelp, VInput } from './components';
 
 Component.registerHooks([
@@ -17,6 +16,7 @@ Component.registerHooks([
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
 Vue.use(Vuelidate);
+Vue.use(ResponsivePlugin);
 Vue.component('VueSlider', VueSlider);
 Vue.component('VField', VField);
 Vue.component('VHelp', VHelp);
@@ -44,20 +44,3 @@ if (process.env.NODE_ENV !== 'production') {
     },
   });
 }
-
-Vue.mixin({
-  computed: {
-    $mobile() {
-      return viewModule.isMobile;
-    },
-    $pc() {
-      return viewModule.isPC;
-    },
-  },
-  methods: {
-    $from: viewModule.from,
-    $until: viewModule.until,
-  },
-});
-
-window.addEventListener('resize', viewModule.RESIZE);

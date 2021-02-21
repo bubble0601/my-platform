@@ -1,15 +1,21 @@
 import { Size } from '@/store/view';
 
-declare module 'vue/types/vue' {
-  interface Vue {
-    $mobile: boolean;
-    $pc: boolean;
-    $from: (size: Size) => boolean;
-    $until: (size: Size) => boolean;
-  }
+export type Variant = '' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'light' | 'dark';
+
+export interface MsgOptions {
+  title?: string;
+  message?: string;
+  variant?: Variant;
+  duration?: number;
+  dismissible?: boolean;
 }
 
-export type Variant = '' | 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'light' | 'dark';
+type MessageArgs =
+  [MsgOptions] |
+  [string, MsgOptions?] |
+  [string, string, MsgOptions?] |
+  [Variant, string, string, MsgOptions?];
+
 
 export interface MsgBoxOptions {
   type?: 'confirm' | 'prompt';
@@ -26,12 +32,30 @@ export interface MsgBoxOptions {
   cancelText?: string;
 }
 
-export interface MsgOptions {
-  title?: string;
-  message?: string;
-  variant?: Variant;
-  duration?: number;
-  dismissible?: boolean;
+type MsgBoxArgs =
+  [MsgBoxOptions] |
+  [string, MsgBoxOptions?] |
+  [string, string, MsgBoxOptions?];
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    // dialogs
+    $message: {
+      (...args: MessageArgs): void,
+      info: (...args: MessageArgs) => void,
+      success: (...args: MessageArgs) => void,
+      warn: (...args: MessageArgs) => void,
+      error: (...args: MessageArgs) => void,
+    };
+    $confirm: (...args: MsgBoxArgs) => Promise<undefined>;
+    $prompt: (...args: MsgBoxArgs) => Promise<string>;
+
+    // responsive
+    $mobile: boolean;
+    $pc: boolean;
+    $from: (size: Size) => boolean;
+    $until: (size: Size) => boolean;
+  }
 }
 
 export interface ContextMenuItem {

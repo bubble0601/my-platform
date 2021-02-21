@@ -3,6 +3,7 @@ import { now, isDate, round } from 'lodash';
 import store from '@/store';
 
 export { default as SizeMixin } from './SizeMixin';
+export { default as ResponsivePlugin } from './ResponsivePlugin';
 export { default as DialogMixin } from './DialogMixin';
 export { default as initDialogs } from './Dialogs';
 

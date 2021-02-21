@@ -1,15 +1,9 @@
 import Vue from 'vue';
 import { isObject } from 'lodash';
 import { Message, MessageBox } from '@/components';
-import { Variant, MsgOptions, MsgBoxOptions } from '@/types';
+import { Variant, MsgOptions, MessageArgs, MsgBoxOptions, MsgBoxArgs } from '@/types';
 
 const variants = ['primary', 'secondry', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
-
-type MessageArgs =
-  [MsgOptions] |
-  [string, MsgOptions?] |
-  [string, string, MsgOptions?] |
-  [Variant, string, string, MsgOptions?];
 
 function isVariant(str: string): str is Variant {
   return variants.includes(str);
@@ -101,11 +95,6 @@ function initMessage() {
   Vue.prototype.$message = message;
 }
 
-type MsgBoxArgs =
-  [MsgBoxOptions] |
-  [string, MsgBoxOptions?] |
-  [string, string, MsgBoxOptions?];
-
 function makeMessageBox(type: 'confirm' | 'prompt') {
   return (...args: MsgBoxArgs) => {
     let options: MsgBoxOptions = {};
@@ -160,20 +149,6 @@ function initDialogs() {
    */
   Vue.prototype.$confirm = makeMessageBox('confirm');
   Vue.prototype.$prompt = makeMessageBox('prompt');
-}
-
-declare module 'vue/types/vue' {
-  interface Vue {
-    $message: {
-      (...args: MessageArgs): void,
-      info: (...args: MessageArgs) => void,
-      success: (...args: MessageArgs) => void,
-      warn: (...args: MessageArgs) => void,
-      error: (...args: MessageArgs) => void,
-    };
-    $confirm: (...args: MsgBoxArgs) => Promise<undefined>;
-    $prompt: (...args: MsgBoxArgs) => Promise<string>;
-  }
 }
 
 export default function() {
