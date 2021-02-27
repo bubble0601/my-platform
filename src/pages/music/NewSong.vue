@@ -29,39 +29,41 @@
           </b-button>
         </div>
       </v-form>
-      <b-card header="Results" no-body class="minw-50 mt-3 mt-md-0 mx-md-3">
-        <b-list-group flush class="border-bottom">
-          <b-list-group-item v-for="(d, i) in downloadQueue" :key="i" class="d-flex align-items-center">
-            <b-spinner v-if="d.status === Status.Processing" type="grow" variant="primary" small/>
-            <b-icon v-else-if="d.status === Status.Success" icon="check" scale="1.5" variant="success"/>
-            <b-icon v-else-if="d.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
-            <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
-            <div class="text-truncate mx-2">
-              <span v-if="d.metadata.title && d.metadata.artist">{{ d.metadata.title }} / {{ d.metadata.artist }}</span>
-              <span v-else>{{ d.url }}</span>
-            </div>
-            <div class="text-nowrap ml-auto">
-              <span v-if="d.status === Status.Processing" class="text-primary">Downloading...</span>
-              <div v-else-if="d.status === Status.Success">
-                <b-button size="sm" variant="primary" @click="play(d.song)">
-                  <b-icon icon="play"/>
-                  <span v-if="$pc">Play</span>
-                </b-button>
-                <b-button size="sm" variant="success" class="ml-2" @click="edit(d)">
-                  <b-icon icon="pencil"/>
-                  <span v-if="$pc">Edit</span>
-                </b-button>
+      <div class="minw-50 mt-3 mt-md-0 px-md-3">
+        <b-card header="Results" no-body class="h-100">
+          <b-list-group flush class="border-bottom">
+            <b-list-group-item v-for="(d, i) in downloadQueue" :key="i" class="d-flex align-items-center">
+              <b-spinner v-if="d.status === Status.Processing" type="grow" variant="primary" small/>
+              <b-icon v-else-if="d.status === Status.Success" icon="check" scale="1.5" variant="success"/>
+              <b-icon v-else-if="d.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+              <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
+              <div class="text-truncate mx-2">
+                <span v-if="d.metadata.title && d.metadata.artist">{{ d.metadata.title }} / {{ d.metadata.artist }}</span>
+                <span v-else>{{ d.url }}</span>
               </div>
-              <div v-else-if="d.status === Status.Warning" class="text-warning">
-                <span>Already exists</span>
+              <div class="text-nowrap ml-auto">
+                <span v-if="d.status === Status.Processing" class="text-primary">Downloading...</span>
+                <div v-else-if="d.status === Status.Success">
+                  <b-button size="sm" variant="primary" @click="play(d.song)">
+                    <b-icon icon="play"/>
+                    <span v-if="$pc">Play</span>
+                  </b-button>
+                  <b-button size="sm" variant="success" class="ml-2" @click="edit(d)">
+                    <b-icon icon="pencil"/>
+                    <span v-if="$pc">Edit</span>
+                  </b-button>
+                </div>
+                <div v-else-if="d.status === Status.Warning" class="text-warning">
+                  <span>Already exists</span>
+                </div>
+                <div v-else>
+                  <b-button size="sm" variant="outline-danger" @click="retry(d)">Retry</b-button>
+                </div>
               </div>
-              <div v-else>
-                <b-button size="sm" variant="outline-danger" @click="retry(d)">Retry</b-button>
-              </div>
-            </div>
-          </b-list-group-item>
-        </b-list-group>
-      </b-card>
+            </b-list-group-item>
+          </b-list-group>
+        </b-card>
+      </div>
     </div>
     <div v-else class="d-md-flex pt-3">
       <div class="minw-50">
@@ -101,80 +103,82 @@
           </b-button>
         </div>
       </div>
-      <b-card header="Results" no-body class="minw-50 mt-3 mt-md-0 mx-md-3">
-        <b-list-group flush class="border-bottom">
-          <template v-for="(u, i) in uploadQueue">
-            <!-- multiple files result -->
-            <b-list-group-item v-if="u.status === Status.Success && u.songs.length > 1" :key="i">
-              <div class="d-flex text-truncate">
-                <span class="text-secondary mr-3" @click="u.expanded = !u.expanded"><b-icon :icon="u.expanded ? 'caret-down-fill' : 'caret-right-fill'"/></span>
-                <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
-                <span v-else>{{ u.filename }}</span>
-                <b-button size="sm" variant="primary" class="ml-auto" @click="play(u.songs)">
-                  <b-icon icon="play"/>
-                  <span>Play all</span>
-                </b-button>
-              </div>
-              <b-collapse v-model="u.expanded">
-                <b-list-group flush class="pl-2">
-                  <b-list-group-item v-for="(f, i) in u.files" :key="f.name" class="d-flex align-items-center">
-                    <b-icon v-if="u.songs[i]" icon="check" scale="1.5" variant="success"/>
-                    <b-icon v-else icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
-                    <div class="text-truncate mx-2">
-                      {{ f.name }}
-                    </div>
-                    <div v-if="u.songs[i]" class="text-nowrap ml-auto">
-                      <b-button size="sm" variant="primary" @click="play(u, i)">
-                        <b-icon icon="play"/>
-                        <span v-if="$pc">Play</span>
-                      </b-button>
-                      <b-button size="sm" variant="success" class="ml-2" @click="edit(u, i)">
-                        <b-icon icon="pencil"/>
-                        <span v-if="$pc">Edit</span>
-                      </b-button>
-                    </div>
-                    <div v-else-if="u.songs[i] === null" class="text-nowrap text-warning ml-auto">
-                      <span>Already exists</span>
-                    </div>
-                  </b-list-group-item>
-                </b-list-group>
-              </b-collapse>
-            </b-list-group-item>
-            <!-- single file -->
-            <b-list-group-item v-else :key="i" class="d-flex align-items-center">
-              <b-spinner v-if="u.status === Status.Processing" type="grow" variant="primary" small/>
-              <b-icon v-else-if="u.status === Status.Success" icon="check" scale="1.5" variant="success"/>
-              <b-icon v-else-if="u.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
-              <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
-              <div class="text-truncate text-nowrap mx-2">
-                <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
-                <span v-else>{{ u.filename }}</span>
-              </div>
-              <div class="text-nowrap ml-auto">
-                <span v-if="u.status === Status.Processing" class="text-primary">
-                  Uploading...({{ u.progress }} / 100 )
-                </span>
-                <div v-else-if="u.status === Status.Success">
-                  <b-button size="sm" variant="primary" @click="play(u.songs)">
+      <div class="minw-50 mt-3 mt-md-0 px-md-3">
+        <b-card header="Results" no-body class="h-100">
+          <b-list-group flush class="border-bottom">
+            <template v-for="(u, i) in uploadQueue">
+              <!-- multiple files result -->
+              <b-list-group-item v-if="u.status === Status.Success && u.songs.length > 1" :key="i">
+                <div class="d-flex text-truncate">
+                  <span class="text-secondary mr-3" @click="u.expanded = !u.expanded"><b-icon :icon="u.expanded ? 'caret-down-fill' : 'caret-right-fill'"/></span>
+                  <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
+                  <span v-else>{{ u.filename }}</span>
+                  <b-button size="sm" variant="primary" class="ml-auto" @click="play(u.songs)">
                     <b-icon icon="play"/>
-                    <span v-if="$pc">Play</span>
-                  </b-button>
-                  <b-button size="sm" variant="success" class="ml-2" @click="edit(u, 0)">
-                    <b-icon icon="pencil"/>
-                    <span v-if="$pc">Edit</span>
+                    <span>Play all</span>
                   </b-button>
                 </div>
-                <div v-else-if="u.status === Status.Warning" class="text-warning">
-                  <span>Already exists</span>
+                <b-collapse v-model="u.expanded">
+                  <b-list-group flush class="pl-2">
+                    <b-list-group-item v-for="(f, i) in u.files" :key="f.name" class="d-flex align-items-center">
+                      <b-icon v-if="u.songs[i]" icon="check" scale="1.5" variant="success"/>
+                      <b-icon v-else icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+                      <div class="text-truncate mx-2">
+                        {{ f.name }}
+                      </div>
+                      <div v-if="u.songs[i]" class="text-nowrap ml-auto">
+                        <b-button size="sm" variant="primary" @click="play(u, i)">
+                          <b-icon icon="play"/>
+                          <span v-if="$pc">Play</span>
+                        </b-button>
+                        <b-button size="sm" variant="success" class="ml-2" @click="edit(u, i)">
+                          <b-icon icon="pencil"/>
+                          <span v-if="$pc">Edit</span>
+                        </b-button>
+                      </div>
+                      <div v-else-if="u.songs[i] === null" class="text-nowrap text-warning ml-auto">
+                        <span>Already exists</span>
+                      </div>
+                    </b-list-group-item>
+                  </b-list-group>
+                </b-collapse>
+              </b-list-group-item>
+              <!-- single file -->
+              <b-list-group-item v-else :key="i" class="d-flex align-items-center">
+                <b-spinner v-if="u.status === Status.Processing" type="grow" variant="primary" small/>
+                <b-icon v-else-if="u.status === Status.Success" icon="check" scale="1.5" variant="success"/>
+                <b-icon v-else-if="u.status === Status.Warning" icon="exclamation-triangle-fill" scale="1.5" variant="warning"/>
+                <b-icon v-else icon="x-circle" scale="1.5" variant="danger"/>
+                <div class="text-truncate text-nowrap mx-2">
+                  <span v-if="u.metadata.title && u.metadata.artist">{{ u.metadata.title }} / {{ u.metadata.artist }}</span>
+                  <span v-else>{{ u.filename }}</span>
                 </div>
-                <div v-else>
-                  <b-button size="sm" variant="outline-danger" @click="retry(u)">Retry</b-button>
+                <div class="text-nowrap ml-auto">
+                  <span v-if="u.status === Status.Processing" class="text-primary">
+                    Uploading...({{ u.progress }} / 100 )
+                  </span>
+                  <div v-else-if="u.status === Status.Success">
+                    <b-button size="sm" variant="primary" @click="play(u.songs)">
+                      <b-icon icon="play"/>
+                      <span v-if="$pc">Play</span>
+                    </b-button>
+                    <b-button size="sm" variant="success" class="ml-2" @click="edit(u, 0)">
+                      <b-icon icon="pencil"/>
+                      <span v-if="$pc">Edit</span>
+                    </b-button>
+                  </div>
+                  <div v-else-if="u.status === Status.Warning" class="text-warning">
+                    <span>Already exists</span>
+                  </div>
+                  <div v-else>
+                    <b-button size="sm" variant="outline-danger" @click="retry(u)">Retry</b-button>
+                  </div>
                 </div>
-              </div>
-            </b-list-group-item>
-          </template>
-        </b-list-group>
-      </b-card>
+              </b-list-group-item>
+            </template>
+          </b-list-group>
+        </b-card>
+      </div>
     </div>
     <song-info-dialog ref="songInfoDialog"/>
   </div>

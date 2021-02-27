@@ -1,5 +1,5 @@
 <template>
-  <b-navbar class="p-0" :class="{ mobile: $mobile }">
+  <b-navbar :type="theme" class="p-0" :class="{ mobile: $mobile }">
     <!-- pc -->
     <div v-if="$pc" class="container h-100">
       <b-navbar-brand to="/">
@@ -94,8 +94,12 @@ export default class Navbar extends Vue {
     return authModule.user;
   }
 
+  get theme() {
+    return settingModule.theme;
+  }
+
   get themeIcon() {
-    return settingModule.theme === 'light' ? 'sun' : 'moon';
+    return this.theme === 'light' ? 'sun' : 'moon';
   }
 
   private goToSignInPage() {
@@ -128,9 +132,6 @@ export default class Navbar extends Vue {
     height: 3.5rem;
   }
 
-  @include theme('light') {
-    background-color: var(--light);
-  }
   @include theme('dark') {
     background-color: var(--dark);
   }

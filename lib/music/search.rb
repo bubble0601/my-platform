@@ -18,7 +18,8 @@ module Lyrics
     threads.each do |t|
       t&.join(10)
     rescue StandardError => e
-      p e
+      puts e.message
+      puts e.backtrace
     end
     results.sort_by{ |r| r[:text] == 'mojim.com' ? 1 : 0 }
   end
