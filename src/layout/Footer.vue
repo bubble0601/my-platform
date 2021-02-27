@@ -119,7 +119,13 @@ footer {
   z-index: 110;
   width: 100%;
   box-shadow: 0 -0.25rem .5rem rgba(0, 0, 0, 0.15);
-  background-color: #3c3f41d0;
+
+  @include theme('light') {
+    background-color: var(--light);
+  }
+  @include theme('dark') {
+    background-color: var(--dark);
+  }
 
   .foot-menu {
     user-select: none;

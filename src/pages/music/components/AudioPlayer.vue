@@ -32,43 +32,45 @@
         <vue-slider v-model="volume" :disabled="mute"/>
       </div>
     </div>
-    <div v-else-if="reduced" class="player-controls d-flex align-items-center position-relative">
-      <div v-if="song" class="text-truncate text-light ml-2">
-        <h5 class="overflow-hidden mb-1">{{ song.title }}</h5>
-        <small>
-          <span>{{ song.artist.name }} / {{ song.album.title }}</span>
-        </small>
+    <template v-else>
+      <div v-if="reduced" class="player-controls d-flex align-items-center position-relative">
+        <div v-if="song" class="text-truncate text-light ml-2">
+          <h5 class="overflow-hidden mb-1">{{ song.title }}</h5>
+          <small>
+            <span>{{ song.artist.name }} / {{ song.album.title }}</span>
+          </small>
+        </div>
+        <div class="control-btn btn-play ml-auto px-1" @click.stop="playing = !playing">
+          <b-icon v-if="playing" icon="pause-fill"/>
+          <b-icon v-else icon="caret-right-fill"/>
+        </div>
+        <div class="control-btn btn-menu mx-2 px-2" @click.stop="mShowMenu">
+          <b-icon icon="three-dots-vertical"/>
+        </div>
       </div>
-      <div class="control-btn btn-play ml-auto px-1" @click.stop="playing = !playing">
-        <b-icon v-if="playing" icon="pause-fill"/>
-        <b-icon v-else icon="caret-right-fill"/>
+      <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
+        <div class="player-progress-mobile px-3">
+          <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertPosToTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
+        </div>
+        <div class="control-btn ml-3 mr-auto" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
+          <b-icon icon="shuffle"/>
+        </div>
+        <div class="control-btn btn-skip" @click="prev">
+          <b-icon icon="skip-start-fill" font-scale="1.8"/>
+        </div>
+        <div class="control-btn btn-play" @click="playing = !playing">
+          <b-icon v-if="playing" icon="pause-fill" font-scale="2.5"/>
+          <b-icon v-else icon="caret-right-fill" font-scale="2.5"/>
+        </div>
+        <div class="control-btn btn-skip" @click="next">
+          <b-icon icon="skip-end-fill" font-scale="1.8"/>
+        </div>
+        <div class="control-btn btn-repeat position-relative ml-auto mr-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
+          <b-icon icon="arrow-repeat"/>
+          <span v-show="repeat === REPEAT.ONE" class="repeat-one">1</span>
+        </div>
       </div>
-      <div class="control-btn btn-menu mx-2 px-2" @click.stop="mShowMenu">
-        <b-icon icon="three-dots-vertical"/>
-      </div>
-    </div>
-    <div v-else class="player-controls d-flex align-items-center justify-content-center position-relative">
-      <div class="player-progress-mobile px-3">
-        <vue-slider :value="progress" :max="max" lazy :marks="timeLabel" :tooltip-formatter="convertPosToTime" :disabled="audioSrc === null" :labelStyle="labelStyle" @change="seek"/>
-      </div>
-      <div class="control-btn ml-3 mr-auto" :class="{ enabled: shuffle }" @click="shuffle = !shuffle">
-        <b-icon icon="shuffle"/>
-      </div>
-      <div class="control-btn btn-skip" @click="prev">
-        <b-icon icon="skip-start-fill" font-scale="1.8"/>
-      </div>
-      <div class="control-btn btn-play" @click="playing = !playing">
-        <b-icon v-if="playing" icon="pause-fill" font-scale="2.5"/>
-        <b-icon v-else icon="caret-right-fill" font-scale="2.5"/>
-      </div>
-      <div class="control-btn btn-skip" @click="next">
-        <b-icon icon="skip-end-fill" font-scale="1.8"/>
-      </div>
-      <div class="control-btn btn-repeat position-relative ml-auto mr-3" :class="{ enabled: repeat !== REPEAT.NONE }" @click="repeat = (repeat + 1) % 3">
-        <b-icon icon="arrow-repeat"/>
-        <span v-show="repeat === REPEAT.ONE" class="repeat-one">1</span>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 <script lang="ts">
@@ -354,6 +356,7 @@ export default class AudioPlayer extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+@import '@/scss/theme/default';
 .player {
   height: 4rem;
   min-height: 4rem;
@@ -367,8 +370,15 @@ export default class AudioPlayer extends Vue {
   height: 100%;
 }
 .control-btn {
-  color: white;
   font-size: 1.5rem;
+
+  @include theme('light') {
+    color: $gray-700;
+  }
+  @include theme('dark') {
+    color: $white;
+  }
+
   &.btn-play {
     font-size: 2.5rem;
   }

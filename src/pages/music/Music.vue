@@ -219,27 +219,56 @@ export default class Music extends Mixins(SizeMixin) {
 }
 </script>
 <style lang="scss" scoped>
+@import '@/scss/theme/default';
+$base-color-light: $gray-200;
+$base-color-dark: $gray-800;
+
 .sidemenu-left {
   display: flex;
   flex-direction: column;
-  background-color: #dee2e655;
   width: 9rem;
   min-width: 9rem;
   overflow-x: auto;
   user-select: none;
 
+  @include theme('light') {
+    background-color: $base-color-light;
+  }
+  @include theme('dark') {
+    background-color: $base-color-dark;
+  }
+
   .menu-item {
     display: block;
-    color: #6c757d;
     cursor: pointer;
     white-space: nowrap;
+
+    @include theme('light') {
+      color: invert($base-color-light);
+    }
+    @include theme('dark') {
+      color: invert($base-color-dark);
+    }
+
     &:hover {
-      color: #595e63;
-      background-color: #9993;
+      @include theme('light') {
+        color: darken(invert($base-color-light), 15%);
+        background-color: darken($base-color-light, 15%);
+      }
+      @include theme('dark') {
+        color: lighten(invert($base-color-dark), 15%);
+        background-color: lighten($base-color-dark, 15%);
+      }
     }
     &.active {
-      color: #494d50;
-      background-color: #9995;
+      @include theme('light') {
+        color: darken(invert($base-color-light), 30%);
+        background-color: darken($base-color-light, 30%);
+      }
+      @include theme('dark') {
+        color: lighten(invert($base-color-dark), 30%);
+        background-color: lighten($base-color-dark, 30%);
+      }
       cursor: default;
     }
   }

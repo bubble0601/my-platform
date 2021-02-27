@@ -5,7 +5,7 @@
         <small>empty</small>
       </b-list-group-item>
       <b-list-group-item v-for="p in playlists" :key="p.id"
-                        :to="`/music/playlist/${p.id}`" variant="secondary"
+                        :to="`/music/playlist/${p.id}`"
                         class="border-0 px-3 py-1" active-class="active"
                         @dblclick.native="shuffleAndPlay">
         <small>{{ p.name }}</small>
@@ -86,7 +86,6 @@ export default class Playlists extends Vue {
 </script>
 <style lang="scss" scoped>
 .playlists {
-  background-color: #9994;
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;

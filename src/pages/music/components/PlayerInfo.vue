@@ -5,7 +5,7 @@
         <b-icon icon="chevron-down" font-scale="1.5" class="text-secondary ml-2 mr-3" @click="$emit('close')"/>
       </template>
     </v-nav>
-    <div class="flex-grow-1 bg-white overflow-auto px-2">
+    <div class="content flex-grow-1 overflow-auto px-2">
       <template v-if="tab === 'song'">
         <div class="d-flex justify-content-center py-3">
           <b-img v-if="coverArtUrl" :src="coverArtUrl" width="128" alt="Cover art" class="shadow"/>
@@ -230,6 +230,15 @@ export default class PlayerInfo extends Vue {
 .player-info {
   display: flex;
   flex-direction: column;
+
+  .content {
+    @include theme('light') {
+      background-color: var(--white);
+    }
+    @include theme('dark') {
+      background-color: var(--black);
+    }
+  }
 }
 .lyrics {
   font-size: 11px;

@@ -9,7 +9,7 @@
       </b-input-group>
       <b-list-group flush>
         <b-list-group-item v-for="artist in artists" :key="artist.id"
-                          :to="`/music/artist/${artist.id}`" variant="secondary"
+                          :to="`/music/artist/${artist.id}`"
                           class="border-0 px-3 py-1 user-select-none" active-class="active"
                           @dblclick.native="shuffleAndPlay"
                           @click.native.right.prevent="showContextMenu($event, artist)">
@@ -46,7 +46,6 @@ import axios from 'axios';
 import { musicModule, viewModule } from '@/store';
 import { Artist } from '@/api/music';
 import { ContextMenu } from '@/components';
-// import { ContextMenuItem } from '@/types';
 import SongList from './SongList.vue';
 
 @Component({
@@ -113,13 +112,20 @@ export default class Artists extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+@import '@/scss/theme/default';
 .artists {
-  background-color: #9994;
   overflow-y: auto;
   overflow-x: hidden;
   word-break: keep-all;
   &.pc {
     width: 14rem;
+  }
+
+  @include theme('light') {
+    background-color: $gray-400;
+  }
+  @include theme('dark') {
+    background-color: $gray-600;
   }
 }
 

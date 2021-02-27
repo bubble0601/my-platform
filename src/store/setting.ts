@@ -13,10 +13,20 @@ export default class SettingModule extends VuexModule {
     this.isLocal = isLocal;
   }
 
+  @Mutation
+  private SET_THEME(theme: Theme) {
+    this.theme = theme;
+  }
+
   @Action
   public async Init() {
     const res = await UserApi.initSettings();
     this.SET_IS_LOCAL(res.data.is_local);
+  }
+
+  @Action
+  public SetTheme(theme: Theme) {
+    this.SET_THEME(theme);
   }
 }
 

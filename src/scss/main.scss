@@ -1,0 +1,53 @@
+@import 'mixins';
+
+[data-theme=light] {
+  @import 'theme/light';
+  @import '~bootstrap/scss/bootstrap';
+  @import '~bootstrap-vue/src/index.scss';
+
+  &:root {
+    @include root($colors, $theme-colors, $grid-breakpoints, $font-family-sans-serif, $font-family-monospace);
+  }
+}
+
+[data-theme=dark] {
+  @import 'theme/dark';
+  @import '~bootstrap/scss/bootstrap';
+  @import '~bootstrap-vue/src/index.scss';
+
+  &:root {
+    @include root($colors, $theme-colors, $grid-breakpoints, $font-family-sans-serif, $font-family-monospace);
+  }
+}
+
+[data-theme=light] *, [data-theme=dark] * {
+  transition: background-color .5s, border-color .5s;
+}
+
+@import '~vue-slider-component/theme/default.css';
+
+@import "util";
+
+html, body {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior-y: none;
+}
+
+
+// Font size
+$breakpoint-min-sm: 576px;
+$breakpoint-max-xs: $breakpoint-min-sm - 0.02px;
+@media screen and (max-width: $breakpoint-max-xs) {
+  html {
+    font-size: 14px;
+  }
+}
+@media screen and (min-width: $breakpoint-min-sm) {
+  html {
+    font-size: 12px;
+  }
+}

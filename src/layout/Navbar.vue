@@ -9,12 +9,13 @@
         <b-nav-item to="/music" active-class="active">Music</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="h-100 ml-auto">
+        <icon-button :icon="themeIcon" :variant="themeIcon === 'sun' ? 'secondary' : 'warning'" @click="toggleTheme"/>
         <!-- Not autheticated -->
-        <div v-if="!isAuthenticated" class="py-1">
-          <b-button variant="primary" size="sm" @click="toSignInPage">ログイン</b-button>
+        <div v-if="!isAuthenticated && $route.path !== '/user/signin'" class="py-1">
+          <b-button variant="primary" size="sm" to="/user/signin">ログイン</b-button>
         </div>
         <!-- Authenticated -->
-        <b-nav-item-dropdown v-else right menu-class="shadow-sm" toggle-class="d-flex align-items-center h-100" class="h-100" @toggle="showUserInfo = !showUserInfo">
+        <b-nav-item-dropdown v-else-if="isAuthenticated" right menu-class="shadow-sm" toggle-class="d-flex align-items-center h-100" class="h-100">
           <template #button-content>
             <b-icon icon="person-fill" size="1.5" :class="{ 'text-muted': !isAuthenticated }"/>
           </template>
@@ -36,29 +37,24 @@
         <img class="brand" src="../assets/logo.png" alt="Logo">
       </b-navbar-brand>
       <b-navbar-nav class="h-100 ml-auto mr-2">
-        <b-nav-item-dropdown right menu-class="shadow-sm" toggle-class="d-flex align-items-center h-100" class="h-100" @toggle="showUserInfo = !showUserInfo">
+        <icon-button :icon="themeIcon" :variant="themeIcon === 'sun' ? 'secondary' : 'warning'" @click="toggleTheme"/>
+        <!-- Not autheticated -->
+        <div v-if="!isAuthenticated && $route.path !== '/user/signin'" class="align-self-center py-1">
+          <b-button variant="primary" size="sm" to="/user/signin">ログイン</b-button>
+        </div>
+        <!-- Authenticated -->
+        <b-nav-item-dropdown v-else-if="isAuthenticated" right menu-class="shadow-sm" toggle-class="d-flex align-items-center h-100" class="h-100">
           <template #button-content>
             <b-icon icon="person-fill" size="1.5" :class="{ 'text-muted': !isAuthenticated }"/>
           </template>
-          <b-dropdown-form v-if="!isAuthenticated" form-class="px-2">
-            <b-form-group>
-              <v-input ref="usernameInput" v-model="username" size="sm" required placeholder="Username" @keydown.native.enter="passwordInput.focus()"/>
-            </b-form-group>
-            <b-form-group>
-              <v-input ref="passwordInput" v-model="password" type="password" size="sm" required placeholder="Password" @keydown.enter="signIn"/>
-            </b-form-group>
-            <b-button variant="primary" size="sm" @click="signIn">Sign In</b-button>
-          </b-dropdown-form>
-          <template v-else>
-            <b-dropdown-text class="d-flex flex-column">
-              <div class="text-muted">Signed in as</div>
-              <div class="font-weight-bolder">{{ user.name }}</div>
-            </b-dropdown-text>
-            <b-dropdown-divider/>
-            <b-dropdown-item @click="signOut">
-              Sign Out
-            </b-dropdown-item>
-          </template>
+          <b-dropdown-text class="d-flex flex-column">
+            <div class="text-muted">Signed in as</div>
+            <div class="font-weight-bolder">{{ user.name }}</div>
+          </b-dropdown-text>
+          <b-dropdown-divider/>
+          <b-dropdown-item @click="signOut">
+            Sign Out
+          </b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
       <b-sidebar v-model="sidebarVisible" shadow backdrop width="15rem">
@@ -77,8 +73,8 @@
   </b-navbar>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop, Watch, Ref } from 'vue-property-decorator';
-import { authModule } from '@/store';
+import { Vue, Component } from 'vue-property-decorator';
+import { authModule, settingModule } from '@/store';
 import { User } from '@/api/user';
 import { IconButton } from '@/components';
 
@@ -89,12 +85,6 @@ import { IconButton } from '@/components';
 })
 export default class Navbar extends Vue {
   private sidebarVisible = false;
-  private showUserInfo = false;
-  private username = '';
-  private password = '';
-
-  @Ref() private usernameInput!: HTMLInputElement;
-  @Ref() private passwordInput!: HTMLInputElement;
 
   get isAuthenticated(): boolean {
     return authModule.isAuthenticated;
@@ -104,41 +94,28 @@ export default class Navbar extends Vue {
     return authModule.user;
   }
 
-  @Watch('showUserInfo')
-  private onUserInfoToggled(val: boolean) {
-    if (!this.isAuthenticated && val) this.usernameInput.focus();
+  get themeIcon() {
+    return settingModule.theme === 'light' ? 'sun' : 'moon';
   }
 
-  private mounted() {
-    document.addEventListener('click', this.hideUserInfo);
-  }
-
-  private beforeDestroy() {
-    document.removeEventListener('click', this.hideUserInfo);
-  }
-
-  private hideUserInfo() {
-    this.showUserInfo = false;
-  }
-
-  // private async signIn() {
-  //   const data = {
-  //     username: this.username,
-  //     password: this.password,
-  //   };
-  //   await authModule.SignIn(data);
-  //   this.hideUserInfo();
-  // }
-  private toSignInPage() {
+  private goToSignInPage() {
     this.$router.push('/user/signin', undefined, () => {
       // Abort if try to push the same route
       this.$router.go(0);
     });
   }
+
   private async signOut() {
     await authModule.SignOut();
     this.$router.push('/user/signin');
-    // this.hideUserInfo();
+  }
+
+  private toggleTheme() {
+    if (settingModule.theme === 'light') {
+      settingModule.SetTheme('dark');
+    } else {
+      settingModule.SetTheme('light');
+    }
   }
 }
 </script>
@@ -149,6 +126,13 @@ export default class Navbar extends Vue {
   z-index:  120;
   &.mobile {
     height: 3.5rem;
+  }
+
+  @include theme('light') {
+    background-color: var(--light);
+  }
+  @include theme('dark') {
+    background-color: var(--dark);
   }
 }
 .brand {

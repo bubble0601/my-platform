@@ -8,7 +8,7 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import { Navbar, Footer as FooterComponent } from '@/layout';
 import { settingModule } from '@/store';
 
@@ -19,13 +19,23 @@ import { settingModule } from '@/store';
   },
 })
 export default class App extends Vue {
+  get theme() {
+    return settingModule.theme;
+  }
+
+  @Watch('theme', { immediate: true })
+  private onThemeChanged() {
+    document.documentElement.setAttribute('data-theme', this.theme);
+  }
+
   protected beforeCreate() {
     settingModule.Init();
   }
 }
 </script>
 <style lang="scss">
-@import 'assets/scss/common';
+@import 'scss/main';
+
 #app {
   display: flex;
   flex-direction: column;
@@ -34,6 +44,5 @@ export default class App extends Vue {
 
 #app > section {
   flex-grow: 1;
-  background-color: #fafafa;
 }
 </style>
