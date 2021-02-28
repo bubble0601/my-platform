@@ -32,7 +32,8 @@ class MainApp
     end
   end
 
-  error do
-    logger.error env['sinatra.error'].message
+  error 500 do
+    logger.info env.inspect
+    logger.error env['sinatra.error']&.message || '500 Internal server error'
   end
 end
