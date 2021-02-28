@@ -31,4 +31,8 @@ class MainApp
       send_file './static/index.html'
     end
   end
+
+  error do
+    logger.error env['sinatra.error'].message
+  end
 end

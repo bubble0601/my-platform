@@ -23,6 +23,7 @@ module UtilityHelpers
 
   def exec_command(cmd)
     cmd = cmd.map(&:shellescape).join(' ') if cmd.is_a?(Array)
+    logger.info("execute command: #{cmd}")
     out = `#{cmd}`
     unless $CHILD_STATUS.success?
       logger.error "An error ocurred when executing `#{cmd}`"
