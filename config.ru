@@ -1,2 +1,2 @@
-require './app/init'
+require './server/app/init'
 run MainApp

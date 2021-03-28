@@ -1,4 +1,4 @@
-require './app/config'
+require './server/app/config'
 require './lib/music/audio'
 
 puts "start convert mp3tag to ID3v2.4/UTF-8...\n"

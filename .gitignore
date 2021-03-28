@@ -1,19 +1,21 @@
-.DS_Store
-node_modules
 /static
 /storage
 /db/migrator.rb
 
+# Server settings
+/conf.yml
+
 # local env files
+.env
 .env.local
 .env.*.local
 .ruby-version
 
 # Log files
+/deploy/log/*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/deploy/log/*
 
 # Editor directories and files
 .idea
@@ -24,5 +26,8 @@ yarn-error.log*
 *.sln
 *.sw*
 
-# Server settings
-/conf.yml
+# Vim swap files
+*.swp
+
+# macOS
+.DS_Store

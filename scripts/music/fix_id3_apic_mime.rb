@@ -1,7 +1,7 @@
 # mimeがbytesリテラルになっていたのを修正
 
 require 'pycall/import'
-require './app/config'
+require './server/app/config'
 
 extend PyCall::Import
 pyfrom 'mutagen.id3', import: :ID3

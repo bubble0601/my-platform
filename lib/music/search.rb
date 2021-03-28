@@ -1,4 +1,4 @@
-require './helpers/util'
+require './server/helpers/util'
 
 module Lyrics
   extend UtilityHelpers

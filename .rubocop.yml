@@ -14,9 +14,9 @@ Lint/UnderscorePrefixedVariableName:
 Metrics/AbcSize:
   Enabled: false
 Metrics/CyclomaticComplexity:
-  Max: 15
+  Enabled: false
 Metrics/PerceivedComplexity:
-  Max: 15
+  Enabled: false
 Metrics/ClassLength:
   Enabled: false
 Metrics/ModuleLength:
