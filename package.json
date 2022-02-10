@@ -37,7 +37,7 @@
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "^4.5.11",
     "cache-loader": "^4.1.0",
-    "node-sass": "^5.0.0",
+    "node-sass": "^7.0.0",
     "sass-loader": "^10.1.1",
     "typescript": "^4.2.2",
     "vue-template-compiler": "^2.6.12",
