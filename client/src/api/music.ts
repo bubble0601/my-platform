@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { Dictionary } from 'lodash';
 
 export interface Song {
   id: number;
@@ -20,9 +19,10 @@ export interface Metadata {
   format: {
     codec: string;
     length: number;
-    bitrate: string;
-    sample_rate: string;
-    channels: string;
+    channels: number;
+    bitrate: number;
+    sample_rate: number;
+    tag_type: string;
   };
   tags: {
     title: string | null;
@@ -64,12 +64,6 @@ export interface Smartlist {
   songs?: Song[];
 }
 
-export interface NormalPlaylist {
-  id: number;
-  name: string;
-  songs?: Song[];
-}
-
 export enum NetworkStatus {
   Processing,
   Success,
@@ -80,14 +74,14 @@ export enum NetworkStatus {
 export interface DownloadStatus {
   status: NetworkStatus;
   url: string;
-  metadata: Dictionary<string>;
+  metadata: Record<string, string>;
   song?: Song;
 }
 
 export interface UploadStatus {
   status: NetworkStatus;
   data: FormData;
-  metadata: Dictionary<string>;
+  metadata: Record<string, string>;
   filename: string;
   progress: number;
   songs?: Song[];
@@ -98,13 +92,13 @@ export interface UploadStatus {
 export const getFilepath = (song: Song) => encodeURI(`/static/music/${song.digest}/${song.filename}`);
 
 export default {
-  fetchSongs: (params: Dictionary<any> = {}) => axios.get<Song[]>('/api/music/songs', { params }),
+  fetchSongs: (params: Record<string, unknown> = {}) => axios.get<Song[]>('/api/music/songs', { params }),
   fetchSong: (id: number) => axios.get<Song>(`/api/music/songs/${id}`),
   fetchAudio: (song: Song) => axios.get<Blob>(getFilepath(song), { responseType: 'blob' }),
   fetchMetadata: (id: number) => axios.get<Metadata>(`/api/music/songs/${id}/metadata`),
 
   updateSong: (id: number, data: Partial<Song>) => axios.put(`/api/music/songs/${id}`, data),
-  updateSongTag: (id: number, data: Dictionary<any>) => axios.put(`/api/music/songs/${id}/tag`, data),
+  updateSongTag: (id: number, data: Record<string, unknown>) => axios.put(`/api/music/songs/${id}/tag`, data),
   incrementPlayedCount: (id: number) => axios.put(`/api/music/songs/${id}/increment`),
   deleteSong: (id: number) => axios.delete(`/api/music/songs/${id}`),
 
@@ -118,14 +112,16 @@ export default {
     },
   }),
 
+  fetchArtist: (id: number) => axios.get<Artist>(`/api/music/artists/${id}`),
   fetchArtists: () => axios.get<Artist[]>('/api/music/artists'),
   fetchArtistSongs: (id: number) => axios.get<Song[]>(`/api/music/artists/${id}/songs`),
+  updateArtist: (id: number, data: Partial<Artist>) => axios.put(`/api/music/artists/${id}`, data),
 
   fetchPlaylists: () => axios.get<Playlist[]>('/api/music/playlists'),
   fetchPlaylistSongs: (id: number) => axios.get<Song[]>(`/api/music/playlists/${id}/songs`),
-  createPlaylist: (name: string) => axios.post<NormalPlaylist>('/api/music/playlists', { name }),
+  createPlaylist: (name: string) => axios.post<Playlist>('/api/music/playlists', { name }),
   fetchPlaylistSong: (id: number, songId: number) => axios.get<Song>(`/api/music/playlists/${id}/songs/${songId}`),
-  addPlaylistSong: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
+  addSongToPlaylist: (id: number, songIds: number[]) => axios.post(`/api/music/playlists/${id}/songs`, songIds),
   updatePlaylistSong: (id: number, songId: number, weight: number) =>
                         axios.put(`/api/music/playlists/${id}/songs/${songId}`, { weight }),
   removePlaylistSong: (id: number, songId: number) => axios.delete(`/api/music/playlists/${id}/songs/${songId}`),

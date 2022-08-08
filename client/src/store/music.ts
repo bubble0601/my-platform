@@ -1,15 +1,9 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
-import { Dictionary, clone, concat, fill, findIndex, last, sample, shuffle as sh, takeRight } from 'lodash';
-import { MusicApi } from '@/api';
-import { Song, Artist, Playlist, Smartlist, Metadata } from '@/api/music';
-import { message } from '@/utils/Dialogs';
+import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
+config.rawError = true;
 
-export interface Rule {
-  key: string;
-  field: 'title' | 'artist' | 'album' | 'album_artist' | 'rating' | 'created_at';
-  operator: string;
-  value: string | number;
-}
+import { clone, concat, fill, findIndex, last, sample, shuffle, takeRight } from 'lodash';
+import { MusicApi } from '@/api';
+import { Song, Playlist, Metadata } from '@/api/music';
 
 export enum REPEAT {
   NONE,
@@ -19,25 +13,19 @@ export enum REPEAT {
 
 @Module({ namespaced: true, name: 'music' })
 export default class MusicModule extends VuexModule {
-  public songs: Song[] = [];
-  public displayedSongs: Song[] = [];
-
-  public artists: Artist[] = [];
-  public artistId: number | null = null;
   public playlists: Playlist[] = [];
-  public playlistId: number  | null = null;
-  public smartlists: Smartlist[] = [];
-  public smartlistId: number | null = null;
-  public temporaryPlaylist: Song[] | null = null;
 
-  public current: Song | null = null;
-  public audioData: Blob | null = null;
-  public audioSrc: string | null = null;
-  public audioMetadata: Metadata | null = null;
+  // player data
+  public currentSong: Song | null = null;
+  public currentAudio: Blob | null = null;
+  public currentAudioSrc: string | null = null;
+  public currentMetadata: Metadata | null = null;
+
   private prefetching = false;
   public nextSong: Song | null = null;
   public nextAudio: Blob | null = null;
   public nextMetadata: Metadata | null = null;
+
   public queue: Song[] = [];
   public queueSet: Song[] = [];
   public history: Song[] = [];
@@ -51,109 +39,31 @@ export default class MusicModule extends VuexModule {
   public notifySong = false;
 
   @Mutation
-  public SET_SONGS(songs: Song[]) {
-    this.songs = songs;
-  }
-
-  @Mutation
-  private UPDATE_SONGS(data: { id: number, song: Song | null }) {
-    const { id, song } = data;
-    const n = findIndex(this.songs, { id });
-    if (song) {
-      if (n >= 0) {
-        this.songs = this.songs.map((v, i) => n === i ? song : v);
-      }
-    } else {
-      this.songs = this.songs.filter((v, i) => n !== i);
-    }
-  }
-
-  @Mutation
-  private SET_ARTISTS(artists: Artist[]) {
-    this.artists = artists;
-  }
-
-  @Mutation
-  private SET_ARTIST_ID(id: number | null) {
-    this.artistId = id;
-  }
-
-  @Mutation
   private SET_PLAYLISTS(playlists: Playlist[]) {
     this.playlists = playlists;
-  }
-
-  @Mutation
-  private SET_PLAYLIST_ID(id: number | null) {
-    this.playlistId = id;
-  }
-
-  @Mutation
-  private SET_SMARTLISTS(smartlists: Smartlist[]) {
-    this.smartlists = smartlists;
-  }
-
-  @Mutation
-  private SET_SMARTLIST_ID(id: number | null) {
-    this.smartlistId = id;
-  }
-
-  @Mutation
-  private RESET_FETCH_SONGS() {
-    this.artistId = null;
-    this.playlistId = null;
-    this.smartlistId = null;
-  }
-
-  @Mutation
-  public SET_DISPLAYED_SONGS(songs: Song[]) {
-    this.displayedSongs = songs;
-  }
-
-  @Mutation
-  public SET_TEMPORARY_PLAYLIST(songs?: Song[] | null) {
-    if (songs === undefined) {
-      if (this.temporaryPlaylist) this.songs = this.temporaryPlaylist;
-    } else {
-      this.temporaryPlaylist = songs;
-      this.songs = songs || [];
-    }
-  }
-
-  @Mutation
-  public ADD_TO_TEMPORARY_PLAYLIST(songs: Song[]) {
-    if (!this.temporaryPlaylist) return;
-    this.temporaryPlaylist.push(...songs);
-  }
-
-  @Mutation
-  public REMOVE_FROM_TEMPORARY_PLAYLIST(songs: Song[]) {
-    if (!this.temporaryPlaylist) return;
-    const targetIds = songs.map((s) => s.id);
-    this.temporaryPlaylist = this.temporaryPlaylist.filter((s) => !targetIds.includes(s.id));
   }
 
   // player control
   @Mutation
   public SET_CURRENT(song: Song | null) {
-    this.current = song;
+    this.currentSong = song;
   }
 
   @Mutation
   private SET_AUDIO(data: Blob | null) {
     if (data) {
-      this.audioData = data;
-      this.audioSrc = URL.createObjectURL(data);
+      this.currentAudio = data;
+      this.currentAudioSrc = URL.createObjectURL(data);
     } else {
-      if (this.audioSrc) URL.revokeObjectURL(this.audioSrc);
-      this.audioData = null;
-      this.audioSrc = '';
+      if (this.currentAudioSrc) URL.revokeObjectURL(this.currentAudioSrc);
+      this.currentAudio = null;
+      this.currentAudioSrc = '';
     }
   }
 
   @Mutation
   private SET_METADATA(data: Metadata | null) {
-    this.audioMetadata = data;
+    this.currentMetadata = data;
   }
 
   @Mutation
@@ -189,7 +99,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Mutation
-  private UNSHIFT_QUEUE(song = this.current) {
+  private UNSHIFT_QUEUE(song = this.currentSong) {
     if (song) {
       this.queue.unshift(song);
     }
@@ -217,24 +127,36 @@ export default class MusicModule extends VuexModule {
     }
   }
 
+  // @Mutation
+  // private OP_HISTORY(op: string) {
+  //   switch (op) {
+  //     case 'push':
+  //       if (this.current) {
+  //         this.history.push(this.current);
+  //         if (this.history.length > 100) this.history = takeRight(this.history, 100);
+  //       }
+  //       break;
+  //     case 'pop':
+  //       this.history.pop();
+  //       break;
+  //   }
+  // }
   @Mutation
-  private OP_HISTORY(op: string) {
-    switch (op) {
-      case 'push':
-        if (this.current) {
-          this.history.push(this.current);
-          if (this.history.length > 100) this.history = takeRight(this.history, 100);
-        }
-        break;
-      case 'pop':
-        this.history.pop();
-        break;
+  private PUSH_HISTORY() {
+    if (this.currentSong) {
+      this.history.push(this.currentSong);
+      if (this.history.length > 100) this.history = takeRight(this.history, 100);
     }
   }
 
   @Mutation
+  private POP_HISTORY() {
+    this.history.pop();
+  }
+
+  @Mutation
   public SET_PLAYING(val: boolean) {
-    if (val === false || this.current != null) {
+    if (val === false || this.currentSong != null) {
       this.playing = val;
     }
   }
@@ -276,9 +198,9 @@ export default class MusicModule extends VuexModule {
     if (songs && songs.length > 0 && songs[0].weight) {
       const rsongs = songs as Array<Required<Song>>;
       songs = [];
-      rsongs.forEach((s) => {
-        songs!.push(...fill(Array(s.weight), s));
-      });
+      for (const s of rsongs) {
+        songs.push(...fill(Array(s.weight), s));
+      }
     }
 
     if (songs) this.SET_QUEUE_SET(clone(songs));
@@ -295,10 +217,10 @@ export default class MusicModule extends VuexModule {
         }
       }
       if (this.shuffle) {
-        queue = sh(queue);
+        queue = shuffle(queue);
         if (this.repeat === REPEAT.ALL) {
           while (queue.length < 30) {
-            queue.push(...sh(songs));
+            queue.push(...shuffle(songs));
           }
         }
         this.SET_QUEUE(queue);
@@ -320,38 +242,21 @@ export default class MusicModule extends VuexModule {
     const queue = this.queueSet;
     if (!queue.length) return;
     while (this.queue.length < 30) {
-      this.PUSH_QUEUE(this.shuffle ? sh(queue) : queue);
+      this.PUSH_QUEUE(this.shuffle ? shuffle(queue) : queue);
     }
   }
 
-  /* Fetchers */
-  @Action
-  public async FetchAll() {
-    this.SET_SONGS([]);
-    this.RESET_FETCH_SONGS();
-    const { data } = await MusicApi.fetchSongs();
-    this.SET_SONGS(data);
-  }
+  /* Fetch */
+  // @Action
+  // public async FetchAll() {
+  //   const { data } = await MusicApi.fetchSongs();
+  //   return data;
+  // }
 
-  @Action
-  public async FetchSongs(params: { rules: Rule[][], limit?: number, sortBy?: string }) {
-    return await MusicApi.fetchSongs(params);
-  }
-
-  @Action
-  public async FetchArtists() {
-    const { data } = await MusicApi.fetchArtists();
-    this.SET_ARTISTS(data);
-  }
-
-  @Action
-  public async FetchArtistSongs(id: number) {
-    this.SET_SONGS([]);
-    this.RESET_FETCH_SONGS();
-    this.SET_ARTIST_ID(id);
-    const { data } = await MusicApi.fetchArtistSongs(id);
-    this.SET_SONGS(data);
-  }
+  // @Action
+  // public async FetchSongs(params: { rules: Rule[][], limit?: number, sortBy?: string }) {
+  //   return await MusicApi.fetchSongs(params);
+  // }
 
   @Action
   public async FetchPlaylists() {
@@ -360,42 +265,20 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public async FetchPlaylistSongs(id: number) {
-    this.SET_SONGS([]);
-    this.RESET_FETCH_SONGS();
-    this.SET_PLAYLIST_ID(id);
-    const { data } = await MusicApi.fetchPlaylistSongs(id);
-    this.SET_SONGS(data);
-  }
-
-  @Action
-  public async FetchSmartlists() {
-    const { data } = await MusicApi.fetchSmartlists();
-    this.SET_SMARTLISTS(data);
-  }
-
-  @Action
-  public async FetchSmartlistSongs(id: number) {
-    this.SET_SONGS([]);
-    const { data } = await MusicApi.fetchSmartlistSongs(id);
-    this.RESET_FETCH_SONGS();
-    this.SET_SMARTLIST_ID(id);
-    this.SET_SONGS(data);
-  }
-
-  @Action
   public async ReloadSong(id: number) {
     let data = null;
-    if (this.playlistId) {
-      const res = await MusicApi.fetchPlaylistSong(this.playlistId, id);
-      data = res.data;
-    } else {
-      const res = await MusicApi.fetchSong(id);
-      data = res.data;
-    }
-    this.UPDATE_SONGS({ id, song: data });
+    // if (this.playlistId) {
+    //   const res = await MusicApi.fetchPlaylistSong(this.playlistId, id);
+    //   data = res.data;
+    // } else {
+    //   const res = await MusicApi.fetchSong(id);
+    //   data = res.data;
+    // }
+    const res = await MusicApi.fetchSong(id);
+    data = res.data;
+    // this.UPDATE_SONGS({ id, song: data });
     this.UPDATE_QUEUE_ITEM(data);
-    if (this.current && this.current.id === id) {
+    if (this.currentSong && this.currentSong.id === id) {
       this.SET_CURRENT(data);
     }
     return data;
@@ -403,19 +286,19 @@ export default class MusicModule extends VuexModule {
 
   @Action
   public async ReloadSongs() {
-    if (this.artistId) {
-      const { data } = await MusicApi.fetchArtistSongs(this.artistId);
-      this.SET_SONGS(data);
-    } else if (this.playlistId) {
-      const { data } = await MusicApi.fetchPlaylistSongs(this.playlistId);
-      this.SET_SONGS(data);
-    } else if (this.smartlistId) {
-      const { data } = await MusicApi.fetchSmartlistSongs(this.smartlistId);
-      this.SET_SONGS(data);
-    } else { // all
-      const { data } = await MusicApi.fetchSongs();
-      this.SET_SONGS(data);
-    }
+    // if (this.artistId) {
+    //   const { data } = await MusicApi.fetchArtistSongs(this.artistId);
+    //   this.SET_SONGS(data);
+    // } else if (this.playlistId) {
+    //   const { data } = await MusicApi.fetchPlaylistSongs(this.playlistId);
+    //   this.SET_SONGS(data);
+    // } else if (this.smartlistId) {
+    //   const { data } = await MusicApi.fetchSmartlistSongs(this.smartlistId);
+    //   this.SET_SONGS(data);
+    // } else { // all
+    //   const { data } = await MusicApi.fetchSongs();
+    //   this.SET_SONGS(data);
+    // }
   }
 
   @Action
@@ -465,14 +348,14 @@ export default class MusicModule extends VuexModule {
     const { shuffle, repeat } = data;
     if (shuffle != null) {
       this.SET_SHUFFLE(shuffle);
-      if (this.current) {
-        this.setQueue(this.current);
+      if (this.currentSong) {
+        this.setQueue(this.currentSong);
       }
     }
     if (repeat != null) {
       this.SET_REPEAT(repeat);
-      if (this.current) {
-        this.setQueue(this.current);
+      if (this.currentSong) {
+        this.setQueue(this.currentSong);
       }
     }
   }
@@ -491,8 +374,11 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public async PlayAndSet(song: Song | undefined) {
+  public async PlayAndSet(data: { song?: Song, songs?: Song[] }) {
+    const { song } = data;
     if (!song) return;
+    let { songs } = data;
+    if (!songs) songs = this.displayedSongs;
     this.Play(song);
     this.setQueue({ song, songs: this.songs });
   }
@@ -502,16 +388,24 @@ export default class MusicModule extends VuexModule {
     const song = sample(songs);
     if (!song) return;
     this.Play(song);
-    this.setQueue({ song, songs: this.songs });
+    this.setQueue({ song, songs });
   }
 
   @Action
   public PlayFromQueue(i: number) {
     const song = this.queue[i];
     this.SET_CURRENT(song);
-    this.FetchAudioForPlay(song);
+    this.FetchAudioForPlay(song).then(() => {
+      this.SET_PLAYING(true);
+    });
     this.SET_QUEUE(this.queue.slice(i + 1));
     this.updateQueue();
+  }
+
+  @Mutation
+  public MOVE_TO_HEAD(i: number) {
+    const song = this.queue[i];
+    this.queue = concat(song, this.queue.slice(0, i), this.queue.slice(i + 1));
   }
 
   @Action
@@ -552,7 +446,7 @@ export default class MusicModule extends VuexModule {
     });
   }
 
-  /* Operations */
+  /* CRUD Operations */
   @Action
   public async UpdateSong(payload: { id: number, data: Partial<Song> }) {
     const { id, data } = payload;
@@ -565,7 +459,7 @@ export default class MusicModule extends VuexModule {
   }
 
   @Action
-  public async UpdateSongTag(payload: { id: number, data: Dictionary<string | null> }) {
+  public async UpdateSongTag(payload: { id: number, data: Record<string, string | null> }) {
     const { id, data } = payload;
     return await MusicApi.updateSongTag(id, data);
   }
@@ -580,14 +474,14 @@ export default class MusicModule extends VuexModule {
   public async CreatePlaylist(data: { name: string, songs: Song[]}) {
     const res = await MusicApi.createPlaylist(data.name);
     if (data.songs.length === 0) return res.data.id;
-    await MusicApi.addPlaylistSong(res.data.id, data.songs.map((s) => s.id));
+    await MusicApi.addSongToPlaylist(res.data.id, data.songs.map((s) => s.id));
     return res.data.id;
   }
 
   @Action
   public async AddPlaylistSong(data: { id: number, songs: Song[] }) {
     if (this.songs.length === 0) return;
-    return await MusicApi.addPlaylistSong(data.id, data.songs.map((s) => s.id));
+    return await MusicApi.addSongToPlaylist(data.id, data.songs.map((s) => s.id));
   }
 
   @Action
@@ -596,7 +490,7 @@ export default class MusicModule extends VuexModule {
     if (this.playlistId) {
       await MusicApi.updatePlaylistSong(this.playlistId, id, data.weight);
     } else {
-      message.error('An error occurred');
+      // message.error('An error occurred');
     }
   }
 
@@ -605,7 +499,7 @@ export default class MusicModule extends VuexModule {
     if (this.songs.length === 0) return;
     if (!this.playlistId) return;
     const id = this.playlistId;
-    const promises: Array<Promise<any>> = [];
+    const promises: Array<Promise<unknown>> = [];
     data.songs.forEach((song) => {
       const p = MusicApi.removePlaylistSong(id, song.id);
       promises.push(p);
@@ -614,7 +508,6 @@ export default class MusicModule extends VuexModule {
   }
 
   /* Settings */
-
   @Action
   public EnableSongNotification() {
     if (Notification.permission !== 'granted') {
@@ -634,9 +527,9 @@ export default class MusicModule extends VuexModule {
   }
 }
 
-// 永続化する値
+// 永続化するstate
 const keys = [
-  'current',
+  'currentSong',
   'queue',
   'queueSet',
   'history',
@@ -644,9 +537,6 @@ const keys = [
   'repeat',
   'mute',
   'volume',
-  // 'artistId',
-  // 'playlistId',
-  // 'smartlistId',
   'notifySong',
 ];
 export const paths = keys.map((k) => `music.${k}`);

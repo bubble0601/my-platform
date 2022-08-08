@@ -1,6 +1,6 @@
 # Application settings
 app:
-  name: 'my platform'
+  name: my_platform
   debug: true
   genius_access_token: 'xxxxxxx'
 
@@ -26,6 +26,7 @@ db:
 
 # Session Settings
 session:
+  # cookie key
   name: sid
 
 storage:

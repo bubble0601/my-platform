@@ -5,11 +5,7 @@ class MainApp
       when :user
         return true if @user
       end
-      if @is_api
-        halt 403, 'Unauthorized'
-      else
-        halt 403
-      end
+      halt 401
     end
   end
 
@@ -27,7 +23,6 @@ class MainApp
   end
 
   before do
-    @is_api = request.path.start_with?('/api')
     @user = session[:uid] && User[session[:uid]]
   end
 end

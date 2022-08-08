@@ -4,17 +4,11 @@ class MainApp
     use Rack::CommonLogger, Logger.new(CONF.log.access, 'daily')
   end
   def logger
-    if settings.development?
-      @logger ||= Logger.new($stdout)
-    else
-      @logger ||= Logger.new(CONF.log.app, 'monthly')
-    end
+    return @logger if @logger
+
+    @logger = settings.development? ? Logger.new($stdout) : Logger.new(CONF.log.app, 'monthly')
   end
 end
 
-if CONF.app.debug
-  DB.loggers << Logger.new($stdout)
-  DB.sql_log_level = :debug
-else
-  DB.loggers << Logger.new(CONF.log.db, 'daily')
-end
+DB.loggers << Logger.new($stdout)
+DB.sql_log_level = :debug

@@ -56,20 +56,55 @@ class MainApp
       query = Song.where(:songs[:user_id] => @user.id)
                   .eager_graph(:album, :artist)
                   .default_order
-      if params[:rules]
-        rule_groups = params[:rules].map(&:parse_json)
-        rule_groups.each do |or_group|
-          conditions = or_group.map{ |rule| rule_to_query(rule) }.reduce{ |result, q| result | q }
-          query = query.where(conditions)
-        end
+
+      if params[:q]
+        q = params[:q]
+        query = query.where(
+          to_like_query(Sequel[:songs][:title], q) |
+          to_like_query(:artist_name, q) |
+          to_like_query(Sequel[:artist][:name], q) |
+          to_like_query(Sequel[:artist][:ruby], q) |
+          to_like_query(Sequel[:album][:title], q)
+        )
       end
-      if params[:sortBy]
-        s = params[:sortBy].split('__')
-        col = to_col(s[0])
+      if params[:title]
+        query = query.where(to_like_query(Sequel[:songs][:title], params[:title], params[:title_m]))
+      end
+      if params[:artist]
+        query = query.where(
+          to_like_query(:artist_name, params[:artist], params[:artist_m]) |
+          to_like_query(Sequel[:artist][:name], params[:artist], params[:artist_m]) |
+          to_like_query(Sequel[:artist][:ruby], params[:artist], params[:artist_m])
+        )
+      end
+      if params[:album]
+        query = query.where(to_like_query(Sequel[:album][:title], params[:album], params[:album_m]))
+      end
+      if params[:rate_min]
+        query = query.where{ |o| o.rating >= params[:rate_min] }
+      end
+      if params[:rate_max]
+        query = query.where{ |o| o.rating <= params[:rate_max] }
+      end
+      if params[:from]
+        from = Sequel.string_to_date(params[:from])
+        query = query.where(Sequel[:songs][:created_at] >= from)
+      end
+      if params[:to]
+        to = Sequel.string_to_date(params[:to])
+        query = query.where(Sequel[:songs][:created_at] <= to)
+      end
+
+      if params[:limit]
+        raise ArgumentError unless params[:sort]
+
+        s = params[:sort].split('__')
+        col = Sequel[s[0].to_sym]
         order = s[1] == 'asc' ? Sequel.asc(col) : Sequel.desc(col)
         query = query.order_prepend(order)
+        query = query.limit(params[:limit].to_i)
       end
-      query = query.limit(params[:limit].to_i) if params[:limit]
+
       query.map(&method(:song_to_hash))
     rescue ArgumentError
       halt 400, 'Invalid arguments'

@@ -1,4 +1,6 @@
-import { VuexModule, Module, Action, Mutation } from 'vuex-module-decorators';
+import { VuexModule, Module, Action, Mutation, config } from 'vuex-module-decorators';
+config.rawError = true;
+
 import axios from 'axios';
 import { AuthApi } from '@/api';
 import { User } from '@/api/user';
@@ -50,7 +52,7 @@ export default class Auth extends VuexModule {
     if (res) {
       axios.interceptors.request.use((axiosRequestConfig) => {
         if (axiosRequestConfig.method && ['get', 'head', 'options'].includes(axiosRequestConfig.method.toLowerCase())) return axiosRequestConfig;
-        axiosRequestConfig.headers['X-CSRF-TOKEN'] = res.data.token;
+        if (axiosRequestConfig.headers) axiosRequestConfig.headers['X-CSRF-TOKEN'] = res.data.token;
         return axiosRequestConfig;
       });
       if (res.data.user) this.SUCCESS(res.data.user);

@@ -99,57 +99,66 @@ module MusicHelpers
     !q.empty?
   end
 
-  def to_col(field)
-    case field
-    when 'title' then Sequel[:songs][:title]
-    when 'artist' then :artist_name
-    when 'album' then Sequel[:albums][:title]
-    when 'album_artist' then Sequel[:artists][:name]
-    else field.to_sym
-    end
-  end
+  # def to_col(field)
+  #   case field
+  #   when 'title' then Sequel[:songs][:title]
+  #   when 'artist' then :artist_name
+  #   when 'album' then Sequel[:albums][:title]
+  #   when 'album_artist' then Sequel[:artists][:name]
+  #   else field.to_sym
+  #   end
+  # end
 
-  def rule_to_query(rule)
-    case rule[:field]
-    when 'title', 'artist', 'album', 'album_artist'
-      col = to_col(rule[:field])
-      case rule[:operator]
-      when 'include'
-        Sequel.ilike(col, "%#{rule[:value].escape_like}%")
-      when 'prefix'
-        Sequel.ilike(col, "#{rule[:value].escape_like}%")
-      when 'postfix'
-        Sequel.ilike(col, "%#{rule[:value].escape_like}")
-      when 'match'
-        { col => rule[:value] }
-      end
-    when 'rating'
-      raise ArgumentError unless %w[= <= >=].include?(rule[:operator])
+  # def rule_to_query(rule)
+  #   case rule[:field]
+  #   when 'title', 'artist', 'album', 'album_artist'
+  #     col = to_col(rule[:field])
+  #     case rule[:operator]
+  #     when 'include'
+  #       Sequel.ilike(col, "%#{rule[:value].escape_for_like}%")
+  #     when 'prefix'
+  #       Sequel.ilike(col, "#{rule[:value].escape_for_like}%")
+  #     when 'postfix'
+  #       Sequel.ilike(col, "%#{rule[:value].escape_for_like}")
+  #     when 'match'
+  #       { col => rule[:value] }
+  #     end
+  #   when 'rating'
+  #     raise ArgumentError unless %w[= <= >=].include?(rule[:operator])
 
-      Sequel.lit("rating #{rule[:operator]} ?", rule[:value])
-    when 'created_at'
-      raise ArgumentError unless rule[:value].numeric?
+  #     Sequel.lit("rating #{rule[:operator]} ?", rule[:value])
+  #   when 'created_at'
+  #     raise ArgumentError unless rule[:value].numeric?
 
-      Sequel.lit('DATE_ADD(songs.created_at, INTERVAL ? DAY) > NOW()', rule[:value])
-    else
-      raise ArgumentError
+  #     Sequel.lit('DATE_ADD(songs.created_at, INTERVAL ? DAY) > NOW()', rule[:value])
+  #   else
+  #     raise ArgumentError
+  #   end
+  # end
+
+  def to_like_query(column, keyword, type = nil)
+    escaped = keyword.escape_for_like
+    case type
+    when 'prefix' then Sequel.ilike(column, "#{escaped}%")
+    when 'suffix' then Sequel.ilike(column, "%#{escaped}")
+    when 'exact' then Sequel.ilike(column, escaped)
+    else Sequel.ilike(column, "%#{escaped}%")
     end
   end
 
   def youtube_dl(url, basepath, fmt = 'm4a')
-    cmd = [
+    cmd = "PYTHONHOME='' "  # PYTHONHOME is automatically set by PyCall and this causes error.
+    cmd += [
       'youtube-dl',
       '--no-playlist',
       '--geo-bypass',
       '-f', 'bestaudio',
       '--extract-audio',
       '--audio-format', fmt,
-    ]
-    cmd.push('--postprocessor-args "-acodec libfdk_aac"'.no_shellescape) if %w[m4a aac].include?(fmt)
-    cmd.push(
-      '-o', "#{basepath}.%(ext)s",
-      url
-    )
+    ].map(&:shellescape).join(' ')
+    cmd += ' --postprocessor-args "-acodec libfdk_aac"' if %w[m4a aac].include?(fmt)
+    cmd += ' '
+    cmd += ['-o', "#{basepath}.%(ext)s", url].map(&:shellescape).join(' ')
     begin
       exec_command(cmd)
       return File.absolute_path("#{basepath}.#{fmt}") if File.exist?("#{basepath}.#{fmt}")

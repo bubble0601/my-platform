@@ -30,7 +30,7 @@ class String
     escaped.unicode_normalize(:nfc)
   end
 
-  def escape_like
+  def escape_for_like
     gsub(/[\\%_]/){ |m| "\\#{m}" }
   end
 

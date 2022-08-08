@@ -1,6 +1,8 @@
+require './server/helpers/network'
 require './server/helpers/util'
 
 module Lyrics
+  extend NetworkHelpers
   extend UtilityHelpers
 
   module_function
@@ -28,7 +30,7 @@ module Lyrics
     q = [title, artist].filter(&:itself).join(' ')
     url = "https://search.azlyrics.com/search.php?#{URI.encode_www_form(q: q)}"
 
-    doc = get_doc(url)
+    doc = get_html(url)
     links = doc.css('td a:not(.btn)')
     link = nil
     links.each do |l|
@@ -39,7 +41,7 @@ module Lyrics
     end
     return unless link
 
-    doc = get_doc(link['href'])
+    doc = get_html(link['href'])
     body = nil
     divs = doc.css('div.main-page > div > div > div')
     divs.each do |div|
@@ -58,11 +60,11 @@ module Lyrics
     q = [title, artist].filter(&:itself).join(' ')
     url = "https://www.musixmatch.com/search/#{CGI.escape(q).gsub('+', '%20')}"
 
-    doc = get_doc(url)
+    doc = get_html(url)
     link = doc.css('a.title')[0]
     return unless link
 
-    doc = get_doc("https://www.musixmatch.com#{link['href']}")
+    doc = get_html("https://www.musixmatch.com#{link['href']}")
     body = doc.css('.mxm-lyrics .mxm-lyrics')[0]
     return unless body
 
@@ -78,11 +80,11 @@ module Lyrics
             "https://search2.j-lyric.net/index.php?#{URI.encode_www_form(kt: title, ct: 2)}"
           end
 
-    doc = get_doc(url)
+    doc = get_html(url)
     link = doc.css('div#mnb .bdy .mid a')[0]
     return unless link
 
-    doc = get_doc(link['href'])
+    doc = get_html(link['href'])
     body = doc.css('p#Lyric')[0]
     return unless body
 
@@ -98,11 +100,11 @@ module Lyrics
           else
             "https://utaten.com/search?#{URI.encode_www_form(title: title)}"
           end
-    doc = get_doc(url)
+    doc = get_html(url)
     link = doc.css('table .searchResult__title a')[0]
     return unless link
 
-    doc = get_doc("https://utaten.com/#{link['href']}")
+    doc = get_html("https://utaten.com/#{link['href']}")
     body = doc.css('.lyricBody .hiragana')[0]
     return unless body
 
@@ -124,11 +126,11 @@ module Lyrics
     q = [title, artist].filter(&:itself).join(' ')
     url = "http://mojim.com/#{CGI.escape(q)}.html?j4"
 
-    doc = get_doc(url)
+    doc = get_html(url)
     link = doc.css('table.iB .mxsh_ss3 a')[0]
     return unless link
 
-    doc = get_doc("http://mojim.com#{link['href']}")
+    doc = get_html("http://mojim.com#{link['href']}")
     body = doc.css('#fsZx1')[0]
     return unless body
 
@@ -143,6 +145,7 @@ module Lyrics
 end
 
 module CoverArt
+  extend NetworkHelpers
   extend UtilityHelpers
 
   module_function
@@ -169,7 +172,7 @@ module CoverArt
   #   q = [title, artist].filter(&:itself).join(' ')
   #   url = URI.escape("https://www.google.com/search?q=#{q}&tbm=isch")
 
-  #   doc = get_doc(url)
+  #   doc = get_html(url)
   # end
 
   def search_yahoo(results, title, artist, page = 0)
@@ -177,7 +180,7 @@ module CoverArt
     b = page * 20 + 1
     url = "https://search.yahoo.co.jp/image/search?#{URI.encode_www_form(p: q, b: b)}"
 
-    doc = get_doc(url)
+    doc = get_html(url)
     images = doc.to_s.scan(%r{"imageSrc":"(https://msp.c.yimg.jp/images/v2/[0-9a-zA-Z_\-=./]*)"}).map{ |m| m[0] }
     results.push(*images)
   end

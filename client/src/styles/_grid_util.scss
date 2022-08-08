@@ -1,0 +1,20 @@
+@import '~vuetify/src/styles/styles.sass';
+
+// column width ratio
+@for $i from 1 through 20 {
+  .colr-#{$i} {
+    flex: $i 0 0;
+    overflow: hidden;
+  }
+}
+
+@each $size, $width in $grid-breakpoints {
+  @media screen and (min-width: #{$width}) {
+    @for $i from 1 through 20 {
+      .colr-#{$size}-#{$i} {
+        flex: $i 0 0;
+        overflow: hidden;
+      }
+    }
+  }
+}

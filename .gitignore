@@ -2,7 +2,7 @@
 /storage
 /db/migrator.rb
 
-# Server settings
+# Application settings
 /conf.yml
 
 # local env files

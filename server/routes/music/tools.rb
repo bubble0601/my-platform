@@ -4,7 +4,7 @@ class MainApp
       def get_youtube_title(url, limit = 5)
         return '' if limit == 0
 
-        title = get_doc(url).title
+        title = get_html(url).title
         return title if title != 'YouTube'
 
         get_youtube_title(url, limit - 1)
@@ -15,7 +15,7 @@ class MainApp
         remote_dir = "#{CONF.local.remote.ssh.name}:#{CONF.local.remote.root}/#{@user.id}/#{CONF.local.remote.storage.music}/"
         cmd = ['rsync', '-avhuz']
         cmd.push('-n') if testrun
-        cmd.push('--iconv=UTF-8-MAC,UTF-8'.no_shellescape, "--exclude='.DS_Store'".no_shellescape) if env[:os][:mac]
+        cmd.push('--iconv=UTF-8-MAC,UTF-8'.no_shellescape, "--exclude='.DS_Store'".no_shellescape) if os == :mac
         cmd.push('--delete') if delete
         cmd.push('-e', 'ssh')
         if local

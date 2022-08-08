@@ -37,6 +37,7 @@ class MainApp
         cmd = ['ffmpeg', '-y', '-ss', params[:start]]
         cmd.push('-to', params[:end]) if params[:end]
         cmd.push('-i', input_path, '-c', 'copy', output_path)
+        cmd = cmd.map(&:shellescape).join(' ')
         exec_command(cmd)
         FileUtils.move(output_path, input_path) unless reset
       # when 'noisered'
@@ -51,6 +52,7 @@ class MainApp
         cmd = ['ffmpeg', '-i', input_path]
         cmd.push('-filter:a', 'loudnorm')
         cmd.push(output_path)
+        cmd = cmd.map(&:shellescape).join(' ')
         exec_command(cmd)
         FileUtils.move(output_path, input_path) unless reset
       when 'download'

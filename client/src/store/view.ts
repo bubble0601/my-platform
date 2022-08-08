@@ -1,69 +1,28 @@
-import { VuexModule, Module, Mutation } from 'vuex-module-decorators';
-import { VueConstructor } from 'vue/types/umd';
-import { Dictionary } from 'lodash';
+import { VuexModule, Module, Mutation, config } from 'vuex-module-decorators';
+config.rawError = true;
 
-export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+import { VueConstructor } from 'vue/types/umd';
 
 export interface Footer {
   name: string;
   component: VueConstructor;
-  props: Dictionary<any>;
-  listeners?: Dictionary<(...args: any) => any>;
-  nativeListeners?: Dictionary<(...args: any) => any>;
+  props: Record<string, unknown>;
+  listeners?: Record<string, (...args: unknown[]) => unknown>;
+  nativeListeners?: Record<string, (...args: unknown[]) => unknown>;
 }
-
-const sm = 576;
-const md = 768;
-const lg = 992;
-const xl = 1200;
-
-const getScreenSize: () => Size = () => {
-  const w = window.innerWidth;
-  if (w >= xl) return 'xl';
-  if (w >= lg) return 'lg';
-  if (w >= md) return 'md';
-  if (w >= sm) return 'sm';
-  return 'xs';
-};
 
 @Module({ namespaced: true, name: 'view' })
 export default class ViewModule extends VuexModule {
-  private readonly devices = {
-    xs: 0,
-    sm: 1,
-    md: 2,
-    lg: 3,
-    xl: 4,
-  };
-
-  public width = window.innerWidth;
-  public size: Size = getScreenSize();
+  public drawer = false;
 
   public footerFixed = false;
   public footer: Footer | null = null;
   public footers: Footer[] = [];
   public footerHeight = 0;
 
-  get isMobile() {
-    return this.devices[this.size] <= this.devices.sm;
-  }
-
-  get isPC() {
-    return this.devices[this.size] >= this.devices.md;
-  }
-
-  get from() {
-    return (device: Size) => this.devices[this.size] >= this.devices[device];
-  }
-
-  get until() {
-    return (device: Size) => this.devices[this.size] <= this.devices[device];
-  }
-
   @Mutation
-  public RESIZE() {
-    this.width = window.innerWidth;
-    this.size = getScreenSize();
+  public SET_DRAWER(show: boolean) {
+    this.drawer = show;
   }
 
   @Mutation
@@ -85,7 +44,7 @@ export default class ViewModule extends VuexModule {
   }
 
   @Mutation
-  public SET_FOOTER_PROPS(props: Dictionary<any>) {
+  public SET_FOOTER_PROPS(props: Record<string, unknown>) {
     if (this.footer) this.footer.props = props;
   }
 

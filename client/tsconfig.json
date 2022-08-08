@@ -18,6 +18,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "vue-smooth-dnd": [
+        "types/vue-smooth-dnd"
       ]
     },
     "lib": [

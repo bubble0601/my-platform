@@ -1,8 +1,11 @@
 require 'sinatra'
 require 'logger'
+require 'pp' if development?
 
 ROOT = File.join(File.dirname(__FILE__), '..')
 ENV['RACK_ENV'] ||= 'development'
+
+Logger.new($stdout).info("Starting application in #{ENV['RACK_ENV']} mode...")
 
 require_relative './util'
 require_relative './config'

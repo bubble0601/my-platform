@@ -1,4 +1,5 @@
 export default {
+  home: 'ホーム',
   all: 'すべて',
   artist: 'アーティスト',
   playlist: 'プレイリスト',
@@ -17,6 +18,5 @@ export default {
     time: '時間',
     year: '年',
     played_count: '再生回数',
-    weight: 'Weight',
   },
 };

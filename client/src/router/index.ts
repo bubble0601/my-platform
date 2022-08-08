@@ -1,24 +1,32 @@
 import Vue from 'vue';
-import Router from 'vue-router';
+import VueRouter, { RouteConfig } from 'vue-router';
 import { authModule } from '@/store';
-import Home from '@/pages/Home.vue';
 import music from './music';
 import user from './user';
 
-Vue.use(Router);
+Vue.use(VueRouter);
 
-const routes = [
+const routes: Array<RouteConfig> = [
   {
     path: '/',
-    name: 'home',
-    component: Home,
-    meta: { title: 'Home', public: true },
+    component: () => import(/* webpackChunkName: "home" */ '@/views/Home.vue'),
+    meta: {
+      public: true,
+      appbarTitle: 'ホーム',
+    },
   },
   ...user,
   ...music,
+  {
+    path: '/note',
+    component: () => import(/* webpackChunkName: "home" */ '@/views/Home.vue'),
+    meta: {
+      appbarTitle: 'Note',
+    },
+  },
 ];
 
-const router = new Router({
+const router = new VueRouter({
   mode: 'history',
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
@@ -42,18 +50,6 @@ router.beforeEach(async(to, from, next) => {
         redirect: to.path,
       },
     });
-  }
-});
-
-router.afterEach((to) => {
-  let title: string | null = null;
-  to.matched.forEach((record) => {
-    if (record.meta.title) title = record.meta.title;
-  });
-  if (title) {
-    document.title = `${title} | iBubble`;
-  } else {
-    document.title = 'iBubble';
   }
 });
 

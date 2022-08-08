@@ -1,52 +1,43 @@
 <template>
-  <b-modal ref="modal" v-bind="attrs" v-on="listeners">
-    <div class="d-flex mb-2">
-      <b-button variant="outline-primary" @click="selectAll">Select all</b-button>
-      <b-button variant="outline-primary" class="ml-2" @click="unselectAll">Unselect all</b-button>
-    </div>
-    <b-form-group v-for="item in filteredItems" :key="item.key" :label="item.label">
-      <b-form-checkbox-group v-model="item.selected" :options="item.options" stacked/>
-    </b-form-group>
-  </b-modal>
+  <v-dialog v-model="show" scrollable class="pa-3">
+    <v-card>
+      <v-card-title>項目を選択</v-card-title>
+      <div class="d-flex">
+        <v-btn color="primary" outlined @click="selectAll">
+          すべて選択
+        </v-btn>
+        <v-btn color="primary" outlined class="ml-2" @click="unselectAll">
+          選択解除
+        </v-btn>
+      </div>
+      <div v-for="item in filteredItems" :key="item.key">
+        <v-subheader>{{ item.label }}</v-subheader>
+        <v-checkbox v-for="(o, i) in item.options" :key="i" v-model="item.selected" :value="o" hide-details/>
+      </div>
+      <v-card-actions>
+        <v-btn color="secondary" @click="show = false">キャンセル</v-btn>
+        <v-btn color="primary" @click="onOK">OK</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop, Ref } from 'vue-property-decorator';
-import { BModal } from 'bootstrap-vue';
-import { Dictionary, filter } from 'lodash';
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import { filter } from 'lodash';
 
 @Component
 export default class SelectItemDialog extends Vue {
   @Prop({ type: Array, default: () => [] })
   private items!: Array<{ key: string, label?: string, options: string[], selected: string[] }>;
 
-  get attrs() {
-    return {
-      title: 'Select items',
-      ...this.$attrs,
-    };
-  }
-
-  get listeners() {
-    return {
-      ...this.$listeners,
-      ok: () => {
-        const result: Dictionary<string[]> = {};
-        this.filteredItems.forEach((i) => {
-          result[i.key] = i.selected;
-        });
-        this.$emit('ok', result);
-      },
-    };
-  }
-
-  @Ref() private modal!: BModal;
+  private show = false;
 
   get filteredItems() {
-    return filter(this.items as Array<{ key: string, label?: string, options: string[], selected: string[] }>, (i) => i.options.length > 0);
+    return filter(this.items, (i) => i.options.length > 0);
   }
 
-  public show() {
-    this.modal.show();
+  public open() {
+    this.show = true;
   }
 
   private selectAll() {
@@ -59,6 +50,14 @@ export default class SelectItemDialog extends Vue {
     this.items.forEach((i) => {
       i.selected = [];
     });
+  }
+
+  private onOK() {
+    const result: Record<string, string[]> = {};
+    this.filteredItems.forEach((i) => {
+      result[i.key] = i.selected;
+    });
+    this.$emit('ok', result);
   }
 }
 </script>

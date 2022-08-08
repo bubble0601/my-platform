@@ -20,9 +20,11 @@ class MainApp
 
     post '/login' do
       # check if cookie is enabled
-      halt 401, 'Please enable cookies' unless request.cookies.key?(CONF.session.name)
+      halt_with_message 401, 'Please enable cookies' unless request.cookies.key?(CONF.session.name)
+
       @user = User.authenticate(@json[:username], @json[:password])
-      halt 401, 'Invalid username or password' if @user.nil?
+      halt_with_message 401, 'Invalid username or password' if @user.nil?
+
       regenerate_session
       session[:uid] = @user.id
       { user: @user.slice(:name) }
@@ -50,7 +52,7 @@ class MainApp
       if user.valid?
         user.save
       else
-        halt 400, { errors: user.errors }
+        halt_with_error 400, user.errors
       end
       status 201
     end

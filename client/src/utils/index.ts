@@ -2,19 +2,18 @@ import Vue, { VueConstructor } from 'vue';
 import { now, isDate, round } from 'lodash';
 import store from '@/store';
 
-export { default as SizeMixin } from './SizeMixin';
-export { default as ResponsivePlugin } from './ResponsivePlugin';
+export { default as LongTapMixin } from './LongTapMixin';
 export { default as DialogMixin } from './DialogMixin';
-export { default as initDialogs } from './Dialogs';
 
-const ua = window.navigator.userAgent.toLowerCase();
+// @deprecated: use userAgentData
+const ua = navigator.userAgent.toLowerCase();
 export const env = {
   os: {
     mac: ua.indexOf('mac os x') !== -1,
     windows: ua.indexOf('windows nt') !== -1,
   },
   renderer: {
-    webkit: navigator.userAgent.indexOf('WebKit') !== -1,
+    webkit: ua.indexOf('webkit') !== -1,
   },
   rem() {
     const fontsize = getComputedStyle(document.documentElement || document.body).fontSize;
@@ -24,7 +23,7 @@ export const env = {
   },
 };
 
-const beforeUnloads: { [s: string]: (e: BeforeUnloadEvent) => any } = {};
+const beforeUnloads: { [key: string]: (e: BeforeUnloadEvent) => string | void } = {};
 export function setBeforeUnload(name: string, hasChanged: () => boolean) {
   beforeUnloads[name] = (e: BeforeUnloadEvent) => {
     if (hasChanged()) {
@@ -41,6 +40,7 @@ export function unsetBeforeUnload(name: string) {
 
 export function waitUntil(check: () => boolean, timeout = 1000) {
   const end = now() + timeout;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const exec = (resolve: (...args: any) => void, reject: (...args: any) => void) => {
     if (check()) resolve();
     else if (now() > end) reject('timeout');
@@ -77,7 +77,7 @@ function parseDate(str: string) {
 }
 // Date->曜日(String)
 export function getWeekDay(arg: string | Date) {
-  let date: any = arg;
+  let date: unknown = arg;
   if (typeof arg === 'string') {
     date = parseDate(arg);
   }
@@ -132,3 +132,24 @@ export function createVueInstance(comp: VueConstructor) {
     store,
   });
 }
+
+const stopEvent = (e: Event) => {
+  e.stopPropagation();
+};
+
+export const stopRipple = {
+  touchstart: stopEvent,
+  touchend: stopEvent,
+  touchmove: stopEvent,
+  touchcancel: stopEvent,
+
+  mousedown: stopEvent,
+  mouseup: stopEvent,
+  mouseleave: stopEvent,
+
+  keydown: stopEvent,
+  keyup: stopEvent,
+
+  blur: stopEvent,
+  dragstart: stopEvent,
+};

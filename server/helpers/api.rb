@@ -1,9 +1,19 @@
 module APIHelpers
-  def halt(*res)
-    if res.length == 2 && res[0].is_a?(Integer) && res[1].is_a?(String)
-      super(res[0], { error_message: res[1] })
-    else
-      super(*res)
+  def halt_with_message(code, message = nil)
+    unless message
+      message = code
+      code = 200
     end
+    body({ message: message })
+    halt code
+  end
+
+  def halt_with_error(code, errors = nil)
+    unless errors
+      errors = code
+      code = 200
+    end
+    body({ errors: errors })
+    halt code
   end
 end

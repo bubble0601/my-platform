@@ -7,7 +7,7 @@ module ValidationHelpers
   rescue RuntimeError
     return false if halt == false
 
-    halt 401, 'Invalid Request'
+    halt 400, 'Invalid Request'
   end
 
   def validates_presence(obj, *keys, halt: nil)
@@ -19,6 +19,6 @@ module ValidationHelpers
   rescue RuntimeError
     return false if halt == false
 
-    halt 401, 'Invalid Request'
+    halt 400, 'Invalid Request'
   end
 end

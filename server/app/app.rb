@@ -19,8 +19,10 @@ class MainApp < Sinatra::Base
       memcache_server: 'localhost:11211',
       expire_after: 3600 * 24 * 28,
       key: CONF.session.name,
+      same_site: :lax,
       httponly: true
 
+  # set :sessions, same_site: :lax
   set :sessions, secure: true if CONF.server.ssl
 
   # checks referer and authenticity token
@@ -29,14 +31,4 @@ class MainApp < Sinatra::Base
   use Rack::Protection::RemoteToken
 
   use Rack::Protection::SessionHijacking if production?
-
-  # # using `set :show_exceptions, :after_handler` can only catch classes under Exception, not under Error
-  # # so we do the following hack
-  # disable :show_exceptions # disable Sinatra ShowExceptions
-  # set :raise_errors, settings.development? # enable fallback to Rack::ShowExceptions
-  # error do
-  #   err = request.env['sinatra.error']
-  #   logger.warn err.message
-  #   logger.info err.backtrace.join("\t\n")
-  # end
 end

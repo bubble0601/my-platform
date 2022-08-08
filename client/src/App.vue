@@ -1,48 +1,34 @@
 <template>
-  <div id="app">
-    <navbar/>
-    <section>
-      <router-view/>
-    </section>
-    <footer-component/>
-  </div>
+  <router-view/>
 </template>
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { Navbar, Footer as FooterComponent } from '@/layout';
-import { settingModule } from '@/store';
+import { appbarModule, settingModule } from '@/store';
+// import DefaultAppBar from '@/layouts/DefaultAppBar.vue';
 
 @Component({
-  components: {
-    Navbar,
-    FooterComponent,
-  },
+  // metaInfo: {
+  //   titleTemplate: '%s | iBubble',
+  // },
 })
 export default class App extends Vue {
-  get theme() {
-    return settingModule.theme;
-  }
-
-  @Watch('theme', { immediate: true })
-  private onThemeChanged() {
-    document.documentElement.setAttribute('data-theme', this.theme);
+  @Watch('$route', { immediate: true })
+  private onRouteChanged() {
+    for (let record of this.$route.matched.slice().reverse()) {
+      const val = record.meta?.appbarTitle;
+      if (typeof val === 'string') {
+        appbarModule.SET_TITLE(val);
+        break;
+      }
+    }
   }
 
   protected beforeCreate() {
     settingModule.Init();
+    // appbarModule.PUSH(DefaultAppBar);
   }
 }
 </script>
 <style lang="scss">
-@import 'scss/main';
-
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-}
-
-#app > section {
-  flex-grow: 1;
-}
+@import 'styles/main';
 </style>

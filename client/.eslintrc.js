@@ -1,36 +1,45 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
   },
   extends: [
     'plugin:vue/essential',
     'eslint:recommended',
-    '@vue/typescript/recommended'
+    '@vue/typescript/recommended',
   ],
   parserOptions: {
-    ecmaVersion: 2020
+    ecmaVersion: 2020,
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'semi': [
       'error',
-      'always'
+      'always',
     ],
     'comma-dangle': [
       'error',
-      'only-multiline'
+      'always-multiline',
     ],
     'curly': 'off',
     'lines-between-class-members': 'off',
     'space-before-function-paren': [
       'error',
-      'never'
+      'never',
     ],
     'vue/html-closing-bracket-spacing': 'off',
     'vue/max-attributes-per-line': 'off',
     'vue/singleline-html-element-content-newline': 'off',
+    'vue/valid-v-slot': [
+      'error',
+      { allowModifiers: true },
+    ],
+    '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-  }
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_' },
+    ],
+  },
 };
