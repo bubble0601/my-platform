@@ -2,8 +2,9 @@
 My personal website
 
 # Dependencies
+node
+yarn
 mysql
-memcached
 youtube-dl
 ffmpeg(built with libfdk_aac)
-python and mutagen
+<!-- python and mutagen -->

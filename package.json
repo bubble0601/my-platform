@@ -1,0 +1,9 @@
+{
+  "name": "my-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "My personal website",
+  "author": "bubble",
+  "license": "UNLICENSED",
+  "scripts": {}
+}
