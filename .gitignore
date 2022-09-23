@@ -25,3 +25,6 @@ yarn-error.log*
 *.sln
 *.sw?
 *.swp
+
+web-*/
+*_old/
