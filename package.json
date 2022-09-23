@@ -1,9 +1,20 @@
 {
   "name": "my-platform",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "My personal website",
   "author": "bubble",
   "license": "UNLICENSED",
-  "scripts": {}
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "api": "yarn workspace api",
+    "web": "yarn workspace web"
+  },
+  "devDependencies": {
+    "eslint": "^8.23.0",
+    "prettier": "^2.7.1"
+  }
 }
