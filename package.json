@@ -6,11 +6,9 @@
   "author": "bubble",
   "license": "UNLICENSED",
   "workspaces": [
-    "api",
     "web"
   ],
   "scripts": {
-    "api": "yarn workspace api",
     "web": "yarn workspace web"
   },
   "devDependencies": {
