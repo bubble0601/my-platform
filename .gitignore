@@ -3,6 +3,10 @@ node_modules
 .npm
 .eslintcache
 
+# Outputs
+.turbo
+.next
+
 # Local env files
 .env
 .env.local
