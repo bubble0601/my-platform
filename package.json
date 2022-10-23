@@ -5,7 +5,6 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "turbo run build",
-    "test": "turbo run test",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
     "web": "pnpm -F 'web'",
