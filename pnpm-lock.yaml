@@ -12,7 +12,7 @@ importers:
       prettier: 2.7.1
       turbo: 1.6.1
 
-  apps/api:
+  api:
     specifiers:
       '@internal/eslint-config': workspace:*
       '@internal/tsconfig': workspace:*
@@ -23,8 +23,8 @@ importers:
       '@trpc/server': 10.0.0-proxy-beta.25
       superjson: 1.11.0
     devDependencies:
-      '@internal/eslint-config': link:../../packages/eslint-config
-      '@internal/tsconfig': link:../../packages/tsconfig
+      '@internal/eslint-config': link:../packages/eslint-config
+      '@internal/tsconfig': link:../packages/tsconfig
       eslint: 8.26.0
 
   apps/web:
@@ -50,7 +50,7 @@ importers:
       typescript: 4.8.4
       zod: ^3.19.1
     dependencies:
-      '@internal/api': link:../api
+      '@internal/api': link:../../api
       '@tanstack/react-query': 4.13.0_biqbaboplfbrettd7655fr4n2y
       '@trpc/client': 10.0.0-proxy-beta.25_ndhcfffzalmz7qevgejzwgh3fi
       '@trpc/next': 10.0.0-proxy-beta.25_yyoog2yz6va6vkrfrna2pbsk7e
