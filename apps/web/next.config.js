@@ -1,3 +1,5 @@
+const withTM = require('next-transpile-modules')(['@internal/api'])
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -5,4 +7,4 @@ const nextConfig = {
   poweredByHeader: false,
 }
 
-module.exports = nextConfig
+module.exports = withTM(nextConfig)

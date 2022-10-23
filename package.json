@@ -7,6 +7,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
+    "api": "pnpm -F '@internal/api'",
     "web": "pnpm -F 'web'",
     "eslint-config": "pnpm -F '@internal/eslint-config'",
     "tsconfig": "pnpm -F '@internal/tsconfig'"

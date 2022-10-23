@@ -3,15 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 8000",
+    "dev": "PORT=8000 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@internal/api": "workspace:*",
+    "@tanstack/react-query": "^4.13.0",
+    "@trpc/client": "10.0.0-proxy-beta.25",
+    "@trpc/next": "10.0.0-proxy-beta.25",
+    "@trpc/react-query": "10.0.0-proxy-beta.25",
+    "@trpc/server": "10.0.0-proxy-beta.25",
     "next": "^12.3.1",
+    "next-transpile-modules": "^9.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "superjson": "^1.11.0",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
