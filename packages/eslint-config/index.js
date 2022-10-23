@@ -1,0 +1,1 @@
+module.reports = require('./.eslintrc')
