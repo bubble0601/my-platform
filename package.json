@@ -8,6 +8,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
+    "web": "pnpm -F 'web'",
     "eslint-config": "pnpm -F '@internal/eslint-config'",
     "tsconfig": "pnpm -F '@internal/tsconfig'"
   },
