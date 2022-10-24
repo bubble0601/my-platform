@@ -2,13 +2,14 @@
   "name": "@internal/eslint-config",
   "version": "0.0.0",
   "private": true,
-  "main": "./.eslintrc.js",
   "exports": {
-    ".": "./.eslintrc.js"
+    ".": "./.eslintrc.default.js",
+    "./*": "./.eslintrc.*.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.26.0",
+    "eslint-config-next": "12.3.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-turbo": "^0.0.4",
     "eslint-import-resolver-typescript": "^3.5.2",

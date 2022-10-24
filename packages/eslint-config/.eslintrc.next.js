@@ -1,4 +1,4 @@
 /** @type {import('@types/eslint').Linter.BaseConfig} */
 module.exports = {
-  extends: ['@internal/eslint-config/next'],
+  extends: ['./.eslintrc.base', 'next/core-web-vitals'],
 }
