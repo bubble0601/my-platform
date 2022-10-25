@@ -5,15 +5,20 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "lint": "eslint"
+    "lint": "eslint",
+    "ps:gen": "prisma generate",
+    "ps:case": "pnpm dlx prisma-case-format --file ./prisma/schema.prisma"
   },
   "dependencies": {
+    "@prisma/client": "^4.5.0",
     "@trpc/server": "10.0.0-proxy-beta.25",
     "superjson": "^1.11.0"
   },
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
     "@internal/tsconfig": "workspace:*",
-    "eslint": "^8.26.0"
+    "eslint": "^8.26.0",
+    "prisma": "^4.5.0",
+    "typescript": "4.8.4"
   }
 }
