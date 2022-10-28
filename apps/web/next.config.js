@@ -1,10 +1,12 @@
-const withTM = require('next-transpile-modules')(['@internal/api'])
-
+// @ts-check
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   poweredByHeader: false,
+  experimental: {
+    transpilePackages: ['@internal/api'],
+  },
 }
 
-module.exports = withTM(nextConfig)
+module.exports = nextConfig

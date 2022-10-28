@@ -12,6 +12,7 @@
     "moduleResolution": "node",
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
+    "preserveSymlinks": true,
     "preserveWatchOutput": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
