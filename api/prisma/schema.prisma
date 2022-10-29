@@ -1,5 +1,9 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // workaround for pnpm
+  // https://github.com/prisma/prisma/issues/6603#issuecomment-1054227614
+  output          = "../node_modules/.prisma/client"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -7,18 +11,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        BigInt     @id @default(autoincrement())
+  createdAt DateTime?  @map("created_at") @db.DateTime(0)
+  updatedAt DateTime?  @map("updated_at") @db.DateTime(0)
+  name      String     @unique(map: "name") @db.VarChar(255)
+  password  String     @db.VarChar(255)
+  songs     Song[]
+  albums    Album[]
+  artists   Artist[]
+  playlists Playlist[]
+
+  @@map("users")
+}
+
+model Song {
+  id                BigInt           @id @default(autoincrement())
+  createdAt         DateTime?        @map("created_at") @db.DateTime(0)
+  updatedAt         DateTime?        @map("updated_at") @db.DateTime(0)
+  userId            BigInt           @map("user_id")
+  user              User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "songs_ibfk_3")
+  enabled           Boolean          @default(true)
+  title             String           @db.VarChar(255)
+  filename          String           @db.VarChar(255)
+  digest            String           @unique(map: "digest") @db.VarChar(255)
+  albumId           BigInt?          @map("album_id")
+  album             Album?           @relation(fields: [albumId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "songs_ibfk_2")
+  artistName        String?          @map("artist_name") @db.VarChar(255)
+  artistId          BigInt?          @map("artist_id")
+  artist            Artist?          @relation(fields: [artistId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "songs_ibfk_1")
+  year              Int?
+  trackNum          Int?             @map("track_num")
+  discNum           Int?             @default(1) @map("disc_num")
+  hasCoverArt       Boolean          @default(false) @map("has_cover_art")
+  hasLyrics         Boolean          @default(false) @map("has_lyrics")
+  length            Int
+  rating            Int              @default(0)
+  playedCount       Int              @default(0) @map("played_count")
+  syncedPlayedCount Int              @default(0) @map("synced_played_count")
+  playedAt          DateTime?        @map("played_at") @db.DateTime(0)
+  playlists         PlaylistsSongs[]
+
+  @@index([albumId], map: "album_id")
+  @@index([artistId], map: "artist_id")
+  @@index([userId], map: "songs_user_id_index")
+  @@map("songs")
+}
+
 model Album {
   id         BigInt    @id @default(autoincrement())
   createdAt  DateTime? @map("created_at") @db.DateTime(0)
   updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+  userId     BigInt    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "albums_ibfk_2")
   title      String    @db.VarChar(255)
   artistId   BigInt    @map("artist_id")
+  artist     Artist    @relation(fields: [artistId], references: [id], onUpdate: Restrict, map: "albums_ibfk_1")
   year       Int?
   trackCount Int?      @map("track_count")
   discCount  Int?      @default(1) @map("disc_count")
-  userId     BigInt    @map("user_id")
-  artist     Artist    @relation(fields: [artistId], references: [id], onUpdate: Restrict, map: "albums_ibfk_1")
-  user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "albums_ibfk_2")
   songs      Song[]
 
   @@index([userId], map: "albums_user_id_index")
@@ -30,10 +81,10 @@ model Artist {
   id        BigInt    @id @default(autoincrement())
   createdAt DateTime? @map("created_at") @db.DateTime(0)
   updatedAt DateTime? @map("updated_at") @db.DateTime(0)
-  name      String    @db.VarChar(255)
-  ruby      String?   @db.VarChar(255)
   userId    BigInt?   @map("user_id")
   user      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "artists_ibfk_1")
+  name      String    @db.VarChar(255)
+  ruby      String?   @db.VarChar(255)
   albums    Album[]
   songs     Song[]
 
@@ -45,9 +96,9 @@ model Playlist {
   id        BigInt           @id @default(autoincrement())
   createdAt DateTime?        @map("created_at") @db.DateTime(0)
   updatedAt DateTime?        @map("updated_at") @db.DateTime(0)
-  name      String           @db.VarChar(255)
   userId    BigInt           @map("user_id")
   user      User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "playlists_ibfk_1")
+  name      String           @db.VarChar(255)
   songs     PlaylistsSongs[]
 
   @@index([userId], map: "playlists_user_id_index")
@@ -73,51 +124,4 @@ model SchemaInfo {
 
   @@map("schema_info")
   @@ignore
-}
-
-model Song {
-  id                BigInt           @id @default(autoincrement())
-  createdAt         DateTime?        @map("created_at") @db.DateTime(0)
-  updatedAt         DateTime?        @map("updated_at") @db.DateTime(0)
-  filename          String           @db.VarChar(255)
-  digest            String           @unique(map: "digest") @db.VarChar(255)
-  title             String           @db.VarChar(255)
-  artistName        String?          @map("artist_name") @db.VarChar(255)
-  artistId          BigInt?          @map("artist_id")
-  albumId           BigInt?          @map("album_id")
-  trackNum          Int?             @map("track_num")
-  discNum           Int?             @default(1) @map("disc_num")
-  hasCoverArt       Boolean          @default(false) @map("has_cover_art")
-  hasLyrics         Boolean          @default(false) @map("has_lyrics")
-  length            Int
-  rating            Int              @default(0)
-  syncedPlayedCount Int              @default(0) @map("synced_played_count")
-  enabled           Boolean          @default(true)
-  year              Int?
-  playedCount       Int              @default(0) @map("played_count")
-  playedAt          DateTime?        @map("played_at") @db.DateTime(0)
-  userId            BigInt           @map("user_id")
-  artist            Artist?          @relation(fields: [artistId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "songs_ibfk_1")
-  album             Album?           @relation(fields: [albumId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "songs_ibfk_2")
-  user              User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "songs_ibfk_3")
-  playlists         PlaylistsSongs[]
-
-  @@index([albumId], map: "album_id")
-  @@index([artistId], map: "artist_id")
-  @@index([userId], map: "songs_user_id_index")
-  @@map("songs")
-}
-
-model User {
-  id        BigInt     @id @default(autoincrement())
-  createdAt DateTime?  @map("created_at") @db.DateTime(0)
-  updatedAt DateTime?  @map("updated_at") @db.DateTime(0)
-  name      String     @unique(map: "name") @db.VarChar(255)
-  password  String     @db.VarChar(255)
-  albums    Album[]
-  artists   Artist[]
-  playlists Playlist[]
-  songs     Song[]
-
-  @@map("users")
 }
