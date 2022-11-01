@@ -1,8 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  // workaround for pnpm
-  // https://github.com/prisma/prisma/issues/6603#issuecomment-1054227614
-  output          = "../node_modules/.prisma/client"
   previewFeatures = ["interactiveTransactions"]
 }
 

@@ -3,21 +3,26 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
+  "workspaces": [
+    "api",
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
-    "api": "pnpm -F '@internal/api'",
-    "web": "pnpm -F 'web'",
-    "eslint-config": "pnpm -F '@internal/eslint-config'",
-    "tsconfig": "pnpm -F '@internal/tsconfig'"
+    "api": "yarn workspace @internal/api",
+    "web": "yarn workspace web",
+    "eslint-config": "yarn workspace @internal/eslint-config",
+    "tsconfig": "yarn workspace @internal/tsconfig"
   },
   "devDependencies": {
     "prettier": "^2.7.1",
     "turbo": "^1.6.1",
-    "@internal/eslint-config": "workspace:*"
+    "@internal/eslint-config": "*"
   },
   "engines": {
-    "pnpm": ">=7"
+    "yarn": "^1"
   }
 }

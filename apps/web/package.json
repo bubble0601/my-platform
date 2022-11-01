@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@internal/api": "workspace:*",
+    "@internal/api": "*",
     "@tanstack/react-query": "^4.13.0",
     "@trpc/client": "10.0.0-proxy-beta.25",
     "@trpc/next": "10.0.0-proxy-beta.25",
@@ -22,8 +22,8 @@
     "zod": "^3.19.1"
   },
   "devDependencies": {
-    "@internal/eslint-config": "workspace:*",
-    "@internal/tsconfig": "workspace:*",
+    "@internal/eslint-config": "*",
+    "@internal/tsconfig": "*",
     "@types/node": "^18.11.3",
     "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
