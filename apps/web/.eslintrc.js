@@ -1,4 +1,5 @@
-/** @type {import('@types/eslint').Linter.BaseConfig} */
+// @ts-check
+/** @type {import('eslint').Linter.BaseConfig} */
 module.exports = {
   extends: ['@internal/eslint-config/next'],
 }
