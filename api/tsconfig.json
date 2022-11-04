@@ -2,6 +2,9 @@
   "extends": "@internal/tsconfig/base",
   "compilerOptions": {
     "incremental": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    }
   }
 }

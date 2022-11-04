@@ -1,4 +1,8 @@
 // @ts-check
+const OFF = 0
+const WARN = 1
+const ERROR = 2
+
 /** @type {import('eslint').Linter.BaseConfig} */
 module.exports = {
   extends: ['./.eslintrc.base', 'plugin:import/recommended', 'plugin:import/typescript'],
@@ -7,5 +11,9 @@ module.exports = {
       typescript: true,
       node: true,
     },
+  },
+  rules: {
+    'import/no-named-as-default-member': OFF,
+    'import/no-named-as-default': OFF,
   },
 }

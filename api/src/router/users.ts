@@ -1,8 +1,8 @@
-import { t } from '../trpc'
+import { t } from '../core/trpc'
 
 export default t.router({
-  get: t.procedure.query(() => ({
+  get: t.procedure.query(({ ctx }) => ({
     id: 'foobar',
-    name: 'world',
+    name: ctx.session ? ctx.session.userId : 'guest',
   })),
 })

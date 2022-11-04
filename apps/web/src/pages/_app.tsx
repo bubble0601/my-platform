@@ -1,6 +1,6 @@
-import { trpc } from '@/utils/trpc'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { trpc } from '~/utils/trpc'
 
 function App({ Component, pageProps }: AppProps) {
   return (
