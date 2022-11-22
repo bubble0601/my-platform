@@ -9,7 +9,7 @@
     "ps:gen": "prisma generate",
     "ps:case": "npx prisma-case-format --file ./prisma/schema.prisma"
   },
-  "dependencies": {
+  "//dependencies": {
     "@prisma/client": "^4.5.0",
     "@trpc/server": "10.0.0-proxy-beta.25",
     "bcryptjs": "^2.4.3",
@@ -21,7 +21,7 @@
     "superjson": "^1.11.0",
     "zod": "^3.19.1"
   },
-  "devDependencies": {
+  "//devDependencies": {
     "@internal/eslint-config": "*",
     "@internal/tsconfig": "*",
     "@types/bcryptjs": "^2.4.2",

@@ -1,0 +1,21 @@
+{
+  "extends": "@internal/tsconfig/base",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "declaration": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "incremental": true,
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "strictPropertyInitialization": false,
+    "exactOptionalPropertyTypes": false
+  },
+  "exclude": ["node_modules", "dist"]
+}

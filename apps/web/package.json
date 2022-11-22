@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@internal/api": "*",
     "@tanstack/react-query": "^4.13.0",
     "@trpc/client": "10.0.0-proxy-beta.25",
     "@trpc/next": "10.0.0-proxy-beta.25",

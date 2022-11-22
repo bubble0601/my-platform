@@ -8,7 +8,7 @@ module.exports = {
   extends: ['plugin:@typescript-eslint/recommended', 'prettier', 'turbo'],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: 'tsconfig.json' },
-  ignorePatterns: ['.eslintrc.*.js', '*.d.ts'],
+  ignorePatterns: ['.eslintrc*.js', '*.d.ts'],
   rules: {
     'turbo/no-undeclared-env-vars': WARN,
   },
