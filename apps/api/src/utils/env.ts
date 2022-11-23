@@ -1,7 +1,9 @@
-import { config } from 'dotenv'
+import dotenv from 'dotenv'
+dotenv.config()
+
+import { randomBytes } from 'crypto'
 import { envsafe, port, str, ValidatorSpec } from 'envsafe'
 
-config()
 export const env = envsafe({
   NODE_ENV: str({
     devDefault: 'development',
@@ -10,6 +12,9 @@ export const env = envsafe({
   PORT: port({
     devDefault: 8080,
   }),
+  LOCATION_ORIGIN: str({
+    devDefault: `http://localhost:${process.env.PORT ?? 8080}`,
+  }),
   DATABASE_URL: str(),
   REDIS_HOST: str({
     default: 'localhost',
@@ -17,14 +22,11 @@ export const env = envsafe({
   REDIS_PORT: port({
     default: 6379,
   }),
-  HASHIDS_SALT: str({
-    devDefault: 'rainbow',
-  }),
-  COOKIE_NAME: str({
+  COOKIE_NAME_FOR_SESSION: str({
     default: '_sid',
   }),
   SESSION_SECRET: str({
-    devDefault: 'secret',
+    devDefault: randomBytes(24).toString('base64'),
   }),
 })
 

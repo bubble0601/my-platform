@@ -2,6 +2,8 @@
 /src/@generated
 /dist
 /node_modules
+/src/schema.gql
+/src/nexus-types.d.ts
 
 # Logs
 logs
