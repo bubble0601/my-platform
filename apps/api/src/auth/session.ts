@@ -37,9 +37,9 @@ export const sessionStore: fastifySession.SessionStore = {
     }
   },
   set(sessionId, session, callback) {
-    const sessionData: SessionDataInput = session.user
+    const sessionData: SessionDataInput | null = session.user
       ? { user: { id: session.user.id.toString(), name: session.user.name } }
-      : {}
+      : null
     redis
       .setex(sessionId, SESSION_EXPIRE, JSON.stringify(sessionData))
       .then(() => callback())

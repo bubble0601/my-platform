@@ -47,7 +47,7 @@ export const authMutation = mutationType({
         },
       }),
       async resolve(_, __, { request }) {
-        request.session.destroy()
+        await request.session.destroy()
         return { result: 'ok' }
       },
     })

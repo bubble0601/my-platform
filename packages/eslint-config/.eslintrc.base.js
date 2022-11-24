@@ -10,6 +10,7 @@ module.exports = {
   parserOptions: { project: 'tsconfig.json' },
   ignorePatterns: ['.eslintrc*.js', '*.d.ts'],
   rules: {
+    '@typescript-eslint/no-unused-vars': [WARN, { varsIgnorePattern: '^_' }],
     'turbo/no-undeclared-env-vars': WARN,
   },
 }

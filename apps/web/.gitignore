@@ -12,6 +12,9 @@
 /.next/
 /out/
 
+# output
+/src/@generated
+
 # production
 /build
 

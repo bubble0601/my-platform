@@ -1,20 +1,38 @@
 import { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { SyntheticEvent, useId, useRef } from 'react'
-import { trpc } from '~/utils/trpc'
+import { useMutation } from 'urql'
+import { graphql } from '~/@generated'
+
+const loginMutation = graphql(`
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      user {
+        name
+      }
+    }
+  }
+`)
 
 export const Login: NextPage = () => {
+  const router = useRouter()
   const usernameInputId = useId()
   const usernameInput = useRef<HTMLInputElement>(null)
   const passwordInputId = useId()
   const passwordInput = useRef<HTMLInputElement>(null)
-  const login = trpc.auth.login.useMutation()
+
+  const [_, login] = useMutation(loginMutation)
+
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
     if (!usernameInput.current || !passwordInput.current) return
-    login.mutate({
+    const result = await login({
       username: usernameInput.current.value,
       password: passwordInput.current.value,
     })
+    if (result.data?.login?.user) {
+      router.push('/')
+    }
   }
 
   return (

@@ -6,21 +6,26 @@
     "dev": "PORT=8000 next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "codegen": "graphql-codegen"
   },
   "dependencies": {
-    "@tanstack/react-query": "^4.13.0",
-    "@trpc/client": "10.0.0-proxy-beta.25",
-    "@trpc/next": "10.0.0-proxy-beta.25",
-    "@trpc/react-query": "10.0.0-proxy-beta.25",
-    "@trpc/server": "10.0.0-proxy-beta.25",
+    "@urql/core": "^3.0.5",
+    "@urql/exchange-graphcache": "^5.0.5",
+    "@urql/exchange-request-policy": "^1.0.0",
+    "dotenv": "^16.0.3",
+    "envsafe": "^2.0.3",
+    "graphql": "^16.6.0",
     "next": "^13.0.0",
+    "next-urql": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "superjson": "^1.11.0",
+    "urql": "^3.0.3",
     "zod": "^3.19.1"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^2.13.12",
+    "@graphql-codegen/client-preset": "^1.1.5",
     "@internal/eslint-config": "*",
     "@internal/tsconfig": "*",
     "@types/node": "^18.11.3",

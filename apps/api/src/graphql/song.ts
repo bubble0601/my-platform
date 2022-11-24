@@ -12,7 +12,7 @@ export const SongType = objectType({
 
 export const SongQuery = queryType({
   definition(t) {
-    t.list.field('songs', {
+    t.nonNull.list.field('songs', {
       type: SongType,
       async resolve(_, __, { db }) {
         return await db.song.findMany()

@@ -15,5 +15,6 @@ module.exports = {
   rules: {
     'import/no-named-as-default-member': OFF,
     'import/no-named-as-default': OFF,
+    'import/no-extraneous-dependencies': ERROR,
   },
 }
