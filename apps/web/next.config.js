@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { env } = require('./src/utils/env')
 const rewrites =
   env.NODE_ENV === 'production'

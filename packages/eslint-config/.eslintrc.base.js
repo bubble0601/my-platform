@@ -7,8 +7,8 @@ const ERROR = 2
 module.exports = {
   extends: ['plugin:@typescript-eslint/recommended', 'prettier', 'turbo'],
   parser: '@typescript-eslint/parser',
-  parserOptions: { project: 'tsconfig.json' },
-  ignorePatterns: ['.eslintrc*.js', '*.d.ts'],
+  parserOptions: { tsconfigRootDir: '.' },
+  ignorePatterns: ['*.js'],
   rules: {
     '@typescript-eslint/no-unused-vars': [WARN, { varsIgnorePattern: '^_' }],
     'turbo/no-undeclared-env-vars': WARN,

@@ -8,5 +8,19 @@ module.exports = {
   extends: ['./.eslintrc.base', 'next/core-web-vitals'],
   rules: {
     'import/no-extraneous-dependencies': ERROR,
+    'import/order': [
+      ERROR,
+      {
+        alphabetize: {
+          order: 'asc',
+        },
+        pathGroups: [
+          {
+            pattern: '~/**',
+            group: 'parent',
+          },
+        ],
+      },
+    ],
   },
 }
