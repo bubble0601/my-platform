@@ -47,7 +47,18 @@ const createServer = (opts: FastifyServerOptions = {}): FastifyInstance => {
 }
 
 export const startServer = async () => {
-  const server = createServer({ logger: true })
+  const server = createServer({
+    logger: isProduction
+      ? {
+          transport: {
+            target: './pino-pretty-transport',
+            options: {
+              translateTime: 'yyyy-mm-dd HH:MM:ss',
+            },
+          },
+        }
+      : true,
+  })
   try {
     await server.listen({
       port: env.PORT,
