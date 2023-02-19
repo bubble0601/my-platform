@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
-// import { envsafe, str, url } from 'envsafe'
+require('dotenv').config()
 const { envsafe, str, url } = require('envsafe')
 
 const env = envsafe(

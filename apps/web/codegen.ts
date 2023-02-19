@@ -1,6 +1,3 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 import { CodegenConfig } from '@graphql-codegen/cli'
 import { env } from './src/utils/env'
 

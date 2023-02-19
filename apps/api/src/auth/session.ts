@@ -1,4 +1,4 @@
-import fastifySession from '@fastify/session'
+import type { SessionStore } from '@fastify/session'
 import Redis from 'ioredis'
 import { z } from 'zod'
 import { env } from '~/utils/env'
@@ -25,7 +25,7 @@ declare module 'fastify' {
   interface Session extends SessionDataOutput {}
 }
 
-export const sessionStore: fastifySession.SessionStore = {
+export const sessionStore: SessionStore = {
   async get(sessionId, callback) {
     try {
       const rawSession = await redis.get(sessionId)

@@ -1,5 +1,5 @@
-import { FastifyPluginCallback } from 'fastify'
 import { env } from 'process'
+import { FastifyPluginCallback } from 'fastify'
 
 const filteredMethods = ['post', 'put', 'delete']
 
