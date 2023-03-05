@@ -10,6 +10,7 @@
     "codegen": "graphql-codegen"
   },
   "dependencies": {
+    "@graphql-typed-document-node/core": "^3.1.2",
     "@urql/core": "^3.1.1",
     "@urql/exchange-graphcache": "^5.0.9",
     "@urql/exchange-request-policy": "^1.0.0",
@@ -26,8 +27,8 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
     "@graphql-codegen/client-preset": "^2.0.0",
-    "@internal/eslint-config": "*",
-    "@internal/tsconfig": "*",
+    "@internal/eslint-config": "workspace:*",
+    "@internal/tsconfig": "workspace:*",
     "@types/node": "^18.14.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

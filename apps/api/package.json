@@ -10,7 +10,7 @@
     "generate": "run-s -l generate:prisma generate:nexus",
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
-    "prisma:case": "npx prisma-case-format --file ./prisma/schema.prisma",
+    "prisma:case": "pnpm dlx prisma-case-format --file ./prisma/schema.prisma",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix"
   },
@@ -22,7 +22,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.3",
     "envsafe": "^2.0.3",
-    "fastify": "^4.13.0",
+    "fastify": "^4.14.0",
     "fastify-plugin": "^4.5.0",
     "graphql": "^16.6.0",
     "graphql-middleware": "^6.1.33",
@@ -35,10 +35,9 @@
     "zod": "^3.20.6"
   },
   "devDependencies": {
-    "@internal/eslint-config": "*",
-    "@internal/tsconfig": "*",
+    "@internal/eslint-config": "workspace:*",
+    "@internal/tsconfig": "workspace:*",
     "@types/bcryptjs": "^2.4.2",
-    "@types/dotenv": "^8.2.0",
     "@types/node": "^18.14.0",
     "esbuild": "^0.17.8",
     "eslint": "^8.34.0",

@@ -2,14 +2,16 @@
   "extends": "@internal/tsconfig/base",
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2017",
-    "declaration": true,
+    "target": "es2020",
+    "declaration": false,
+    "declarationMap": false,
     "sourceMap": true,
     "baseUrl": "./",
     "outDir": "./dist",
     "incremental": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "preserveSymlinks": true,
     "paths": {
       "~/*": ["./src/*"]
     }

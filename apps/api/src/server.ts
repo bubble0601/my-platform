@@ -48,7 +48,7 @@ const createServer = (opts: FastifyServerOptions = {}): FastifyInstance => {
 
 export const startServer = async () => {
   const server = createServer({
-    logger: isProduction
+    logger: !isProduction
       ? {
           transport: {
             target: './pino-pretty-transport',

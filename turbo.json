@@ -5,9 +5,7 @@
       "outputs": [".next/**"],
       "dependsOn": ["^build"]
     },
-    "lint": {
-      "outputs": []
-    },
+    "lint": {},
     "dev": {
       "cache": false
     }

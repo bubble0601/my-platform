@@ -3,24 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "workspaces": {
-    "packages": [
-      "apps/*",
-      "packages/*"
-    ],
-    "nohoist": [
-      "**/@nestjs/**"
-    ]
-  },
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
-    "api": "yarn workspace api",
-    "web": "yarn workspace web",
-    "eslint-config": "yarn workspace @internal/eslint-config",
-    "tsconfig": "yarn workspace @internal/tsconfig",
-    "organize": "npx yarn-deduplicate yarn.lock --strategy highest && npx syncyarnlock -s -k"
+    "api": "pnpm -F api",
+    "web": "pnpm -F web",
+    "eslint-config": "pnpm -F @internal/eslint-config",
+    "tsconfig": "pnpm -F @internal/tsconfig"
   },
   "devDependencies": {
     "@internal/eslint-config": "*",
@@ -29,6 +19,7 @@
     "turbo": "^1.8.1"
   },
   "engines": {
-    "yarn": "^1"
+    "node": ">=18",
+    "pnpm": ">=7"
   }
 }
