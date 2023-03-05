@@ -1,5 +1,6 @@
-/** @type {import('eslint').Linter.BaseConfig} */
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   extends: ['@internal/eslint-config'],
-  ignorePatterns: ['build.js', 'dist', 'src/@generated'],
+  ignorePatterns: ['build.js', 'dist', 'src/@generated', 'nexus-types.d.ts'],
+  root: true,
 }

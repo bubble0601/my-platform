@@ -3,7 +3,6 @@ import type { FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
 
 declare module 'fastify' {
-  // @ts-ignore - pnpmを使っているとGenericsを使用したinterfaceの拡張がエラーになる
   interface FastifyInstance {
     prisma: PrismaClient
   }

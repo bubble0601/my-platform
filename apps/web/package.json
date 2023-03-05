@@ -6,7 +6,9 @@
     "dev": "PORT=8000 next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "fmt": "prettier --write 'src/**/*.ts'",
+    "lint": "NODE_ENV=test next lint",
+    "typechk": "tsc",
     "codegen": "graphql-codegen"
   },
   "dependencies": {

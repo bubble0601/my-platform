@@ -1,3 +1,4 @@
+/* next.config.jsでも読み込めるようにcommonjsで書いている */
 /* eslint-disable @typescript-eslint/no-var-requires */
 // @ts-check
 require('dotenv').config()

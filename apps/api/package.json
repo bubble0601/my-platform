@@ -7,12 +7,13 @@
     "prebuild": "rimraf dist",
     "build": "node ./build.js",
     "start": "node ./dist/index.js",
+    "fmt": "prettier --write 'src/**/*.ts'",
+    "lint": "eslint src --ext .ts --cache",
+    "typechk": "tsc --noEmit",
     "generate": "run-s -l generate:prisma generate:nexus",
     "generate:prisma": "prisma generate",
     "generate:nexus": "ts-node --transpile-only src/schema",
-    "prisma:case": "pnpm dlx prisma-case-format --file ./prisma/schema.prisma",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"src/**/*.ts\" --fix"
+    "prisma:case": "pnpm dlx prisma-case-format --file ./prisma/schema.prisma"
   },
   "dependencies": {
     "@fastify/cookie": "^8.3.0",

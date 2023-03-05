@@ -5,9 +5,10 @@
       "outputs": [".next/**"],
       "dependsOn": ["^build"]
     },
-    "lint": {},
     "dev": {
       "cache": false
-    }
+    },
+    "lint": {},
+    "typechk": {}
   }
 }

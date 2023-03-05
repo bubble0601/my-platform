@@ -5,7 +5,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "turbo run build",
-    "lint": "turbo run lint",
+    "lint": "FORCE_COLOR=1 turbo run lint typechk",
     "dev": "turbo run dev",
     "api": "pnpm -F api",
     "web": "pnpm -F web",
@@ -20,6 +20,8 @@
   },
   "engines": {
     "node": ">=18",
-    "pnpm": ">=7"
+    "pnpm": ">=7",
+    "npm": "banned",
+    "yarn": "banned"
   }
 }
