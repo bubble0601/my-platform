@@ -39,6 +39,7 @@
     "@internal/eslint-config": "workspace:*",
     "@internal/tsconfig": "workspace:*",
     "@types/bcryptjs": "^2.4.2",
+    "@types/internal": "workspace:*",
     "@types/node": "^18.14.0",
     "esbuild": "^0.17.8",
     "eslint": "^8.34.0",

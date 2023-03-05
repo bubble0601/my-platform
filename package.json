@@ -10,7 +10,8 @@
     "api": "pnpm -F api",
     "web": "pnpm -F web",
     "eslint-config": "pnpm -F @internal/eslint-config",
-    "tsconfig": "pnpm -F @internal/tsconfig"
+    "tsconfig": "pnpm -F @internal/tsconfig",
+    "types": "pnpm -F @types/internal"
   },
   "devDependencies": {
     "@internal/eslint-config": "*",
