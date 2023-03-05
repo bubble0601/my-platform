@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["interactiveTransactions"]
+  provider = "prisma-client-js"
 }
 
 generator nexusPrisma {
@@ -9,14 +8,14 @@ generator nexusPrisma {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id        BigInt     @id @default(autoincrement())
-  createdAt DateTime?  @map("created_at") @db.DateTime(0)
-  updatedAt DateTime?  @map("updated_at") @db.DateTime(0)
+  createdAt DateTime?  @map("created_at") @db.Timestamp
+  updatedAt DateTime?  @map("updated_at") @db.Timestamp
   name      String     @unique(map: "name") @db.VarChar(255)
   password  String     @db.VarChar(255)
   songs     Song[]
@@ -29,8 +28,8 @@ model User {
 
 model Song {
   id                BigInt           @id @default(autoincrement())
-  createdAt         DateTime?        @map("created_at") @db.DateTime(0)
-  updatedAt         DateTime?        @map("updated_at") @db.DateTime(0)
+  createdAt         DateTime?        @map("created_at") @db.Timestamp
+  updatedAt         DateTime?        @map("updated_at") @db.Timestamp
   userId            BigInt           @map("user_id")
   user              User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "songs_ibfk_3")
   enabled           Boolean          @default(true)
@@ -51,19 +50,19 @@ model Song {
   rating            Int              @default(0)
   playedCount       Int              @default(0) @map("played_count")
   syncedPlayedCount Int              @default(0) @map("synced_played_count")
-  playedAt          DateTime?        @map("played_at") @db.DateTime(0)
+  playedAt          DateTime?        @map("played_at") @db.Timestamp
   playlists         PlaylistsSongs[]
 
-  @@index([albumId], map: "album_id")
-  @@index([artistId], map: "artist_id")
+  @@index([albumId], map: "songs_album_id_index")
+  @@index([artistId], map: "songs_artist_id_index")
   @@index([userId], map: "songs_user_id_index")
   @@map("songs")
 }
 
 model Album {
   id         BigInt    @id @default(autoincrement())
-  createdAt  DateTime? @map("created_at") @db.DateTime(0)
-  updatedAt  DateTime? @map("updated_at") @db.DateTime(0)
+  createdAt  DateTime? @map("created_at") @db.Timestamp
+  updatedAt  DateTime? @map("updated_at") @db.Timestamp
   userId     BigInt    @map("user_id")
   user       User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "albums_ibfk_2")
   title      String    @db.VarChar(255)
@@ -75,14 +74,14 @@ model Album {
   songs      Song[]
 
   @@index([userId], map: "albums_user_id_index")
-  @@index([artistId], map: "artist_id")
+  @@index([artistId], map: "albums_artist_id_index")
   @@map("albums")
 }
 
 model Artist {
   id        BigInt    @id @default(autoincrement())
-  createdAt DateTime? @map("created_at") @db.DateTime(0)
-  updatedAt DateTime? @map("updated_at") @db.DateTime(0)
+  createdAt DateTime? @map("created_at") @db.Timestamp
+  updatedAt DateTime? @map("updated_at") @db.Timestamp
   userId    BigInt?   @map("user_id")
   user      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "artists_ibfk_1")
   name      String    @db.VarChar(255)
@@ -96,8 +95,8 @@ model Artist {
 
 model Playlist {
   id        BigInt           @id @default(autoincrement())
-  createdAt DateTime?        @map("created_at") @db.DateTime(0)
-  updatedAt DateTime?        @map("updated_at") @db.DateTime(0)
+  createdAt DateTime?        @map("created_at") @db.Timestamp
+  updatedAt DateTime?        @map("updated_at") @db.Timestamp
   userId    BigInt           @map("user_id")
   user      User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "playlists_ibfk_1")
   name      String           @db.VarChar(255)
@@ -116,14 +115,6 @@ model PlaylistsSongs {
 
   @@id([playlistId, songId])
   @@index([playlistId, songId], map: "playlists_songs_playlist_id_song_id_index")
-  @@index([songId], map: "song_id")
+  @@index([songId], map: "playlists_songs_song_id_index")
   @@map("playlists_songs")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
-model SchemaInfo {
-  version Int @default(0)
-
-  @@map("schema_info")
-  @@ignore
 }
