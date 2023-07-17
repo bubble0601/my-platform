@@ -9,7 +9,6 @@ build({
   platform: 'node',
   format: 'cjs',
   minify: isProduction,
-  watch: !isProduction,
 }).catch((error) => {
   console.error(error)
   process.exit(1)

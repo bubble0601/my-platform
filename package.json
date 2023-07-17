@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "FORCE_COLOR=1 turbo run lint typechk",
+    "fmt": "prettier --write .",
     "dev": "turbo run dev",
     "api": "pnpm -F api",
     "web": "pnpm -F web",
@@ -14,10 +15,8 @@
     "types": "pnpm -F @types/internal"
   },
   "devDependencies": {
-    "@internal/eslint-config": "*",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^2.8.4",
-    "turbo": "^1.8.1"
+    "prettier": "^3.0.0",
+    "turbo": "^1.10.7"
   },
   "engines": {
     "node": ">=18",

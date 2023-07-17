@@ -1,0 +1,24 @@
+type User {
+  id: ID!
+  name: String!
+}
+
+extend type Query {
+  me: User
+  user(id: ID!): User
+  users: [User]
+}
+
+input CreateUserInput {
+  sub: String!
+  name: String
+  email: EmailAddress!
+}
+
+type CreateUserResponse {
+  token: String @skipAuth
+}
+
+extend type Mutation {
+  createUser(data: CreateUserInput!): CreateUserResponse @skipAuth
+}

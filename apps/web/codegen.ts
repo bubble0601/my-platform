@@ -1,15 +1,26 @@
-import { CodegenConfig } from '@graphql-codegen/cli'
-import { env } from './src/utils/env'
+import type { CodegenConfig } from "@graphql-codegen/cli";
+import { envsafe, url } from "envsafe";
+
+const env = envsafe({
+  API_URL: url({
+    devDefault: "http://localhost:8080",
+  }),
+});
 
 const config: CodegenConfig = {
-  schema: `${env.API_BASE_URL}/graphql`,
-  documents: ['src/**/*.tsx', '!src/@generated/**/*'],
+  schema: `${env.API_URL}/graphql`,
+  documents: ["app/**/*.ts", "app/**/*.tsx"],
+  ignoreNoDocuments: true,
+  errorsOnly: true,
   generates: {
-    './src/@generated/': {
-      preset: 'client',
-      plugins: [],
+    "./app/_gql/": {
+      preset: "client",
+      config: {
+        scalars: {
+          EmailAddress: "string",
+        },
+      },
     },
   },
-}
-
-export default config
+};
+export default config;

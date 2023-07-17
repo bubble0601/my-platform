@@ -1,9 +1,9 @@
 # compiled output
-/src/@generated
 /dist
 /node_modules
-/src/schema.gql
-/src/nexus-types.d.ts
+/src/schema/generated.gql
+/src/schema/resolvers-types.ts
+/src/db/types.ts
 
 # Logs
 logs

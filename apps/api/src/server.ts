@@ -1,70 +1,55 @@
-import fastifyCookie from '@fastify/cookie'
-import fastifyEtag from '@fastify/etag'
-import fastifySession from '@fastify/session'
-import fastify, { FastifyInstance, FastifyServerOptions } from 'fastify'
-import mercurius from 'mercurius'
-import { sessionStore } from '~/auth/session'
-import { checkOriginPlugin, prismaPlugin, shutdownPlugin } from '~/plugins'
-import { env, isProduction } from '~/utils/env'
-import { Context } from './context'
-import { schema } from './schema'
+import { readFileSync } from "fs";
+import { createServer } from "http";
+import { resolve } from "path";
+import { useGenericAuth } from "@envelop/generic-auth";
+import {
+  EmailAddressTypeDefinition,
+  EmailAddressResolver,
+} from "graphql-scalars";
+import { createSchema, createYoga } from "graphql-yoga";
+import { resolvers } from "~/schema/resolvers";
+import { BaseContext } from "./context";
+import { db } from "./db";
+import { resolveUserFn } from "./utils/auth";
+import { env } from "./utils/env";
 
-const createServer = (opts: FastifyServerOptions = {}): FastifyInstance => {
-  const server = fastify(opts)
+const typeDefs = readFileSync(
+  resolve(__dirname, "./schema/generated.gql"),
+  "utf8",
+);
 
-  server.register(prismaPlugin)
-  server.register(shutdownPlugin)
-  server.register(fastifyEtag)
-
-  server.register(fastifyCookie)
-  server.register(fastifySession, {
-    secret: env.SESSION_SECRET,
-    cookieName: env.COOKIE_NAME_FOR_SESSION,
-    cookie: {
-      maxAge: 60 * 60 * 24 * 14,
-      secure: isProduction,
-      httpOnly: true,
-      sameSite: 'lax',
+export const createYogaServer = () => {
+  const schema = createSchema<BaseContext>({
+    typeDefs: [EmailAddressTypeDefinition, typeDefs],
+    resolvers: {
+      EmailAddress: EmailAddressResolver,
+      ...resolvers,
     },
-    saveUninitialized: false,
-    store: sessionStore,
-  })
-  server.register(checkOriginPlugin)
+  });
 
-  server.register(mercurius, {
+  const yoga = createYoga({
     schema,
-    graphiql: !isProduction,
-    context(request, reply): Context {
-      return {
-        db: server.prisma,
-        request,
-        reply,
-      }
-    },
-  })
+    context: (ctx): BaseContext => ({
+      ...ctx,
+      db,
+    }),
+    plugins: [
+      useGenericAuth({
+        resolveUserFn,
+        mode: "protect-all",
+      }),
+    ],
+  });
 
-  return server
-}
+  return yoga;
+};
 
-export const startServer = async () => {
-  const server = createServer({
-    logger: !isProduction
-      ? {
-          transport: {
-            target: './pino-pretty-transport',
-            options: {
-              translateTime: 'yyyy-mm-dd HH:MM:ss',
-            },
-          },
-        }
-      : true,
-  })
-  try {
-    await server.listen({
-      port: env.PORT,
-    })
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
-  }
-}
+export const startServer = () => {
+  const yoga = createYogaServer();
+
+  const server = createServer(yoga);
+
+  server.listen(env.PORT, () => {
+    console.info(`Server is running on http://localhost:${env.PORT}/graphql`);
+  });
+};

@@ -3,20 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./.eslintrc.default.js",
+    ".": "./.eslintrc.base.js",
     "./*": "./.eslintrc.*.js"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.52.0",
-    "eslint": "^8.34.0",
-    "eslint-config-next": "^13.1.6",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-config-turbo": "^0.0.9",
-    "eslint-import-resolver-typescript": "^3.5.3",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-next": "^13.4.9",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-turbo": "^1.10.7",
+    "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-turbo": "^0.0.9",
-    "typescript": "^4.9.5"
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "typescript": "^5.1.6"
   }
 }

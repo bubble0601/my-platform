@@ -12,9 +12,6 @@
 /.next/
 /out/
 
-# output
-/src/@generated
-
 # production
 /build
 
@@ -38,4 +35,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vscode
+_gql/
