@@ -7,7 +7,7 @@ import { supabase } from "~/_utils/client";
 
 type Props = {
   session: Session | null;
-}
+};
 
 export const LoginForm = ({ session }: Props) => {
   const router = useRouter();

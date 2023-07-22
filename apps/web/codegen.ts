@@ -3,12 +3,12 @@ import { envsafe, url } from "envsafe";
 
 const env = envsafe({
   API_URL: url({
-    devDefault: "http://localhost:8080",
+    default: "http://localhost:8080/graphql",
   }),
 });
 
 const config: CodegenConfig = {
-  schema: `${env.API_URL}/graphql`,
+  schema: env.API_URL,
   documents: ["app/**/*.ts", "app/**/*.tsx"],
   ignoreNoDocuments: true,
   errorsOnly: true,

@@ -12,17 +12,18 @@ const env = envsafe({
       })
     ),
   API_URL: url({
-    devDefault: "http://localhost:8080",
+    default: "http://localhost:8080/graphql",
+    allowEmpty: true,
   }),
 });
 
 const rewrites =
-  env.NODE_ENV === "production"
+  env.API_URL === ""
     ? []
     : [
         {
           source: "/graphql",
-          destination: `${env.API_URL}/graphql`,
+          destination: env.API_URL,
         },
       ];
 
@@ -33,6 +34,9 @@ const nextConfig = {
   poweredByHeader: false,
   async rewrites() {
     return rewrites;
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   experimental: {
     serverActions: true,

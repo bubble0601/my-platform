@@ -6,7 +6,7 @@ export const env = envsafe({
     choices: ["development", "test", "production"],
   }) as ValidatorSpec<"development" | "test" | "production">,
   PORT: port({
-    devDefault: 8080,
+    default: 8080,
   }),
   DB_HOST: str(),
   DB_PORT: port(),

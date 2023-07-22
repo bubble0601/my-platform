@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "fmt": "prettier --write 'app/**/*.ts'",
-    "lint": "NODE_ENV=development next lint",
+    "lint": "next lint --no-cache",
     "typechk": "tsc",
     "gen": "graphql-codegen"
   },

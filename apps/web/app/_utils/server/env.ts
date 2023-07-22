@@ -9,7 +9,7 @@ export const env = envsafe({
       choices: ["development", "test", "production"],
     }),
   API_URL: url({
-    devDefault: "http://localhost:8080",
+    default: "http://localhost:8080/graphql",
   }),
   NEXT_PUBLIC_SUPABASE_URL: url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: str(),

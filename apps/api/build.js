@@ -1,15 +1,14 @@
 // @ts-check
-const { build } = require('esbuild')
-
-const isProduction = process.env.NODE_ENV === 'production'
+const { build } = require("esbuild");
 
 build({
-  entryPoints: ['src/index.ts'],
-  outdir: 'dist',
-  platform: 'node',
-  format: 'cjs',
-  minify: isProduction,
+  entryPoints: ["src/index.ts"],
+  outdir: "dist",
+  platform: "node",
+  format: "cjs",
+  bundle: true,
+  minify: true,
 }).catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+  console.error(error);
+  process.exit(1);
+});

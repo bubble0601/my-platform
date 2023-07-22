@@ -9,7 +9,7 @@ import {
 import { createSchema, createYoga } from "graphql-yoga";
 import { resolvers } from "~/schema/resolvers";
 import { BaseContext } from "./context";
-import { db } from "./db";
+import { closeDb, db } from "./db";
 import { resolveUserFn } from "./utils/auth";
 import { env } from "./utils/env";
 
@@ -51,5 +51,17 @@ export const startServer = () => {
 
   server.listen(env.PORT, () => {
     console.info(`Server is running on http://localhost:${env.PORT}/graphql`);
+    process.send?.("ready");
+  });
+
+  process.on("SIGINT", async () => {
+    console.log("Received SIGINT signal. Exiting gracefully...");
+    await new Promise<void>((resolve) => {
+      server.close(() => {
+        resolve();
+      });
+    });
+    await closeDb();
+    process.exit(0);
   });
 };

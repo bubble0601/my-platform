@@ -1,10 +1,13 @@
 # ibubble
+
 My personal website
 
 # Dependencies
+
 node
-yarn
-mysql
+pnpm
+postgresql
 youtube-dl
 ffmpeg(built with libfdk_aac)
+
 <!-- python and mutagen -->

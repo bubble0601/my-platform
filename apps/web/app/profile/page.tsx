@@ -11,9 +11,7 @@ const getProfileDocument = graphql(`
 `);
 
 const ProfilePage = async () => {
-  const start = performance.now();
   const client = await getAuthedClient();
-  console.log("getAuthedClient", performance.now() - start);
   const result = await client.query(getProfileDocument, {}).toPromise();
 
   if (result.error) {

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "dotenv -- ts-node-dev --transpile-only -r tsconfig-paths/register ./src/index.ts",
-    "build": "rimraf dist && node ./build.js",
+    "build": "rimraf dist && mkdir -p ./dist/schema && node ./build.js && cp ./src/schema/generated.gql ./dist/schema/generated.gql",
     "start": "dotenv -- node ./dist/index.js",
     "fmt": "prettier --write 'src/**/*.ts'",
     "lint": "eslint src --ext .ts --cache",
@@ -12,8 +12,11 @@
     "gen": "pnpm run '/^gen:.*/'",
     "gen:prisma": "prisma generate",
     "gen:gql": "graphql-codegen",
-    "pstudio": "prisma studio",
-    "migrate": "prisma migrate dev",
+    "db": "prisma studio",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:dev": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "docker:up": "docker-compose -f ./test/docker-compose.yml up -d ",
     "docker:down": "docker-compose -f ./test/docker-compose.yml down",
     "test": "pnpm docker:up && dotenv -e .env.test pnpm prisma db push && dotenv -e .env.test vitest"
