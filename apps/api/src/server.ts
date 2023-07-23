@@ -1,12 +1,12 @@
-import { readFileSync } from "fs";
-import { createServer } from "http";
-import { resolve } from "path";
 import { useGenericAuth } from "@envelop/generic-auth";
 import {
-  EmailAddressTypeDefinition,
   EmailAddressResolver,
+  EmailAddressTypeDefinition,
 } from "graphql-scalars";
 import { createSchema, createYoga } from "graphql-yoga";
+import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { resolve } from "node:path";
 import { resolvers } from "~/schema/resolvers";
 import { BaseContext } from "./context";
 import { closeDb, db } from "./db";

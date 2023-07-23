@@ -3,9 +3,9 @@
 import { Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { SyntheticEvent, useId, useRef } from "react";
-import { signUp } from "../actions";
 import { supabase } from "~/_utils/client";
 import { handleError } from "~/_utils/error";
+import { signUp } from "../actions";
 
 type Props = {
   session: Session | null;

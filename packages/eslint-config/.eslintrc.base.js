@@ -30,20 +30,7 @@ module.exports = {
     "import/named": OFF,
     "import/namespace": OFF,
     "import/no-named-as-default-member": OFF,
-    "import/order": [
-      ERROR,
-      {
-        alphabetize: {
-          order: "asc",
-        },
-        pathGroups: [
-          {
-            pattern: "~/**",
-            group: "parent",
-          },
-        ],
-      },
-    ],
+    "import/order": OFF,
     "@typescript-eslint/consistent-type-definitions": OFF,
     "@typescript-eslint/no-misused-promises": [
       ERROR,
@@ -63,6 +50,5 @@ module.exports = {
       WARN,
       { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
     ],
-    "turbo/no-undeclared-env-vars": WARN,
   },
 };
