@@ -8,6 +8,9 @@ export const env = envsafe({
       devDefault: "development",
       choices: ["development", "test", "production"],
     }),
+  APP_NAME: str({
+    default: "My App",
+  }),
   API_URL: url({
     default: "http://localhost:8080/graphql",
   }),

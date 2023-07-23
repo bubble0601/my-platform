@@ -1,14 +1,36 @@
 {
   "$schema": "https://turborepo.org/schema.json",
+  "globalDotEnv": [".env", ".env.local"],
   "pipeline": {
     "build": {
-      "outputs": [".next/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "dependsOn": ["^build"]
     },
-    "dev": {
+    "lint": {
+      "outputMode": "new-only"
+    },
+    "lint:ci": {
       "cache": false
     },
-    "lint": {},
-    "typechk": {}
+    "typechk": {
+      "outputMode": "new-only"
+    },
+    "gen": {},
+    "api#gen": {
+      "inputs": ["apps/api/prisma/schema.prisma", "apps/api/src/**/*.gql"],
+      "outputs": [
+        "apps/api/src/db/types.ts",
+        "apps/api/src/schema/generated.gql",
+        "apps/api/src/schema/resolvers-types.ts"
+      ],
+      "outputMode": "new-only"
+    },
+    "web#gen": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
   }
 }

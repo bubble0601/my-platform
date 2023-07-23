@@ -2,7 +2,7 @@
 
 ## サーバについて
 
-AmazonのLightsailを使用
+AmazonのLightsail(Amazon Linux 2023)を使用
 
 ## sshの設定
 

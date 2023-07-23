@@ -12,7 +12,6 @@ module.exports = {
     "plugin:import/recommended",
     "plugin:import/typescript",
     "prettier",
-    "turbo",
   ],
   ignorePatterns: ["*.js"],
   parser: "@typescript-eslint/parser",

@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -27,7 +31,7 @@ jobs:
             fnm use $(cat .node-version)
             pnpm install
             pnpm api gen
-            pnpm lint
+            pnpm lint:ci
             pnpm api build
             pnpm web build
             pm2 stop api && pm2 delete api

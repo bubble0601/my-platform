@@ -6,8 +6,8 @@
     "dev": "concurrently -c auto -n next,gen 'next dev' 'pnpm:gen --watch'",
     "build": "next build",
     "start": "next start",
-    "fmt": "prettier --write 'app/**/*.ts'",
-    "lint": "next lint --no-cache",
+    "lint": "next lint",
+    "lint:ci": "next lint --no-cache",
     "typechk": "tsc",
     "gen": "graphql-codegen"
   },

@@ -15,7 +15,6 @@ export const getAuthedClient = async () => {
     data: { session },
   } = await supabase.auth.getSession();
 
-  console.log({ session });
   if (session == null) {
     throw new Error("Unauthenticated");
   }

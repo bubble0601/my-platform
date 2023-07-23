@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "FORCE_COLOR=1 turbo run lint typechk",
+    "lint:ci": "FORCE_COLOR=1 turbo run lint:ci typechk",
     "fmt": "prettier --write .",
     "dev": "turbo run dev",
     "api": "pnpm -F api",
