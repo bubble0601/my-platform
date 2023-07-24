@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this, no-use-before-define */
 interface IResult<T, E> {
   isOk(): this is Ok<T, E>;
   isErr(): this is Err<T, E>;
@@ -13,18 +14,23 @@ class Ok<T, E> implements IResult<T, E> {
   isOk(): this is Ok<T, E> {
     return true;
   }
+
   isErr(): this is Err<T, E> {
     return false;
   }
+
   map<U>(fn: (value: T) => U): Result<U, E> {
     return new Ok(fn(this.value));
   }
+
   unwrap(): T {
     return this.value;
   }
+
   expect(_message: string): T {
     return this.value;
   }
+
   unwrapOr(_value: T): T {
     return this.value;
   }
@@ -36,20 +42,25 @@ class Err<T, E> implements IResult<T, E> {
   isOk(): this is Ok<T, E> {
     return false;
   }
+
   isErr(): this is Err<T, E> {
     return true;
   }
+
   map<U>(_fn: (value: T) => U): Result<U, E> {
     return new Err(this.error);
   }
+
   unwrap(): never {
     throw this.error;
   }
+
   expect(message: string): never {
     throw new Error(message, {
       cause: this.error,
     });
   }
+
   unwrapOr(value: T): T {
     return value;
   }
@@ -69,17 +80,16 @@ export const compose = <T extends Result<unknown, unknown>[]>(
     [K in keyof T]: T[K] extends Result<unknown, infer U> ? U : never;
   }[number]
 > => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return results.reduce<Result<unknown[], unknown>>((acc, result) => {
-    if (acc.isErr()) {
-      return acc;
-    }
+  const acc: unknown[] = [];
+  for (const result of results) {
     if (result.isErr()) {
-      return err(result.error);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return err(result.error as any);
     }
-    return ok([...acc.value, result.unwrap()]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }, ok([])) as any;
+    acc.push(result.unwrap());
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return ok(acc as any);
 };
 
 // const r1 = compose(ok(1), ok(2), ok(3)); // ok([1, 2, 3])

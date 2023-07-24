@@ -39,7 +39,9 @@ export const LoginForm = ({ session }: Props) => {
       <div>
         <h1>ログイン済み</h1>
         <p>ログインメールアドレス: {session.user.email}</p>
-        <button onClick={handleSignOut}>ログアウト</button>
+        <button type="button" onClick={handleSignOut}>
+          ログアウト
+        </button>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import {
 import { createSchema, createYoga } from "graphql-yoga";
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { resolve } from "node:path";
+import path from "node:path";
 import { resolvers } from "~/schema/resolvers";
 import { BaseContext } from "./context";
 import { closeDb, db } from "./db";
@@ -14,7 +14,7 @@ import { resolveUserFn } from "./utils/auth";
 import { env } from "./utils/env";
 
 const typeDefs = readFileSync(
-  resolve(__dirname, "./schema/generated.gql"),
+  path.resolve(__dirname, "./schema/generated.gql"),
   "utf8",
 );
 

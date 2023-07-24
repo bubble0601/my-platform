@@ -1,7 +1,7 @@
 import { ResolveUserFn } from "@envelop/generic-auth";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { Selectable } from "kysely";
-import { BaseContext } from "~/context";
+import type { BaseContext } from "~/context";
 import { db } from "~/db";
 import { User } from "~/db/types";
 import { env } from "./env";
@@ -26,7 +26,7 @@ export const resolveUserFn: ResolveUserFn<UserType, BaseContext> = async (
       .where("sub", "=", payload.sub)
       .selectAll()
       .executeTakeFirst();
-  } catch (e) {
+  } catch {
     return null;
   }
 };

@@ -2,7 +2,7 @@ export const getErrorMessage = (e: unknown): string => {
   if (e == null) return "";
   if (typeof e === "string") return e;
   if (e instanceof Error) return e.message;
-  if (e instanceof Array && e.length > 0) {
+  if (Array.isArray(e) && e.length > 0) {
     const combinedMessage = e
       .map((_e, i) => `${i + 1}: ${getErrorMessage(_e)}`)
       .join("\n");
