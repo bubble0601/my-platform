@@ -1,4 +1,4 @@
-import { MutationResolvers, QueryResolvers } from "../resolvers-types";
+import type { MutationResolvers, QueryResolvers } from "../resolvers-types";
 
 export const meQueryResolver: QueryResolvers["me"] = (_, __, context) => {
   return context.currentUser ?? null;

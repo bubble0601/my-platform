@@ -1,18 +1,23 @@
 {
   "extends": "@internal/tsconfig/base",
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "es2017",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "allowJs": true,
-    "incremental": true,
+
     "jsx": "preserve",
-    "noEmit": true,
     "paths": {
       "~/*": ["./app/*"]
     },
-    "plugins": [{ "name": "next" }]
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -26,6 +26,7 @@ module.exports = {
   rules: {
     "arrow-body-style": OFF,
     "max-classes-per-file": OFF,
+    "no-console": OFF,
     "no-restricted-syntax": [
       ERROR,
       {
@@ -46,6 +47,7 @@ module.exports = {
     ],
     "@typescript-eslint/ban-types": [ERROR, { types: { "{}": false } }],
     "@typescript-eslint/consistent-type-definitions": OFF,
+    "@typescript-eslint/consistent-type-imports": ERROR,
     "@typescript-eslint/no-empty-interface": OFF,
     "@typescript-eslint/no-misused-promises": [
       ERROR,

@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
 import { resolvers } from "~/schema/resolvers";
-import { BaseContext } from "./context";
+import type { BaseContext } from "./context";
 import { closeDb, db } from "./db";
 import { resolveUserFn } from "./utils/auth";
 import { env } from "./utils/env";

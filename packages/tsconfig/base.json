@@ -1,19 +1,28 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "composite": false,
+    "lib": ["es2023"],
+    "module": "ESNext",
+
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "inlineSources": false,
+    "composite": false,
     "isolatedModules": true,
-    "moduleResolution": "node",
-    "noImplicitOverride": true,
-    "noUncheckedIndexedAccess": true,
-    "preserveWatchOutput": true,
-    "removeComments": true,
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true
+    "incremental": true,
+    "noEmit": true,
+    "allowJs": true,
+
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "exclude": ["node_modules", "dist"]
 }

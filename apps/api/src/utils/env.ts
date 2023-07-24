@@ -1,4 +1,5 @@
-import { ValidatorSpec, envsafe, port, str } from "envsafe";
+import type { ValidatorSpec } from "envsafe";
+import { envsafe, port, str } from "envsafe";
 
 export const env = envsafe({
   NODE_ENV: str({

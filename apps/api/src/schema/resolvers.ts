@@ -1,4 +1,4 @@
-import { Resolvers } from "./resolvers-types";
+import type { Resolvers } from "./resolvers-types";
 import {
   createUserMutationResolver,
   meQueryResolver,

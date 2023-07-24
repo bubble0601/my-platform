@@ -1,7 +1,7 @@
-import { ValidateUserFn } from "@envelop/generic-auth";
-import { YogaInitialContext } from "graphql-yoga";
-import { db as database } from "./db";
-import { UserType } from "./utils/auth";
+import type { ValidateUserFn } from "@envelop/generic-auth";
+import type { YogaInitialContext } from "graphql-yoga";
+import type { db as database } from "./db";
+import type { UserType } from "./utils/auth";
 
 export interface BaseContext extends YogaInitialContext {
   db: typeof database;

@@ -20,6 +20,7 @@ module.exports = {
     },
   },
   rules: {
+    "no-console": WARN,
     "jsx-a11y/label-has-associated-control": [
       ERROR,
       {

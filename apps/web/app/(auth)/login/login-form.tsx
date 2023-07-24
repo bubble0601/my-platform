@@ -1,8 +1,9 @@
 "use client";
 
-import { Session } from "@supabase/auth-helpers-nextjs";
+import type { Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
-import { SyntheticEvent, useId, useRef } from "react";
+import type { SyntheticEvent } from "react";
+import { useId, useRef } from "react";
 import { supabase } from "~/_utils/client";
 
 type Props = {

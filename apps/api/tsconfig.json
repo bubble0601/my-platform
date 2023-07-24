@@ -1,14 +1,6 @@
 {
   "extends": "@internal/tsconfig/base",
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2020",
-    "declaration": false,
-    "declarationMap": false,
-    "sourceMap": true,
-    "incremental": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"]
     }
@@ -16,5 +8,6 @@
   "ts-node": {
     "require": ["tsconfig-paths/register"]
   },
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

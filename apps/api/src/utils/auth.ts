@@ -1,9 +1,10 @@
-import { ResolveUserFn } from "@envelop/generic-auth";
-import { JwtPayload, verify } from "jsonwebtoken";
-import { Selectable } from "kysely";
+import type { ResolveUserFn } from "@envelop/generic-auth";
+import type { JwtPayload } from "jsonwebtoken";
+import { verify } from "jsonwebtoken";
+import type { Selectable } from "kysely";
 import type { BaseContext } from "~/context";
 import { db } from "~/db";
-import { User } from "~/db/types";
+import type { User } from "~/db/types";
 import { env } from "./env";
 
 export type UserType = Selectable<User>;
