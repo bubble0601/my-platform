@@ -70,7 +70,7 @@ export type Result<T, E> = Ok<T, E> | Err<T, E>;
 export const ok = <T, E = never>(value: T): Result<T, E> => new Ok(value);
 export const err = <T = never, E = unknown>(error: E): Result<T, E> =>
   new Err(error);
-export const compose = <T extends Result<unknown, unknown>[]>(
+export const compose = <T extends Array<Result<unknown, unknown>>>(
   ...results: T
 ): Result<
   {

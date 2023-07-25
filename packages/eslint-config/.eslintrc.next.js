@@ -5,6 +5,7 @@ const ERROR = 2;
 
 /** @type {import('eslint').Linter.BaseConfig} */
 module.exports = {
+  plugins: ["tailwindcss"],
   extends: [
     "airbnb",
     "airbnb/hooks",
@@ -40,5 +41,11 @@ module.exports = {
         extensions: [".tsx"],
       },
     ],
+    "tailwindcss/enforces-negative-arbitrary-values": ERROR,
+    "tailwindcss/enforces-shorthand": ERROR,
+    "tailwindcss/migration-from-tailwind-2": ERROR,
+    "tailwindcss/no-arbitrary-value": WARN,
+    "tailwindcss/no-custom-classname": WARN,
+    "tailwindcss/no-contradicting-classname": ERROR,
   },
 };

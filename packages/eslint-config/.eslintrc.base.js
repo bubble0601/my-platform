@@ -8,15 +8,10 @@ module.exports = {
   extends: [
     "airbnb-base",
     "plugin:unicorn/recommended",
-    "plugin:@typescript-eslint/strict-type-checked",
-    "plugin:@typescript-eslint/stylistic-type-checked",
     "plugin:import/recommended",
     "plugin:import/typescript",
     "prettier",
   ],
-  ignorePatterns: ["*.js"],
-  parser: "@typescript-eslint/parser",
-  parserOptions: { project: "tsconfig.json" },
   settings: {
     "import/resolver": {
       typescript: true,
@@ -45,28 +40,6 @@ module.exports = {
           "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
       },
     ],
-    "@typescript-eslint/ban-types": [ERROR, { types: { "{}": false } }],
-    "@typescript-eslint/consistent-type-definitions": OFF,
-    "@typescript-eslint/consistent-type-imports": ERROR,
-    "@typescript-eslint/no-empty-interface": OFF,
-    "@typescript-eslint/no-misused-promises": [
-      ERROR,
-      {
-        checksConditionals: true,
-        checksSpreads: true,
-        checksVoidReturn: false,
-      },
-    ],
-    "@typescript-eslint/no-throw-literal": [
-      WARN,
-      {
-        allowThrowingAny: true,
-      },
-    ],
-    "@typescript-eslint/no-unused-vars": [
-      WARN,
-      { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
-    ],
     "import/default": OFF,
     "import/extensions": OFF,
     "import/named": OFF,
@@ -79,4 +52,40 @@ module.exports = {
     "unicorn/prefer-module": OFF,
     "unicorn/prevent-abbreviations": OFF,
   },
+  overrides: [
+    {
+      files: ["*.ts", "*.tsx"],
+      extends: [
+        "plugin:@typescript-eslint/strict-type-checked",
+        "plugin:@typescript-eslint/stylistic-type-checked",
+      ],
+      parser: "@typescript-eslint/parser",
+      parserOptions: { project: "tsconfig.json" },
+      rules: {
+        "@typescript-eslint/array-type": [ERROR, { default: "array-simple" }],
+        "@typescript-eslint/ban-types": [ERROR, { types: { "{}": false } }],
+        "@typescript-eslint/consistent-type-definitions": OFF,
+        "@typescript-eslint/consistent-type-imports": ERROR,
+        "@typescript-eslint/no-empty-interface": OFF,
+        "@typescript-eslint/no-misused-promises": [
+          ERROR,
+          {
+            checksConditionals: true,
+            checksSpreads: true,
+            checksVoidReturn: false,
+          },
+        ],
+        "@typescript-eslint/no-throw-literal": [
+          WARN,
+          {
+            allowThrowingAny: true,
+          },
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          WARN,
+          { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
+        ],
+      },
+    },
+  ],
 };
