@@ -3,9 +3,5 @@ out/
 dist/
 build/
 node_modules/
-_gql/
 
-generated.gql
-resolvers-types.ts
-db/types.ts
 pnpm-*.yaml

@@ -52,6 +52,6 @@ export const createUserMutationResolver: MutationResolvers["createUser"] =
     }
 
     return {
-      token: "",
+      ok: true,
     };
   };

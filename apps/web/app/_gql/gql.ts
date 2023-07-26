@@ -1,6 +1,6 @@
 /* eslint-disable */
-import * as types from './graphql';
-import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+import * as types from "./graphql";
 
 /**
  * Map of all GraphQL operations in the project.
@@ -13,8 +13,10 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      token\n    }\n  }\n": types.CreateUserDocument,
-    "\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n": types.GetProfileDocument,
+  "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n":
+    types.CreateUserDocument,
+  "\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n":
+    types.GetProfileDocument,
 };
 
 /**
@@ -34,14 +36,19 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      token\n    }\n  }\n"): (typeof documents)["\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      token\n    }\n  }\n"];
+export function graphql(
+  source: "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n",
+): (typeof documents)["\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n"];
+export function graphql(
+  source: "\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n",
+): (typeof documents)["\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};
 }
 
-export type DocumentType<TDocumentNode extends DocumentNode<any, any>> = TDocumentNode extends DocumentNode<  infer TType,  any>  ? TType  : never;
+export type DocumentType<TDocumentNode extends DocumentNode<any, any>> =
+  TDocumentNode extends DocumentNode<infer TType, any> ? TType : never;

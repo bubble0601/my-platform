@@ -8,7 +8,7 @@ import { env, publicClient } from "~/_utils/server";
 const createUserDocument = graphql(`
   mutation CreateUser($email: EmailAddress!, $sub: String!) {
     createUser(data: { email: $email, sub: $sub }) {
-      token
+      ok
     }
   }
 `);

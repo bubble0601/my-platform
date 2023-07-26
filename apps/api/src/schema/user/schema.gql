@@ -16,7 +16,7 @@ input CreateUserInput {
 }
 
 type CreateUserResponse {
-  token: String @skipAuth
+  ok: Boolean @skipAuth
 }
 
 extend type Mutation {
