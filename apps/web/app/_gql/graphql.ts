@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
+import type { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/core";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = {
@@ -38,12 +38,10 @@ export type CreateUserInput = {
 };
 
 export type CreateUserResponse = {
-  __typename?: "CreateUserResponse";
   ok?: Maybe<Scalars["Boolean"]["output"]>;
 };
 
 export type Mutation = {
-  __typename?: "Mutation";
   createUser?: Maybe<CreateUserResponse>;
 };
 
@@ -52,7 +50,6 @@ export type MutationCreateUserArgs = {
 };
 
 export type Query = {
-  __typename?: "Query";
   me?: Maybe<User>;
   user?: Maybe<User>;
   users?: Maybe<Array<Maybe<User>>>;
@@ -63,7 +60,6 @@ export type QueryUserArgs = {
 };
 
 export type User = {
-  __typename?: "User";
   id: Scalars["ID"]["output"];
   name: Scalars["String"]["output"];
 };
@@ -74,19 +70,12 @@ export type CreateUserMutationVariables = Exact<{
 }>;
 
 export type CreateUserMutation = {
-  __typename?: "Mutation";
-  createUser?: {
-    __typename?: "CreateUserResponse";
-    ok?: boolean | null;
-  } | null;
+  createUser?: { ok?: boolean | null } | null;
 };
 
 export type GetProfileQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetProfileQuery = {
-  __typename?: "Query";
-  me?: { __typename?: "User"; id: string; name: string } | null;
-};
+export type GetProfileQuery = { me?: { id: string; name: string } | null };
 
 export const CreateUserDocument = {
   kind: "Document",

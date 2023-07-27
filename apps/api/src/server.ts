@@ -14,7 +14,7 @@ import { resolveUserFn } from "./utils/auth";
 import { env } from "./utils/env";
 
 const typeDefs = readFileSync(
-  path.resolve(__dirname, "./schema/generated.gql"),
+  path.resolve(__dirname, "./schema/schema.gql"),
   "utf8",
 );
 

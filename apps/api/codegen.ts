@@ -1,11 +1,19 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema: "**/schema.gql",
+  schema: "src/modules/*/schema.gql",
   generates: {
-    "src/schema/resolvers-types.ts": {
+    "src/modules/": {
+      preset: "graphql-modules",
+      presetConfig: {
+        baseTypesPath: "../schema/types.ts",
+        filename: "module-types.ts",
+        useGraphQLModules: false,
+        requireRootResolvers: true,
+      },
       plugins: ["typescript", "typescript-resolvers"],
       config: {
+        contextType: "~/context#Context",
         avoidOptionals: {
           field: true,
           inputValue: true,
@@ -13,14 +21,16 @@ const config: CodegenConfig = {
           defaultValue: true,
           resolvers: true,
         },
-        contextType: "~/context#Context",
+        enumsAsTypes: true,
+        useTypeImports: true,
         strictScalars: true,
+        defaultScalarType: "unknown",
         scalars: {
           EmailAddress: "string",
         },
       },
     },
-    "src/schema/generated.gql": {
+    "src/schema/schema.gql": {
       plugins: ["schema-ast"],
       config: {
         includeDirectives: true,

@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "concurrently -c auto -n app,db,gql 'pnpm:dev:app' 'pnpm:gen:prisma --watch' 'pnpm:gen:gql --watch'",
     "dev:app": "dotenv -- ts-node-dev --transpile-only -r tsconfig-paths/register ./src/index.ts",
-    "build": "rimraf dist && mkdir -p ./dist/schema && node ./build.js && cp ./src/schema/generated.gql ./dist/schema/generated.gql",
+    "build": "rimraf dist && mkdir -p ./dist/schema && node ./build.js && cp ./src/schema/schema.gql ./dist/schema/schema.gql",
     "start": "dotenv -- node ./dist/index.js",
-    "lint": "eslint src --ext .ts,.gql --cache",
-    "lint:ci": "eslint src --ext .ts,.gql",
+    "lint": "eslint src --cache",
+    "lint:ci": "eslint src",
     "typechk": "tsc --noEmit",
     "gen": "pnpm run '/^gen:.*/'",
     "gen:prisma": "prisma generate",
@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/graphql-modules-preset": "^4.0.1",
     "@graphql-codegen/schema-ast": "^4.0.0",
     "@graphql-codegen/typescript": "^4.0.1",
     "@graphql-codegen/typescript-resolvers": "^4.0.1",

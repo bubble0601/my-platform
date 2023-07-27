@@ -16,6 +16,10 @@ const config: CodegenConfig = {
     "./app/_gql/": {
       preset: "client",
       config: {
+        enumsAsTypes: true,
+        useTypeImports: true,
+        skipTypename: true,
+        defaultScalarType: "unknown",
         scalars: {
           EmailAddress: "string",
         },

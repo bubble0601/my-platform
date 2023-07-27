@@ -1,6 +1,3 @@
 scalar EmailAddress
 
 directive @skipAuth on FIELD_DEFINITION
-
-type Query
-type Mutation

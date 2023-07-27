@@ -1,18 +1,11 @@
-import type { Resolvers } from "./resolvers-types";
-import {
-  createUserMutationResolver,
-  meQueryResolver,
-  userQueryResolver,
-  usersQueryResolver,
-} from "./user/resolvers";
+import { userMutationResolvers, userQueryResolvers } from "~/modules/user";
+import type { Resolvers } from "./types";
 
-export const resolvers: PickRequired<Resolvers, "Query" | "Mutation"> = {
+export const resolvers: Pick<Resolvers, "Query" | "Mutation"> = {
   Query: {
-    me: meQueryResolver,
-    user: userQueryResolver,
-    users: usersQueryResolver,
+    ...userQueryResolvers,
   },
   Mutation: {
-    createUser: createUserMutationResolver,
+    ...userMutationResolvers,
   },
 };

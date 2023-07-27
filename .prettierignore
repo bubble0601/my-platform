@@ -1,7 +1,1 @@
-.next/
-out/
-dist/
-build/
-node_modules/
-
 pnpm-*.yaml

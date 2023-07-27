@@ -1,9 +1,10 @@
 # compiled output
 /dist
 /node_modules
-/src/schema/generated.gql
-/src/schema/resolvers-types.ts
 /src/db/types.ts
+/src/schema/types.ts
+/src/schema/schema.gql
+module-types.ts
 
 # Logs
 logs

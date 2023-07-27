@@ -5,15 +5,17 @@ module.exports = {
   ignorePatterns: [
     "build.js",
     "dist",
-    "src/schema/resolvers-types.ts",
     "src/db/types.ts",
+    "src/schema/types.ts",
+    "src/modules/*/module-types.ts",
+    "src/schema/schema.gql",
   ],
   overrides: [
     {
-      files: ["*.gql"],
+      files: ["src/modules/*/schema.gql"],
       extends: "plugin:@graphql-eslint/schema-recommended",
       parserOptions: {
-        schema: "./src/**/*.gql",
+        schema: "./src/**/schema.gql",
       },
       rules: {
         "@graphql-eslint/require-description": "off",

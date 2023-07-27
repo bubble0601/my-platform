@@ -20,8 +20,8 @@
       "inputs": ["apps/api/prisma/schema.prisma", "apps/api/src/**/*.gql"],
       "outputs": [
         "apps/api/src/db/types.ts",
-        "apps/api/src/schema/generated.gql",
-        "apps/api/src/schema/resolvers-types.ts"
+        "apps/api/src/schema/schema.gql",
+        "apps/api/src/module/*/module-types.ts"
       ],
       "outputMode": "new-only"
     },
