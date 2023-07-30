@@ -33,6 +33,7 @@ export const createYogaServer = () => {
       ...ctx,
       db,
     }),
+    graphiql: env.NODE_ENV === "development",
     plugins: [
       useGenericAuth({
         resolveUserFn,

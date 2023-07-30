@@ -13,7 +13,7 @@ import * as types from "./graphql";
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-  "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n":
+  "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      user {\n        id\n        name\n      }\n    }\n  }\n":
     types.CreateUserDocument,
   "\n  query GetProfile {\n    me {\n      id\n      name\n    }\n  }\n":
     types.GetProfileDocument,
@@ -37,8 +37,8 @@ export function graphql(source: string): unknown;
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n",
-): (typeof documents)["\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      ok\n    }\n  }\n"];
+  source: "\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      user {\n        id\n        name\n      }\n    }\n  }\n",
+): (typeof documents)["\n  mutation CreateUser($email: EmailAddress!, $sub: String!) {\n    createUser(data: { email: $email, sub: $sub }) {\n      user {\n        id\n        name\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

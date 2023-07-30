@@ -38,8 +38,9 @@ export const userMutationResolvers: UserModule.MutationResolvers = {
     if (user == null) {
       throw new Error("Failed to create user");
     }
+
     return {
-      ok: true,
+      user,
     };
   },
 };

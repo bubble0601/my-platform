@@ -19,9 +19,10 @@ module.exports = {
       },
       rules: {
         "@graphql-eslint/require-description": "off",
+        "@graphql-eslint/no-unreachable-types": "off",
         "@graphql-eslint/strict-id-in-types": [
           "error",
-          { exceptions: { suffixes: ["Response"] } },
+          { exceptions: { suffixes: ["Error", "Payload"] } },
         ],
       },
     },

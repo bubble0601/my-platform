@@ -1,6 +1,6 @@
 type User {
-  id: ID!
-  name: String!
+  id: ID! @skipAuth
+  name: String! @skipAuth
 }
 
 extend type Query {
@@ -9,16 +9,16 @@ extend type Query {
   users: [User]
 }
 
+extend type Mutation {
+  createUser(data: CreateUserInput!): CreateUserPayload @skipAuth
+}
+
 input CreateUserInput {
   sub: String!
   name: String
   email: EmailAddress!
 }
 
-type CreateUserResponse {
-  ok: Boolean @skipAuth
-}
-
-extend type Mutation {
-  createUser(data: CreateUserInput!): CreateUserResponse @skipAuth
+type CreateUserPayload {
+  user: User @skipAuth
 }

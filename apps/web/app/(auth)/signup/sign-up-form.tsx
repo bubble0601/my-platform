@@ -27,8 +27,8 @@ export const SignUpForm = ({ session }: Props) => {
       emailInput.current.value,
       passwordInput.current.value,
     );
-    if (result.errors.length > 0) {
-      handleError(result.errors);
+    if (!result.ok) {
+      handleError(result.error.errors);
       return;
     }
     router.push("/signup/success");

@@ -3,12 +3,16 @@
 import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { graphql } from "~/_gql";
+import { err, ok } from "~/_utils/result";
 import { env, publicClient } from "~/_utils/server";
 
 const createUserDocument = graphql(`
   mutation CreateUser($email: EmailAddress!, $sub: String!) {
     createUser(data: { email: $email, sub: $sub }) {
-      ok
+      user {
+        id
+        name
+      }
     }
   }
 `);
@@ -30,9 +34,7 @@ export const signUp = async (email: string, password: string) => {
     email_confirm: true,
   });
   if (signUpResult.error) {
-    return {
-      errors: [signUpResult.error],
-    };
+    return err({ errors: [signUpResult.error] });
   }
 
   const { user } = signUpResult.data;
@@ -45,8 +47,7 @@ export const signUp = async (email: string, password: string) => {
     }),
     publicClient.mutation(createUserDocument, { email, sub }).toPromise(),
   ]);
+  const errors = [signInResult.error, createUserResult.error].filter(Boolean);
 
-  return {
-    errors: [signInResult.error, createUserResult.error].filter(Boolean),
-  };
+  return errors.length > 0 ? err({ errors }) : ok();
 };

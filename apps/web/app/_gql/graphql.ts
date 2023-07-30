@@ -37,12 +37,12 @@ export type CreateUserInput = {
   sub: Scalars["String"]["input"];
 };
 
-export type CreateUserResponse = {
-  ok?: Maybe<Scalars["Boolean"]["output"]>;
+export type CreateUserPayload = {
+  user?: Maybe<User>;
 };
 
 export type Mutation = {
-  createUser?: Maybe<CreateUserResponse>;
+  createUser?: Maybe<CreateUserPayload>;
 };
 
 export type MutationCreateUserArgs = {
@@ -70,7 +70,7 @@ export type CreateUserMutationVariables = Exact<{
 }>;
 
 export type CreateUserMutation = {
-  createUser?: { ok?: boolean | null } | null;
+  createUser?: { user?: { id: string; name: string } | null } | null;
 };
 
 export type GetProfileQueryVariables = Exact<{ [key: string]: never }>;
@@ -147,7 +147,17 @@ export const CreateUserDocument = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "ok" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "user" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                    ],
+                  },
+                },
               ],
             },
           },

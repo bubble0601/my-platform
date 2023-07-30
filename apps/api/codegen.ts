@@ -28,6 +28,9 @@ const config: CodegenConfig = {
         scalars: {
           EmailAddress: "string",
         },
+        mappers: {
+          User: "~/db/types#User as UserModel",
+        },
       },
     },
     "src/schema/schema.gql": {

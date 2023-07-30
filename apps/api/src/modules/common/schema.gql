@@ -1,3 +1,8 @@
 scalar EmailAddress
 
 directive @skipAuth on FIELD_DEFINITION
+
+interface Error {
+  code: String!
+  message: String!
+}
