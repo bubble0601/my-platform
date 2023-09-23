@@ -1,13 +1,8 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { getSession } from "~/_utils/server";
 import { SignUpForm } from "./sign-up-form";
 
-const SignUpPage = async () => {
-  const supabase = createServerComponentClient({ cookies });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export default async function SignUpPage() {
+  const session = await getSession();
 
   return (
     <div>
@@ -15,6 +10,4 @@ const SignUpPage = async () => {
       <SignUpForm session={session} />
     </div>
   );
-};
-
-export default SignUpPage;
+}

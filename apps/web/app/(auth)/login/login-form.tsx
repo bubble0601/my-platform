@@ -2,8 +2,9 @@
 
 import type { Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
-import type { SyntheticEvent } from "react";
+import type { FormEvent } from "react";
 import { useId, useRef } from "react";
+import { Button } from "~/_components/ui/button";
 import { supabase } from "~/_utils/client";
 
 type Props = {
@@ -17,7 +18,7 @@ export const LoginForm = ({ session }: Props) => {
   const passwordInputId = useId();
   const passwordInput = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!emailInput.current || !passwordInput.current) return;
 
@@ -51,7 +52,14 @@ export const LoginForm = ({ session }: Props) => {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor={emailInputId}>メールアドレス</label>
-        <input ref={emailInput} id={emailInputId} type="email" name="email" />
+        <input
+          ref={emailInput}
+          id={emailInputId}
+          type="email"
+          name="email"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+        />
       </div>
       <div>
         <label htmlFor={passwordInputId}>パスワード</label>
@@ -63,7 +71,7 @@ export const LoginForm = ({ session }: Props) => {
         />
       </div>
       <div>
-        <input type="submit" value="ログイン" />
+        <Button type="submit">ログイン</Button>
       </div>
     </form>
   );

@@ -1,7 +1,7 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
-  extends: ["@internal/eslint-config/next"],
+  extends: ["@internal/eslint-config/next", "plugin:storybook/recommended"],
   ignorePatterns: ["app/_gql"],
   // processor: "@graphql-eslint/graphql",
   // overrides: [
@@ -13,4 +13,12 @@ module.exports = {
   //     },
   //   },
   // ],
+  overrides: [
+    {
+      files: ["*.stories.tsx"],
+      rules: {
+        "react-hooks/rules-of-hooks": "off",
+      },
+    },
+  ],
 };

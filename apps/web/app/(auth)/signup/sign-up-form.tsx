@@ -55,7 +55,14 @@ export const SignUpForm = ({ session }: Props) => {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor={emailInputId}>メールアドレス</label>
-        <input ref={emailInput} id={emailInputId} type="email" name="email" />
+        <input
+          ref={emailInput}
+          id={emailInputId}
+          type="email"
+          name="email"
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+        />
       </div>
       <div>
         <label htmlFor={passwordInputId}>パスワード</label>

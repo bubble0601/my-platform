@@ -40,6 +40,7 @@ module.exports = {
           "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
       },
     ],
+    "no-underscore-dangle": OFF,
     "import/default": OFF,
     "import/extensions": OFF,
     "import/named": OFF,
@@ -47,6 +48,7 @@ module.exports = {
     "import/no-named-as-default-member": OFF,
     "import/order": OFF,
     "import/prefer-default-export": OFF,
+    "unicorn/no-array-callback-reference": OFF,
     "unicorn/no-null": OFF,
     // TODO: migrate to esm
     "unicorn/prefer-module": OFF,
@@ -62,6 +64,7 @@ module.exports = {
       parser: "@typescript-eslint/parser",
       parserOptions: { project: "tsconfig.json" },
       rules: {
+        "unicorn/prefer-native-coercion-functions": OFF,
         "@typescript-eslint/array-type": [ERROR, { default: "array-simple" }],
         "@typescript-eslint/ban-types": [ERROR, { types: { "{}": false } }],
         "@typescript-eslint/consistent-type-definitions": OFF,

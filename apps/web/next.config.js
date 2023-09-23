@@ -40,6 +40,8 @@ const nextConfig = {
   },
   experimental: {
     serverActions: true,
+    typedRoutes: true,
+    swcPlugins: [["@swc-jotai/react-refresh", {}]],
   },
 };
 

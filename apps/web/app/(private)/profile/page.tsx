@@ -10,7 +10,7 @@ const getProfileDocument = graphql(`
   }
 `);
 
-const ProfilePage = async () => {
+export default async function ProfilePage() {
   const client = await getAuthedClient();
   const result = await client.query(getProfileDocument, {}).toPromise();
 
@@ -27,6 +27,4 @@ const ProfilePage = async () => {
       <p>name: {result.data.me.name}</p>
     </div>
   );
-};
-
-export default ProfilePage;
+}

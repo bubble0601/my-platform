@@ -1,4 +1,4 @@
-const Page = () => {
+export default function Page() {
   return (
     <main className="flex min-h-screen flex-col p-24">
       <a href="/signup">Signup</a>
@@ -6,6 +6,4 @@ const Page = () => {
       <a href="/profile">Profile</a>
     </main>
   );
-};
-
-export default Page;
+}

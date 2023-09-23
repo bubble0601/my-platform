@@ -1,7 +1,4 @@
 // @ts-check
-const OFF = 0;
-const WARN = 1;
-const ERROR = 2;
 
 /** @type {import('eslint').Linter.BaseConfig} */
 module.exports = {
@@ -14,6 +11,7 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "plugin:jsx-a11y/recommended",
     "plugin:@next/next/recommended",
+    "plugin:storybook/recommended",
   ],
   settings: {
     react: {
@@ -21,31 +19,35 @@ module.exports = {
     },
   },
   rules: {
-    "no-console": WARN,
+    "no-console": "warn",
+    "prefer-arrow-callback": ["error", { allowNamedFunctions: true }],
     "jsx-a11y/label-has-associated-control": [
-      ERROR,
+      "error",
       {
         assert: "either",
       },
     ],
+    "react/self-closing-comp": "off",
     "react/function-component-definition": [
-      ERROR,
+      "error",
       {
-        namedComponents: "arrow-function",
+        namedComponents: ["arrow-function", "function-declaration"],
         unnamedComponents: "arrow-function",
       },
     ],
     "react/jsx-filename-extension": [
-      ERROR,
+      "error",
       {
         extensions: [".tsx"],
       },
     ],
-    "tailwindcss/enforces-negative-arbitrary-values": ERROR,
-    "tailwindcss/enforces-shorthand": ERROR,
-    "tailwindcss/migration-from-tailwind-2": ERROR,
-    "tailwindcss/no-arbitrary-value": WARN,
-    "tailwindcss/no-custom-classname": WARN,
-    "tailwindcss/no-contradicting-classname": ERROR,
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off",
+    "tailwindcss/enforces-negative-arbitrary-values": "error",
+    "tailwindcss/enforces-shorthand": "error",
+    "tailwindcss/migration-from-tailwind-2": "error",
+    "tailwindcss/no-arbitrary-value": "warn",
+    "tailwindcss/no-custom-classname": "warn",
+    "tailwindcss/no-contradicting-classname": "error",
   },
 };
