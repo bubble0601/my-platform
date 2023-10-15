@@ -87,3 +87,9 @@ export const SubtleIcon: Story = {
     variant: "subtle",
   },
 };
+
+export const Withicon: Story = {
+  args: {
+    children: [<FaComment />, "Button"],
+  },
+};

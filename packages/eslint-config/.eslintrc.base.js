@@ -49,6 +49,7 @@ module.exports = {
     "import/order": OFF,
     "import/prefer-default-export": OFF,
     "unicorn/no-array-callback-reference": OFF,
+    "unicorn/no-negated-condition": OFF,
     "unicorn/no-null": OFF,
     // TODO: migrate to esm
     "unicorn/prefer-module": OFF,
@@ -69,6 +70,7 @@ module.exports = {
         "@typescript-eslint/ban-types": [ERROR, { types: { "{}": false } }],
         "@typescript-eslint/consistent-type-definitions": OFF,
         "@typescript-eslint/consistent-type-imports": ERROR,
+        "@typescript-eslint/no-redundant-type-constituents": OFF,
         "@typescript-eslint/no-empty-interface": OFF,
         "@typescript-eslint/no-misused-promises": [
           ERROR,
@@ -84,6 +86,8 @@ module.exports = {
             allowThrowingAny: true,
           },
         ],
+        "@typescript-eslint/no-unsafe-assignment": OFF,
+        "@typescript-eslint/no-unsafe-return": OFF,
         "@typescript-eslint/no-unused-vars": [
           WARN,
           { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },

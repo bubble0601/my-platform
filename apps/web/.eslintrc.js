@@ -17,6 +17,8 @@ module.exports = {
     {
       files: ["*.stories.tsx"],
       rules: {
+        "import/no-extraneous-dependencies": "off",
+        "react/jsx-key": "off",
         "react-hooks/rules-of-hooks": "off",
       },
     },

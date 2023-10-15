@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { CommonLayout } from "~/_components/layout/common-layout";
 import { getSession } from "~/_utils/server";
 
 type Props = {
@@ -13,10 +14,5 @@ export default async function Layout({ children }: Props) {
     redirect("/");
   }
 
-  return (
-    <div>
-      <h1>My App</h1>
-      {children}
-    </div>
-  );
+  return <CommonLayout>{children}</CommonLayout>;
 }

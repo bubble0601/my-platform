@@ -35,6 +35,12 @@ module.exports = {
         unnamedComponents: "arrow-function",
       },
     ],
+    "react/jsx-key": [
+      "error",
+      {
+        checkFragmentShorthand: true,
+      },
+    ],
     "react/jsx-filename-extension": [
       "error",
       {
