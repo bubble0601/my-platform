@@ -1,6 +1,8 @@
+"use client";
+
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { tv } from "tailwind-variants";
-import { wrap } from "~/_utils/client/wrap";
+import { wrap } from "../utils/wrap";
 
 const menuLabel = tv({
   base: `text-muted-foreground px-2 py-1.5 text-sm font-semibold`,

@@ -1,3 +1,5 @@
+"use client";
+
 import type { AvatarImageProps } from "@radix-ui/react-avatar";
 import { Avatar as AvatarRoot, Fallback, Image } from "@radix-ui/react-avatar";
 import type { PropsWithoutRef, ReactNode } from "react";

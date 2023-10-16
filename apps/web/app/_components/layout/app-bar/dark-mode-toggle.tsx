@@ -1,7 +1,7 @@
 "use client";
 
+import { Button } from "@internal/ui";
 import { BsMoonStars, BsSun } from "react-icons/bs";
-import { Button } from "~/_components/ui/button";
 import { useDarkMode } from "../dark-mode";
 
 type Props = {

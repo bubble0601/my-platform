@@ -1,8 +1,8 @@
-import "@internal/ui/src/styles.css";
 import { Preview } from "@storybook/react";
 // @ts-ignore
 import { themes } from "@storybook/theming";
 import React from "react";
+import "../src/styles.css";
 
 window.React = React;
 

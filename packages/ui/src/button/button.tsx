@@ -1,8 +1,7 @@
-import Link from "next/link";
-import type { ComponentProps, ForwardedRef } from "react";
-import { forwardRef } from "react";
+import type { ComponentProps } from "react";
+import { cloneElement, forwardRef } from "react";
 import { tv } from "tailwind-variants";
-import { isTruthy } from "~/_utils/guard";
+import { isElement } from "../utils/is-element";
 
 type ButtonVariant = "filled" | "outline" | "subtle";
 
@@ -34,6 +33,9 @@ const baseButton = tv({
     },
     disabled: {
       true: "pointer-events-none cursor-default opacity-50",
+    },
+    fullWidth: {
+      true: "w-full",
     },
   },
 });
@@ -112,6 +114,7 @@ type BaseButtonProps = {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   rounded?: true | keyof typeof baseButton.variants.rounded;
   fullWidth?: boolean;
+  asChild?: boolean;
 };
 
 type ButtonProps = ComponentProps<"button"> & BaseButtonProps;
@@ -128,97 +131,51 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = "md",
       rounded = "default",
       fullWidth = false,
+      asChild = false,
+      children,
       ...props
     },
     ref,
   ) {
-    return (
-      <button
-        ref={ref}
-        // eslint-disable-next-line react/button-has-type
-        type={type}
-        className={button({
-          disabled,
-          variant,
-          color,
-          size: icon ? `icon-${size}` : size,
-          rounded: rounded === true ? "pill" : rounded,
-          className: [className, fullWidth && "w-full"]
-            .filter(isTruthy)
-            .join(" "),
-        })}
-        disabled={disabled}
-        {...props}
-      />
-    );
-  },
-);
-
-type LinkButtonProps<T = unknown> = Omit<ComponentProps<"a">, "href"> &
-  BaseButtonProps & {
-    disabled?: boolean;
-  } & (
-    | {
-        href: string;
-        to?: never;
-      }
-    | {
-        href?: never;
-        to: ComponentProps<typeof Link<T>>["href"];
-        scroll?: ComponentProps<typeof Link<T>>["scroll"];
-        replace?: ComponentProps<typeof Link<T>>["replace"];
-        prefetch?: ComponentProps<typeof Link<T>>["prefetch"];
-      }
-  );
-
-const _LinkButton = function LinkButton<T>(
-  {
-    children,
-    className,
-    disabled,
-    icon = false,
-    variant = "filled",
-    color = "default",
-    size = "md",
-    rounded = "default",
-    fullWidth = false,
-    to,
-    ...props
-  }: LinkButtonProps<T>,
-  ref: ForwardedRef<HTMLAnchorElement>,
-) {
-  const element = (
-    <a
-      ref={ref}
-      className={button({
+    const rootProps = {
+      ref,
+      className: button({
         disabled,
         variant,
         color,
         size: icon ? `icon-${size}` : size,
         rounded: rounded === true ? "pill" : rounded,
-        className: ["cursor-pointer", fullWidth && "w-full", className]
-          .filter(isTruthy)
-          .join(" "),
-      })}
-      {...props}
-      aria-disabled={disabled}
-      tabIndex={disabled ? -1 : undefined}
-    >
-      {children}
-    </a>
-  );
+        fullWidth,
+        className,
+      }),
+      disabled,
+      ...props,
+    };
 
-  if (to != null) {
+    if (asChild) {
+      const cloned = isElement(children)
+        ? cloneElement(children, rootProps)
+        : null;
+      console.log({
+        asChild,
+        children,
+        isElement: isElement(children),
+        cloned,
+      });
+      if (!isElement(children)) {
+        throw new Error(
+          "Invalid children passed to Button when asChild is true. Children must be a single element.",
+        );
+      }
+
+      return cloneElement(children, rootProps);
+    }
+
     return (
-      <Link href={to} passHref legacyBehavior>
-        {element}
-      </Link>
+      // eslint-disable-next-line react/button-has-type
+      <button type={type} {...rootProps}>
+        {children}
+      </button>
     );
-  }
-
-  return element;
-};
-
-export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(
-  _LinkButton,
-) as typeof _LinkButton;
+  },
+);

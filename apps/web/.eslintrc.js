@@ -1,7 +1,11 @@
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
   root: true,
-  extends: ["@internal/eslint-config/next", "plugin:storybook/recommended"],
+  extends: [
+    "@internal/eslint-config/react",
+    "plugin:@next/next/recommended",
+    "plugin:storybook/recommended",
+  ],
   ignorePatterns: ["app/_gql"],
   // processor: "@graphql-eslint/graphql",
   // overrides: [

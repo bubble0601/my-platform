@@ -14,7 +14,7 @@ const meta = {
   },
   parameters: {
     permutation: {
-      deactivate: ["type", "icon", "variant", "fullWidth"],
+      deactivate: ["type", "icon", "variant", "fullWidth", "asChild"],
       autoload: "all",
     },
   },

@@ -6,11 +6,8 @@ import type {
   DropdownMenuTriggerProps,
 } from "@radix-ui/react-dropdown-menu";
 import {
-  DropdownMenuGroup,
   DropdownMenuPortal,
-  DropdownMenuRadioGroup,
   DropdownMenu as DropdownMenuRoot,
-  DropdownMenuSub,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import {
@@ -18,21 +15,12 @@ import {
   useState,
   type ComponentProps,
   type PropsWithChildren,
-  type ReactElement,
   type ReactNode,
 } from "react";
 import { tv } from "tailwind-variants";
-import { composeEventHandlers } from "~/_utils/client/compose-handlers";
 import { Button } from "../button";
-import { DropdownMenuCheckboxItem } from "./dropdown-menu-checkbox-item";
+import { composeEventHandlers } from "../utils/compose-handlers";
 import { DropdownMenuContent } from "./dropdown-menu-content";
-import { DropdownMenuItem } from "./dropdown-menu-item";
-import { DropdownMenuKeybind } from "./dropdown-menu-keybind";
-import { DropdownMenuLabel } from "./dropdown-menu-label";
-import { DropdownMenuRadioItem } from "./dropdown-menu-radio-item";
-import { DropdownMenuSeparator } from "./dropdown-menu-separator";
-import { DropdownMenuSubContent } from "./dropdown-menu-sub-content";
-import { DropdownMenuSubTrigger } from "./dropdown-menu-sub-trigger";
 
 type Props = Omit<DropdownMenuProps, "children" | "modal"> &
   PropsWithChildren<
@@ -42,7 +30,7 @@ type Props = Omit<DropdownMenuProps, "children" | "modal"> &
       contentProps?: DropdownMenuContentProps;
     } & Xor<
       {
-        trigger?: ReactElement;
+        trigger?: JSX.Element;
       },
       {
         buttonProps?: ComponentProps<typeof Button>;
@@ -65,7 +53,7 @@ const dropDownMenu = tv({
   base: "",
 });
 
-const DropdownMenu = ({
+export const DropdownMenu = ({
   children,
   className,
   trigger,
@@ -144,7 +132,11 @@ const DropdownMenu = ({
           onPointerDownOutside={composeEventHandlers(
             contentProps?.onPointerDownOutside,
             (e) => {
-              if (!modal && e.target === triggerRef.current) {
+              if (
+                !modal &&
+                e.target instanceof Node &&
+                triggerRef.current?.contains(e.target)
+              ) {
                 e.preventDefault();
               }
             },
@@ -175,20 +167,3 @@ const DropdownMenu = ({
     </DropdownMenuRoot>
   );
 };
-
-const _DropdownMenu = Object.assign(DropdownMenu, {
-  Portal: DropdownMenuPortal,
-  Label: DropdownMenuLabel,
-  Item: DropdownMenuItem,
-  Group: DropdownMenuGroup,
-  CheckboxItem: DropdownMenuCheckboxItem,
-  RadioGroup: DropdownMenuRadioGroup,
-  RadioItem: DropdownMenuRadioItem,
-  Sub: DropdownMenuSub,
-  SubTrigger: DropdownMenuSubTrigger,
-  SubContent: DropdownMenuSubContent,
-  Separator: DropdownMenuSeparator,
-  Keybind: DropdownMenuKeybind,
-});
-
-export { _DropdownMenu as DropdownMenu };

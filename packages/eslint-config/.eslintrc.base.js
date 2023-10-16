@@ -94,5 +94,11 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ["*.test.ts", "*.test.tsx"],
+      rules: {
+        "import/no-extraneous-dependencies": [ERROR, { devDependencies: true }],
+      },
+    },
   ],
 };

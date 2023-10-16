@@ -1,6 +1,8 @@
+"use client";
+
 import { Item } from "@radix-ui/react-dropdown-menu";
 import { tv } from "tailwind-variants";
-import { wrap } from "~/_utils/client/wrap";
+import { wrap } from "../utils/wrap";
 
 const menuItem = tv({
   base: `focus:bg-accent focus:text-accent-foreground relative flex

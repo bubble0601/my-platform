@@ -1,6 +1,8 @@
+"use client";
+
 import { Content } from "@radix-ui/react-dropdown-menu";
 import { tv } from "tailwind-variants";
-import { wrap } from "~/_utils/client/wrap";
+import { wrap } from "../utils/wrap";
 
 const content = tv({
   base: `bg-popover text-popover-foreground

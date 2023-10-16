@@ -10,8 +10,6 @@ module.exports = {
     "plugin:react/recommended",
     "plugin:react/jsx-runtime",
     "plugin:jsx-a11y/recommended",
-    "plugin:@next/next/recommended",
-    "plugin:storybook/recommended",
   ],
   settings: {
     react: {

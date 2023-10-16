@@ -1,7 +1,9 @@
+"use client";
+
 import { SubTrigger } from "@radix-ui/react-dropdown-menu";
 import { RxChevronRight } from "react-icons/rx";
 import { tv } from "tailwind-variants";
-import { wrap } from "~/_utils/client/wrap";
+import { wrap } from "../utils/wrap";
 
 const subTrigger = tv({
   base: "focus:bg-accent aria-expanded:bg-accent flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",

@@ -1,6 +1,8 @@
+"use client";
+
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { tv } from "tailwind-variants";
-import { wrap } from "~/_utils/client/wrap";
+import { wrap } from "../utils/wrap";
 
 const separator = tv({
   base: `bg-muted -mx-1 my-1 h-px`,

@@ -38,6 +38,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  transpilePackages: ["@internal/ui"],
   experimental: {
     serverActions: true,
     typedRoutes: true,

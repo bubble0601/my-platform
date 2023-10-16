@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@internal/ui";
 import type { Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useId, useRef } from "react";
-import { Button } from "~/_components/ui/button";
 import { supabase } from "~/_utils/client";
 
 type Props = {

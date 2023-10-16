@@ -1,0 +1,4 @@
+{
+  "extends": "@internal/tsconfig/base",
+  "exclude": ["node_modules"]
+}
