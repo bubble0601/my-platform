@@ -29,7 +29,7 @@ const config: CodegenConfig = {
           EmailAddress: "string",
         },
         mappers: {
-          User: "~/db/types#User as UserModel",
+          User: "~/db/models#UserModel",
         },
       },
     },

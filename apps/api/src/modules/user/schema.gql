@@ -3,13 +3,13 @@ type User {
   name: String! @skipAuth
 }
 
-extend type Query {
+type Query {
   me: User
   user(id: ID!): User
   users: [User]
 }
 
-extend type Mutation {
+type Mutation {
   createUser(data: CreateUserInput!): CreateUserPayload @skipAuth
 }
 
