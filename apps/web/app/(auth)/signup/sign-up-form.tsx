@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@internal/ui";
 import type { Session } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import type { SyntheticEvent } from "react";
@@ -44,9 +45,9 @@ export const SignUpForm = ({ session }: Props) => {
       <div>
         <h1>ログイン済み</h1>
         <p>ログインメールアドレス: {session.user.email}</p>
-        <button type="button" onClick={handleSignOut}>
+        <Button type="submit" onClick={handleSignOut}>
           ログアウト
-        </button>
+        </Button>
       </div>
     );
   }

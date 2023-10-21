@@ -2,7 +2,8 @@
 
 import { Button } from "@internal/ui";
 import type { Session } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
+import type { Route } from "next";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
 import { useId, useRef } from "react";
 import { supabase } from "~/_utils/client";
@@ -17,6 +18,11 @@ export const LoginForm = ({ session }: Props) => {
   const emailInput = useRef<HTMLInputElement>(null);
   const passwordInputId = useId();
   const passwordInput = useRef<HTMLInputElement>(null);
+  const params = useSearchParams();
+  const unsafeRedirectURL = params.get("redirect");
+  const redirectURL = unsafeRedirectURL?.startsWith("/")
+    ? (unsafeRedirectURL as Route)
+    : null;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +33,7 @@ export const LoginForm = ({ session }: Props) => {
       password: passwordInput.current.value,
     });
     if (result.data.user) {
-      router.push("/");
+      router.push(redirectURL ?? "/");
     }
   };
 
@@ -41,9 +47,9 @@ export const LoginForm = ({ session }: Props) => {
       <div>
         <h1>ログイン済み</h1>
         <p>ログインメールアドレス: {session.user.email}</p>
-        <button type="button" onClick={handleSignOut}>
+        <Button type="submit" onClick={handleSignOut}>
           ログアウト
-        </button>
+        </Button>
       </div>
     );
   }

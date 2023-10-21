@@ -153,15 +153,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     if (asChild) {
-      const cloned = isElement(children)
-        ? cloneElement(children, rootProps)
-        : null;
-      console.log({
-        asChild,
-        children,
-        isElement: isElement(children),
-        cloned,
-      });
       if (!isElement(children)) {
         throw new Error(
           "Invalid children passed to Button when asChild is true. Children must be a single element.",

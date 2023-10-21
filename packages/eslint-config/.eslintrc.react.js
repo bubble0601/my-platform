@@ -45,6 +45,7 @@ module.exports = {
         extensions: [".tsx"],
       },
     ],
+    "react/jsx-no-useless-fragment": ["error", { allowExpressions: true }],
     "react/jsx-props-no-spreading": "off",
     "react/require-default-props": "off",
     "tailwindcss/enforces-negative-arbitrary-values": "error",

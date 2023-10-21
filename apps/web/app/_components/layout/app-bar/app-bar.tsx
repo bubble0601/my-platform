@@ -5,14 +5,15 @@ import { AppBarUserMenu } from "./app-bar-user-menu";
 import { DarkModeToggle } from "./dark-mode-toggle";
 
 const appBar = tv({
-  base: "flex flex-row items-center border-b border-zinc-400/20 dark:border-b-0 dark:bg-zinc-900",
+  base: "flex h-12 items-center border-b border-zinc-400/20 dark:border-b-0 dark:bg-zinc-900",
 });
 
 type Props = {
   className?: string;
+  hideUserMenu?: boolean;
 };
 
-export const AppBar = ({ className }: Props) => {
+export const AppBar = ({ className, hideUserMenu = false }: Props) => {
   return (
     <header className={appBar({ className })}>
       <AppBarTitle />
@@ -20,7 +21,7 @@ export const AppBar = ({ className }: Props) => {
       <ClientOnly>
         <DarkModeToggle className="mr-2" />
       </ClientOnly>
-      <AppBarUserMenu />
+      {!hideUserMenu && <AppBarUserMenu />}
     </header>
   );
 };

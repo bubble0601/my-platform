@@ -41,11 +41,6 @@ export type CreateUserPayload = {
   user?: Maybe<User>;
 };
 
-export type Error = {
-  code: Scalars["String"]["output"];
-  message: Scalars["String"]["output"];
-};
-
 export type Mutation = {
   createUser?: Maybe<CreateUserPayload>;
 };
