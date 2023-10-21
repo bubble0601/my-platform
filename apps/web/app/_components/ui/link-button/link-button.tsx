@@ -1,10 +1,7 @@
 import { Button } from "@internal/ui";
+import type { LinkProps } from "next/link";
 import Link from "next/link";
-import type {
-  ComponentProps,
-  ComponentPropsWithoutRef,
-  ForwardedRef,
-} from "react";
+import type { ComponentPropsWithoutRef, ForwardedRef } from "react";
 import { forwardRef } from "react";
 
 type ButtonProps = Pick<
@@ -12,7 +9,10 @@ type ButtonProps = Pick<
   "icon" | "variant" | "color" | "size" | "rounded" | "fullWidth" | "disabled"
 >;
 
-type LinkButtonProps<T = unknown> = Omit<ComponentProps<"a">, "href"> &
+type LinkButtonProps<T = unknown> = Omit<
+  ComponentPropsWithoutRef<"a">,
+  "href"
+> &
   ButtonProps &
   (
     | {
@@ -21,10 +21,10 @@ type LinkButtonProps<T = unknown> = Omit<ComponentProps<"a">, "href"> &
       }
     | {
         href?: never;
-        to: ComponentProps<typeof Link<T>>["href"];
-        scroll?: ComponentProps<typeof Link<T>>["scroll"];
-        replace?: ComponentProps<typeof Link<T>>["replace"];
-        prefetch?: ComponentProps<typeof Link<T>>["prefetch"];
+        to: LinkProps<T>["href"];
+        scroll?: LinkProps<T>["scroll"];
+        replace?: LinkProps<T>["replace"];
+        prefetch?: LinkProps<T>["prefetch"];
       }
   );
 
