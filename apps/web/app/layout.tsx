@@ -6,6 +6,8 @@ import { env } from "./_utils/server";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: env.APP_NAME,
 };
