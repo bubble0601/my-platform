@@ -23,16 +23,16 @@
     "test": "pnpm docker:up && dotenv -e .env.test pnpm prisma db push && dotenv -e .env.test vitest"
   },
   "dependencies": {
-    "@envelop/generic-auth": "^6.0.0",
+    "@envelop/generic-auth": "^6.1.1",
     "@prisma/client": "4.16.2",
-    "@types/jsonwebtoken": "^9.0.2",
+    "@types/jsonwebtoken": "^9.0.4",
     "envsafe": "^2.0.3",
-    "graphql": "^16.7.1",
-    "graphql-scalars": "^1.22.2",
-    "graphql-yoga": "^4.0.3",
-    "jsonwebtoken": "^9.0.1",
-    "kysely": "^0.26.0",
-    "pg": "^8.11.1"
+    "graphql": "^16.8.1",
+    "graphql-scalars": "^1.22.4",
+    "graphql-yoga": "^4.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "kysely": "^0.26.3",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^4.0.1",
@@ -43,19 +43,19 @@
     "@internal/eslint-config": "workspace:*",
     "@internal/tsconfig": "workspace:^",
     "@types/internal": "workspace:^",
-    "@types/node": "^18.14.0",
-    "@types/pg": "^8.10.2",
-    "concurrently": "^8.2.0",
-    "dotenv-cli": "^7.2.1",
-    "esbuild": "^0.18.11",
-    "eslint": "^8.44.0",
+    "@types/node": "^20.8.7",
+    "@types/pg": "^8.10.7",
+    "concurrently": "^8.2.2",
+    "dotenv-cli": "^7.3.0",
+    "esbuild": "^0.19.5",
+    "eslint": "^8.52.0",
     "prisma": "^4.16.2",
-    "prisma-kysely": "^1.5.0",
-    "rimraf": "^5.0.1",
+    "prisma-kysely": "^1.7.1",
+    "rimraf": "^5.0.5",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.6",
-    "vite": "^4.4.4",
-    "vitest": "^0.33.0"
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0",
+    "vitest": "^0.34.6"
   }
 }
