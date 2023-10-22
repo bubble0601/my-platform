@@ -1,0 +1,13 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "pipeline": {
+    "before:lint:ci": {},
+    "lint:ci": {
+      "dependsOn": ["before:lint:ci"]
+    },
+    "typechk": {
+      "dependsOn": ["before:lint:ci"]
+    }
+  }
+}
