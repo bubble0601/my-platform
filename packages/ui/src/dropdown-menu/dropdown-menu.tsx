@@ -103,7 +103,8 @@ export const DropdownMenu = ({
               triggerType === "hover" &&
               !(
                 e.relatedTarget instanceof Node &&
-                contentRef.current?.contains(e.relatedTarget)
+                contentRef.current &&
+                contentRef.current.contains(e.relatedTarget)
               )
             ) {
               setOpen(false);
@@ -135,7 +136,8 @@ export const DropdownMenu = ({
               if (
                 !modal &&
                 e.target instanceof Node &&
-                triggerRef.current?.contains(e.target)
+                triggerRef.current &&
+                triggerRef.current.contains(e.target)
               ) {
                 e.preventDefault();
               }

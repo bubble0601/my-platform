@@ -47,7 +47,7 @@ const _LinkButton = function LinkButton<T>(
   const anchorProps = {
     ...props,
     "aria-disabled": disabled,
-    tabIndex: disabled ? -1 : undefined,
+    tabIndex: disabled === true ? -1 : undefined,
   };
   const renderButton = (element: JSX.Element) => (
     <Button

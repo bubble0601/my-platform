@@ -20,9 +20,10 @@ export const LoginForm = ({ session }: Props) => {
   const passwordInput = useRef<HTMLInputElement>(null);
   const params = useSearchParams();
   const unsafeRedirectURL = params.get("redirect");
-  const redirectURL = unsafeRedirectURL?.startsWith("/")
-    ? (unsafeRedirectURL as Route)
-    : null;
+  const redirectURL =
+    unsafeRedirectURL?.startsWith("/") === true
+      ? (unsafeRedirectURL as Route)
+      : null;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

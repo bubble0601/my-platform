@@ -3,6 +3,7 @@
   "compilerOptions": {
     "lib": ["es2023"],
     "module": "ESNext",
+    "target": "ES2022",
 
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

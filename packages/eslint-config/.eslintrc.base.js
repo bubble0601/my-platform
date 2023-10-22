@@ -41,6 +41,7 @@ module.exports = {
       },
     ],
     "no-underscore-dangle": OFF,
+    "no-void": [ERROR, { allowAsStatement: true }],
     "import/default": OFF,
     "import/extensions": OFF,
     "import/named": OFF,
@@ -49,8 +50,10 @@ module.exports = {
     "import/order": OFF,
     "import/prefer-default-export": OFF,
     "unicorn/no-array-callback-reference": OFF,
+    "unicorn/no-await-expression-member": OFF,
     "unicorn/no-negated-condition": OFF,
     "unicorn/no-null": OFF,
+    "unicorn/no-useless-undefined": [ERROR, { checkArguments: false }],
     // TODO: migrate to esm
     "unicorn/prefer-module": OFF,
     "unicorn/prevent-abbreviations": OFF,
@@ -92,6 +95,7 @@ module.exports = {
           WARN,
           { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
         ],
+        "@typescript-eslint/strict-boolean-expressions": ERROR,
       },
     },
     {

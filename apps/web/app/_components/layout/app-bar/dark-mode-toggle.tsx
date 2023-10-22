@@ -11,6 +11,8 @@ type Props = {
 export const DarkModeToggle = ({ className }: Props) => {
   const [darkMode, toggleDarkMode] = useDarkMode();
 
+  if (darkMode == null) return null;
+
   return (
     <Button
       className={className}

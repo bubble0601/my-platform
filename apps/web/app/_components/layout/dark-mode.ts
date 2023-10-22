@@ -1,37 +1,37 @@
-import { useAtom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atom, useAtom } from "jotai";
 import {
   useEffect,
   experimental_useEffectEvent as useEffectEvent,
 } from "react";
+import { cookieStore } from "~/_utils/cookie-store";
 
-const initialValue =
-  // eslint-disable-next-line unicorn/no-negated-condition
-  typeof window !== "undefined"
-    ? window.matchMedia("(prefers-color-scheme: dark)").matches
-    : false;
-
-const darkModeAtom = atomWithStorage("darkMode", initialValue);
+const darkModeAtom = atom<boolean | undefined>(undefined);
 
 export const useDarkMode = () => {
   const [darkMode, setDarkMode] = useAtom(darkModeAtom);
 
   const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle("dark", next);
-      return next;
-    });
+    if (darkMode == null) return;
+
+    const next = !darkMode;
+    document.documentElement.classList.toggle("dark", next);
+    setDarkMode(next);
+    void cookieStore.set("darkMode", `${next}`);
   };
 
-  const onLoad = useEffectEvent(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    }
+  const onLoad = useEffectEvent(async () => {
+    const fromCookie = (await cookieStore.get("darkMode"))?.value;
+    const fromMedia = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialDarkMode =
+      fromCookie != null
+        ? fromCookie === "true"
+        : fromMedia;
+    setDarkMode(initialDarkMode);
+    document.documentElement.classList.toggle("dark", initialDarkMode);
   });
 
   useEffect(() => {
-    onLoad();
+    void onLoad();
   }, [onLoad]);
 
   return [darkMode, toggleDarkMode] as const;
