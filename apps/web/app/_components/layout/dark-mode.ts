@@ -21,13 +21,8 @@ export const useDarkMode = () => {
 
   const onLoad = useEffectEvent(async () => {
     const fromCookie = (await cookieStore.get("darkMode"))?.value;
-    const fromMedia = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialDarkMode =
-      fromCookie != null
-        ? fromCookie === "true"
-        : fromMedia;
+    const initialDarkMode = fromCookie != null ? fromCookie === "true" : false;
     setDarkMode(initialDarkMode);
-    document.documentElement.classList.toggle("dark", initialDarkMode);
   });
 
   useEffect(() => {

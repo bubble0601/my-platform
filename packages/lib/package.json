@@ -2,6 +2,7 @@
   "name": "@internal/lib",
   "version": "0.0.0",
   "private": true,
+  "sideEffects": false,
   "scripts": {
     "typechk": "tsc"
   },
